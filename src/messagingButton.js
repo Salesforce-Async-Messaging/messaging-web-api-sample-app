@@ -1,9 +1,11 @@
 import './messagingButton.css';
+import getConfigurationData from './messagingService';
  
 export default function MessagingButton() {
     function handleMessagingButtonClick(evt) {
         if (evt) {
             console.log("Messaging Button clicked.");
+            getConfigurationData();
         }
     }
     
