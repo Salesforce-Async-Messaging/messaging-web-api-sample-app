@@ -1,44 +1,66 @@
 /**
- * Send an HTTP request using fetch with a specified path, and method.
+ * Send an HTTP request using fetch with a specified path, method, mode, headers, and body.
+ *
+ * @param {String} apiPath - Endpoint to make request to.
+ * @param {String} method - HTTP request method (POST, GET, DELETE).
+ * @param {String} mode - HTTP mode (cors, no-cors, same-origin, navigate).
+ * @param {Object} requestHeaders - Headers to include with request.
+ * @param {Object} requestBody - Body to include with request. This method stringifies the object passed in, except when
+ *                               uploading a file. For file attachments, request body must be binary data.
  * @returns {Promise}
  */
-function sendXhrRequest(apiPath, method, caller) {
-	const startTime = performance.now();
-
-	return new Promise((resolve, reject) => {
-		const xhr = new XMLHttpRequest();
-
-		xhr.open(method, apiPath, true);
-
-		xhr.onreadystatechange = (response) => {
-			const state = response.target;
-
-			// DONE === The operation is complete, per https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState.
-			// Business hours return 204 if no business hours is associated with the deployment.
-			if(state && (state.readyState === state.DONE || state.status === 204)) {
-				const timeElapsed = ((performance.now() - startTime) / 1000).toFixed(3); // Read the timeElapsed in seconds and round the value to 3 decimal places.
-
-				if(state.status === 200 || state.status === 204) {
-					const responseJson = state.responseText ? JSON.parse(state.responseText) : state.responseText;
-
-					resolve(responseJson);
-				} else {
-					reject(state.status);
-				}
-				console.log(`${caller ? caller : apiPath} took ${timeElapsed} seconds and returned with the status code ${state.status}`);
-			}
+function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
+	const headers = requestHeaders ?
+		requestHeaders :
+		{
+			"Content-Type": "application/json"
+			//...(messagingJwt && { "Authorization": "Bearer " + messagingJwt })
 		};
-		xhr.send();
+	const body = requestBody ? JSON.stringify(requestBody) : undefined;
+
+	return fetch(
+		apiPath,
+		{
+			method,
+			mode,
+			headers,
+			...(body && { body })
+		}
+	).then(async (response) => {
+		if (response.status === 401) {
+			//clearWebStorage();
+		}
+		if (!response.ok) {
+			let responseObject;
+			try {
+				responseObject = Object.assign(response, await response.json());
+			} catch (e) {
+				responseObject = Object.assign(response, {"message": `Error reading the body stream of error object: ${response}`});
+			}
+			throw responseObject;
+		}
+		return response;
 	});
-}
+};
 
 /**
  * Load the config settings from SCRT 2.0 stack.
  */
 function getConfigurationData() {
-	const configURL = "https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com/embeddedservice/v1/embedded-service-config?orgId=00DSG000001NruH&esConfigName=Web1&language=en";
+	const apiPath = "https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com/embeddedservice/v1/embedded-service-config?orgId=00DSG000001NruH&esConfigName=Web1&language=en";
 
-	return sendXhrRequest(configURL, "GET", "getConfigurationData");
+	return sendFetchRequest(
+		apiPath,
+		"GET",
+		"cors",
+		{},
+		null
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		return response.json();
+	});
 }
 
 export default getConfigurationData;
