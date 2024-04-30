@@ -64,19 +64,3 @@ function getConfigurationData() {
 }
 
 export default getConfigurationData;
-    
-    // // Load config settings from SCRT 2.0.
-	// const configPromise = getConfigurationData().then(
-	// 	response => {
-	// 	    console.log(`Successfully retrieved configuration settings: ${response}`);	
-	// 	},
-	// 	responseStatus => {
-	// 		console.log(`Failed to retrieve configuration settings. Retrying the request`);
-	// 		// Retry one more time to load config settings from SCRT 2.0 if the first attempt fails.
-	// 		return new Promise((resolve, reject) => {
-	// 			getConfigurationData().then(resolve, reject);
-	// 		});
-	// 	}
-	// ).catch(() => {
-	// 	throw new Error("Unable to load Embedded Messaging configuration.");
-	// });
