@@ -1,0 +1,152 @@
+// storageKey holds top level storage key in the browser storage.
+export let storageKey;
+
+/**
+ * True if this browser session allows access to local storage. Some users may have stricter browser security settings. Do nothing on error.
+ */
+export const isLocalStorageAvailable = () => {
+    try {
+        // Test getting an item to see if this triggers an error
+        window.localStorage.getItem("test");
+
+        if (window.localStorage && typeof window.localStorage === "object") {
+            return true;
+        }
+    } catch {
+        // localStorage is not available. User chat sessions continue only in a single-page view and not across multiple pages.
+        console.log("localStorage not available.");
+        return false;
+    }
+    // We should never reach this return statement, it exists to make the linter happy.
+    return false;
+};
+
+/**
+ * True if this browser session allows access to session storage. Some users may have stricter browser security settings. Do nothing on error.
+ */
+export const isSessionStorageAvailable = () => {
+    try {
+        // Test getting an item to see if this triggers an error
+        window.sessionStorage.getItem("test");
+
+        if (window.sessionStorage && typeof window.sessionStorage === "object") {
+            return true;
+        }
+    } catch {
+        // sessionStorage is not available. User chat sessions end after a web page refresh or across browser tabs and windows.
+        console.log("sessionStorage not available.");
+        return false;
+    }
+    // We should never reach this return statement, it exists to make the linter happy.
+    return false;
+};
+
+/**
+ * Determine the type of web storage (local vs. session) to be used
+ * It will prioritize localStorage if specify, otherwise sessionStorage
+ */
+const determineStorageType = (inLocalStorage = false) => {
+    return isLocalStorageAvailable() && inLocalStorage ? localStorage : isSessionStorageAvailable() ? sessionStorage : undefined;
+};
+
+/**
+ * Get item from web storage object payload.
+ *
+ * @param payload - Storage object as string
+ * @param key - Storage Key
+ * @returns {*} - Item if found, undefined otherwise.
+ */
+export const getItemInPayloadByKey = (payload, key) => {
+    let item;
+
+    if (payload) {
+        const storageObj = JSON.parse(payload) || {};
+        item = storageObj[key];
+    }
+
+    return item;
+};
+
+/**
+ * Initialize the web storage object for both localStorage & sessionStorage.
+ */
+export const initializeWebStorage = (organizationId) => {
+    storageKey = `${organizationId}_WEB_STORAGE`;
+
+    const storageObj = JSON.stringify({});
+
+    // Initialize the web storage object
+    if (isLocalStorageAvailable() && !localStorage.getItem(storageKey)) {
+        localStorage.setItem(storageKey, storageObj);
+    }
+    if (isSessionStorageAvailable() && !sessionStorage.getItem(storageKey)) {
+        sessionStorage.setItem(storageKey, storageObj);
+    }
+
+    console.log("Web Storage initialized");
+};
+
+/**
+ * Returns the item in web storage by the key in this current conversation.
+ * It prioritizes getting the object in localStorage if exists in both
+ * Returns undefined if not found
+ */
+export const getItemInWebStorageByKey = (key, inLocalStorage = true) => {
+    let item;
+    const storage = determineStorageType(inLocalStorage);
+
+    if (storage) {
+        const storageObj = (storage.getItem(storageKey) && JSON.parse(storage.getItem(storageKey))) || {};
+        item = storageObj[key];
+    }
+
+    return item;
+};
+
+/**
+ * Set the item in web storage by the key in this current conversation.
+ * If inLocalStorage is true, then first try to store in localStorage, otherwise sessionStorage
+ */
+export const setItemInWebStorage = (key, value, inLocalStorage = true) => {
+    const storage = determineStorageType(inLocalStorage);
+
+    if (storage) {
+        const storageObj = (storage.getItem(storageKey) && JSON.parse(storage.getItem(storageKey))) || {};
+        storageObj[key] = value;
+        storage.setItem(storageKey, JSON.stringify(storageObj));
+        console.log(`${key} set in ${inLocalStorage ? "localStorage" : "sessionStorage"}`);
+    }
+};
+
+/**
+ * Remove item from both localStorage and sessionStorage that match that given key
+ * As well as item that was originally stored in fallback location
+ */
+export const removeItemInWebStorage = (key) => {
+    if (isLocalStorageAvailable() && localStorage.getItem(storageKey)) {
+        const storageObj = JSON.parse(localStorage.getItem(storageKey)) || {};
+        delete storageObj[key];
+        localStorage.setItem(storageKey, JSON.stringify(storageObj));
+    }
+    if (isSessionStorageAvailable() && sessionStorage.getItem(storageKey)) {
+        const storageObj = JSON.parse(sessionStorage.getItem(storageKey)) || {};
+        delete storageObj[key];
+        sessionStorage.setItem(storageKey, JSON.stringify(storageObj));
+    }
+
+    console.log(`${key} removed from web storage`);
+};
+
+/**
+ * Clear all client side stored item in both localStorage & sessionStorage
+ */
+export const clearWebStorage = () => {
+    if (isLocalStorageAvailable()) {
+        localStorage.removeItem(storageKey);
+    }
+    if (isSessionStorageAvailable()) {
+        sessionStorage.removeItem(storageKey);
+    }
+
+    console.log(`web storage cleared`);
+};

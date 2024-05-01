@@ -1,14 +1,32 @@
 "use client";
 
-import './bootstrapMessaging.css';
 import { useState } from "react";
-import MessagingButton from "./messagingButton";
+import './bootstrapMessaging.css';
+import MessagingButton from "./components/messagingButton";
+import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
+import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId } from './services/dataProvider';
+import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
+import { STORAGE_KEYS } from './helpers/constants';
+import { util } from "./helpers/common";
 
 export default function BootstrapMessaging() {
     let [shouldShowMessagingButton, setShowMessagingButton] = useState(false);
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
-    let [scrt2URL, setScrt2URL] = useState('');
+    let [scrt2URL, setSCRT2URL] = useState('');
+    let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
+    let [conversationId, setConversationId] = useState(undefined);
+
+    function initializeMessagingClient() {
+        // Initialize helpers.
+        setOrganizationId(orgId);
+        setDeploymentDeveloperName(deploymentDevName);
+        setScrt2Url(scrt2URL);
+        // Initialize Web Storage.
+        initializeWebStorage(orgId);
+        // Initialize a new conversation-id.
+        setConversationId(util.generateUUID());
+    }
 
     function handleDeploymentDetailsFormSubmit(evt) {
         if (evt) {
@@ -27,7 +45,45 @@ export default function BootstrapMessaging() {
                 setShowMessagingButton(false);
                 return;
             }
+
+            initializeMessagingClient();
             setShowMessagingButton(true);
+        }
+    }
+
+    function parseAccessTokenResponse(response) {
+        if (typeof response === "object") {
+            setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
+            setLastEventId(response.lastEventId);
+            setDeploymentConfiguration(response.context && response.context.configuration);
+        }
+    }
+
+    function handleMessagingButtonClick(evt) {
+        if (evt) {
+            console.log("Messaging Button clicked.");
+
+            getUnauthenticatedAccessToken()
+            .then((response) => {
+                console.log("Successfully fetched an Unautheticated access token.");
+                // Disable Messaging Button once an access-token (JWT) is retrieved.
+                setShouldDisableMessagingButton(true);
+                // Parse the response object which includes access-token (JWT), configutation data.
+                parseAccessTokenResponse(response);
+
+                createConversation(conversationId)
+                .then(() => {
+                    console.log(`Successfully created a new conversation with conversation-id: ${conversationId}`);
+                })
+                .catch((err) => {
+                    console.log(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
+                    clearWebStorage();
+                });
+            })
+            .catch((err) => {
+                console.error(`Something went wrong in fetching an Unauthenticated access token: ${err}`);
+                clearWebStorage();
+            });
         }
     }
 
@@ -35,18 +91,37 @@ export default function BootstrapMessaging() {
         <div className="deploymentDetailsForm">
             <h3>Input your Embedded Service API-type deployment details below</h3>
             <label>Org Id</label>
-            <input type="text" value={orgId} onChange={e => setOrgId(e.target.value.trim())}></input>
+            <input
+                type="text"
+                value={orgId}
+                // defaultValue="00DSG000001NruH"
+                onChange={e => setOrgId(e.target.value.trim())}>
+            </input>
             <label>Deployment Developer Name</label>
-            <input type="text" value={deploymentDevName} onChange={e => setDeploymentDevName(e.target.value.trim())}></input>
+            <input
+                type="text"
+                value={deploymentDevName}
+                // defaultValue="Web1"
+                onChange={e => setDeploymentDevName(e.target.value.trim())}>
+            </input>
             <label>SCRT2 Url</label>
-            <input type="text" value={scrt2URL} onChange={e => setScrt2URL(e.target.value.trim())}></input>
+            <input
+                type="text"
+                value={scrt2URL}
+                // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
+                onChange={e => setSCRT2URL(e.target.value.trim())}>
+            </input>
             <button
                 className="deploymentDetailsFormSubmitButton"
                 onClick={handleDeploymentDetailsFormSubmit}
-                disabled={orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0}>
+                disabled={orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0}
+                >
                     Submit
             </button>
-            {shouldShowMessagingButton && <MessagingButton />}
+            {shouldShowMessagingButton &&
+                <MessagingButton
+                    clickHandler={handleMessagingButtonClick}
+                    disableButton={shouldDisableMessagingButton} />}
         </div>
     );
 }

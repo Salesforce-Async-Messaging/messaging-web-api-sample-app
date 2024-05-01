@@ -1,6 +1,6 @@
 .messagingButton {
     width: 10rem;
-    background-color: #2d8645;
+    background-color: #3fc56e;
     color: white;
     padding: 15px 30px;
     border-radius: 5px;
@@ -17,7 +17,7 @@
 }
 
 .messagingButton:hover:not(:disabled) {
-    background-color: #3fc56e;
+    background-color: #2d8645;
 }
 
 .messagingButton:disabled {
