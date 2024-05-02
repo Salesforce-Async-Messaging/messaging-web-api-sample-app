@@ -4,7 +4,9 @@ import { useState } from "react";
 import './bootstrapMessaging.css';
 import MessagingButton from "./components/messagingButton";
 import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
-import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId } from './services/dataProvider';
+import { subscribeToEventSource } from './services/eventSourceService';
+import * as EventSourcePolyfill from "./helpers/eventsource-polyfill";
+import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
@@ -53,6 +55,7 @@ export default function BootstrapMessaging() {
 
     function parseAccessTokenResponse(response) {
         if (typeof response === "object") {
+            setJwt(response.accessToken);
             setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
             setLastEventId(response.lastEventId);
             setDeploymentConfiguration(response.context && response.context.configuration);
@@ -74,6 +77,10 @@ export default function BootstrapMessaging() {
                 createConversation(conversationId)
                 .then(() => {
                     console.log(`Successfully created a new conversation with conversation-id: ${conversationId}`);
+                    
+                    subscribeToEventSource({
+                        ["CONVERSATION_MESSAGE"]: handleConversationMessageServerSentEvent
+                    });
                 })
                 .catch((err) => {
                     console.log(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
@@ -84,6 +91,14 @@ export default function BootstrapMessaging() {
                 console.error(`Something went wrong in fetching an Unauthenticated access token: ${err}`);
                 clearWebStorage();
             });
+        }
+    }
+
+    function handleConversationMessageServerSentEvent(event) {
+        try {
+            console.log(`Successfully handling conversation message server sent events: ${event}`);
+        } catch(err) {
+            console.error(`Something went wrong in handling conversation message server sent events: ${err}`);
         }
     }
 

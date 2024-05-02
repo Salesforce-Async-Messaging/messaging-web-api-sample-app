@@ -38,6 +38,14 @@ function getLastEventId() {
     return lastEventId;
 }
 
+let jwt;
+function setJwt(JWT) {
+    jwt = JWT;
+}
+function getJwt() {
+    return jwt;
+}
+
 export {
     setOrganizationId,
     getOrganizationId,
@@ -48,5 +56,7 @@ export {
     setDeploymentConfiguration,
     getDeploymentConfiguration,
     setLastEventId,
-    getLastEventId
+    getLastEventId,
+    setJwt,
+    getJwt
 };
