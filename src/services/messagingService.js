@@ -1,4 +1,4 @@
-import { APP_CAPABILITIES_VERSION, APP_PLATFORM, STORAGE_KEYS } from "../helpers/constants";
+import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getScrt2Url } from "./dataProvider";
 import { getItemInWebStorageByKey } from "../helpers/webstorageUtils";
 
@@ -59,8 +59,8 @@ function getUnauthenticatedAccessToken() {
 	const orgId = getOrganizationId();
 	const esDeveloperName = getDeploymentDeveloperName();
 	const scrt2Url = getScrt2Url();
-	const capabilitiesVersion = APP_CAPABILITIES_VERSION;
-	const platform = APP_PLATFORM;
+	const capabilitiesVersion = APP_CONSTANTS.APP_CAPABILITIES_VERSION;
+	const platform = APP_CONSTANTS.APP_PLATFORM;
 	const apiPath = `${scrt2Url}/iamessage/api/v2/authorization/unauthenticated/access-token`;
 
 	return sendFetchRequest(
@@ -115,5 +115,60 @@ function createConversation(conversationId, routingAttributes) {
 		//response.json(); // v2 endpoint not returning any data unlike v1
 	});
 }
+
+/**
+ * Get a JWT with the same subjectId but new clientId as the existing Messaging JWT that was issued previously. This function is used for session continuity in the same tab (page reload) and/or across tabs.
+ *
+ * TODO: insert api doc link
+ *
+ * @returns {Promise}
+ */
+function getContinuityJwt() {
+	const scrt2Url = getScrt2Url();
+	const apiPath = `${scrt2Url}/iamessage/api/v2/authorization/continuation-access-token`;
+
+	return sendFetchRequest(
+		apiPath,
+		"GET",
+		"cors",
+		null,
+		null
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		return response.json();
+	});
+}
+
+/**
+ * Get a list of all conversations the current subjectId is participating in.
+ * Returns:
+ * - number of open conversations
+ * - number of closed conversations
+ * - array of conversations
+ *
+ * TODO: insert api doc link
+ *
+ * @param {Boolean} includeClosedConversations - Whether to include closed conversations in list. Optional.
+ * @returns {Promise}
+ */
+function listConversation(includeClosedConversations = true){
+	const scrt2Url = getScrt2Url();
+	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
+
+	return sendFetchRequest(
+		apiPath,
+		"GET",
+		"cors",
+		null,
+		{}
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		response.json();
+	});
+};
 
 export { getUnauthenticatedAccessToken, createConversation };
