@@ -10,6 +10,7 @@ import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeployme
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
+import MessagingWindow from "./components/messagingWindow";
 
 export default function BootstrapMessaging() {
     let [shouldShowMessagingButton, setShowMessagingButton] = useState(false);
@@ -18,6 +19,7 @@ export default function BootstrapMessaging() {
     let [scrt2URL, setSCRT2URL] = useState('');
     let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [conversationId, setConversationId] = useState(undefined);
+    let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
 
     function initializeMessagingClient() {
         // Initialize helpers.
@@ -81,6 +83,7 @@ export default function BootstrapMessaging() {
                     subscribeToEventSource({
                         ["CONVERSATION_MESSAGE"]: handleConversationMessageServerSentEvent
                     });
+                    setShouldShowMessagingWindow(true);
                 })
                 .catch((err) => {
                     console.log(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
@@ -103,40 +106,44 @@ export default function BootstrapMessaging() {
     }
 
     return (
-        <div className="deploymentDetailsForm">
-            <h3>Input your Embedded Service API-type deployment details below</h3>
-            <label>Org Id</label>
-            <input
-                type="text"
-                value={orgId}
-                // defaultValue="00DSG000001NruH"
-                onChange={e => setOrgId(e.target.value.trim())}>
-            </input>
-            <label>Deployment Developer Name</label>
-            <input
-                type="text"
-                value={deploymentDevName}
-                // defaultValue="Web1"
-                onChange={e => setDeploymentDevName(e.target.value.trim())}>
-            </input>
-            <label>SCRT2 Url</label>
-            <input
-                type="text"
-                value={scrt2URL}
-                // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
-                onChange={e => setSCRT2URL(e.target.value.trim())}>
-            </input>
-            <button
-                className="deploymentDetailsFormSubmitButton"
-                onClick={handleDeploymentDetailsFormSubmit}
-                disabled={orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0}
+        <>
+            <div className="deploymentDetailsForm">
+                <h3>Input your Embedded Service API-type deployment details below</h3>
+                <label>Org Id</label>
+                <input
+                    type="text"
+                    value={orgId}
+                    // defaultValue="00DSG000001NruH"
+                    onChange={e => setOrgId(e.target.value.trim())}>
+                </input>
+                <label>Deployment Developer Name</label>
+                <input
+                    type="text"
+                    value={deploymentDevName}
+                    // defaultValue="Web1"
+                    onChange={e => setDeploymentDevName(e.target.value.trim())}>
+                </input>
+                <label>SCRT2 Url</label>
+                <input
+                    type="text"
+                    value={scrt2URL}
+                    // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
+                    onChange={e => setSCRT2URL(e.target.value.trim())}>
+                </input>
+                <button
+                    className="deploymentDetailsFormSubmitButton"
+                    onClick={handleDeploymentDetailsFormSubmit}
+                    disabled={orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0}
                 >
                     Submit
-            </button>
+                </button>
+            </div>
             {shouldShowMessagingButton &&
                 <MessagingButton
                     clickHandler={handleMessagingButtonClick}
                     disableButton={shouldDisableMessagingButton} />}
-        </div>
+            {shouldShowMessagingWindow &&
+                <MessagingWindow />}
+        </>
     );
 }

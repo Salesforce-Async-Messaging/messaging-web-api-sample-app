@@ -1,0 +1,7 @@
+.messagingBody {
+    height: 85%;
+    border-bottom: 1px solid #ddd;
+    overflow: hidden;
+    background: whitesmoke;
+    border-radius: inherit;
+}
