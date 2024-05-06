@@ -171,4 +171,30 @@ function listConversation(includeClosedConversations = true){
 	});
 };
 
-export { getUnauthenticatedAccessToken, createConversation };
+/**
+ * Close conversation and clean up JWT:
+ * - clear JWT variable on inAppService.
+ * - remove JWT from web storage (if web storage is available).
+ *
+ * This endpoint is typically used for anonymous users.
+ *
+ * TODO: insert api doc link
+ *
+ * @param {String} conversationId - ID of the conversation to close. Required.
+ * @returns {Promise}
+ */
+function closeConversation (conversationId) {
+    const scrt2Url = getScrt2Url();
+	const esDeveloperName = getDeploymentDeveloperName();
+	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/${conversationId}?esDeveloperName=${esDeveloperName}`;
+
+    return sendFetchRequest(
+        apiPath,
+        "DELETE",
+        "cors",
+        null,
+        null
+    );
+};
+
+export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversation, closeConversation };

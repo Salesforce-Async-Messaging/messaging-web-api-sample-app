@@ -1,11 +1,12 @@
 .messagingWindow {
+    z-index: 9999999999;
     background-color: white;
     box-shadow: 0 20px 20px rgba(0, 0, 0, 0.08);
     border-radius: 15px;
     max-width: 550px;
     margin: 0 auto;
     border: 1px solid #ddd;
-    position: fixed;
+    /* position: fixed; */
     width: 550px;
     height: 500px;
     display: inline-block;

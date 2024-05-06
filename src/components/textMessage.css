@@ -1,0 +1,37 @@
+.textMessageSenderContent {
+    color: rgb(153, 153, 153);
+    margin: 0px;
+    font-size: 10px;
+    font-weight: 400;
+    text-align: left;
+}
+
+.textMessageSenderContent[class="outgoing"] {
+    text-align: right;
+}
+
+.textMessageBubbleContainer {
+    overflow: auto;
+}
+
+.textMessageBubble {
+    min-width: 50px;
+    max-width: 350px;
+    width: -webkit-fit-content;
+    background-color: rgb(158 154 154);
+    float: left;
+    border-radius: 20px;
+    margin: 1px auto;
+    padding: 8px 14px;
+}
+
+.textMessageBubble[class="outgoing"] {
+    float: right;
+}
+
+.textMessageContent {
+    color: rgb(255, 255, 255);
+    margin: 0px;
+    font-size: 16px;
+    font-weight: 300;
+}
