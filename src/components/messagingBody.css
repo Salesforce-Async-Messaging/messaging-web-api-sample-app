@@ -7,9 +7,9 @@
 }
 
 .conversationStartTimeText {
-    color: black;
+    color: rgb(98 91 91);
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     text-align: center;
 }

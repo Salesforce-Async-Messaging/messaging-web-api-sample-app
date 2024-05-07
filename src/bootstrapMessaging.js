@@ -105,12 +105,11 @@ export default function BootstrapMessaging() {
             closeConversation(conversationId)
             .then(() => {
                 console.log(`Successfully closed the conversation with conversation-id: ${conversationId}`);
-                clearWebStorage();
             })
             .catch((err) => {
                 console.error(`Something went wrong in closing the conversation with conversation-id: ${err}`);
-                clearWebStorage();
-            });
+            })
+            .finally(clearWebStorage());
         }
     }
 

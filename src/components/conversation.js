@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import * as EventSourcePolyfill from "../helpers/eventsource-polyfill";
-import MessagingBody from "../components/messagingBody";
-import { getJwt, setLastEventId } from "./dataProvider";
-import { subscribeToEventSource, closeEventSource } from './eventSourceService';
+import MessagingBody from "./messagingBody";
+import { getJwt, setLastEventId } from "../services/dataProvider";
+import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
+import MessagingHeader from "./messagingHeader";
 
 export default function Conversation({ conversationId }) {
+    // Initialize a list of conversation entries.
     let [conversationEntries, setConversationEntries] = useState([]);
 
     useEffect(() => {
@@ -28,6 +30,15 @@ export default function Conversation({ conversationId }) {
         };
     }, []);
 
+    /**
+     * Generate a Conversation Entry object from the server sent event.
+     * @param {object} event - Event data payload from server-sent event.
+     * @returns {object|undefined}
+     *
+     * 1. Parse the server sent event.
+     * 2. Create a Conversation Entry object from the parsed event data.
+     * 3. Return the Conversation Entry if the conversationEntry is for the current conversation and undefined, otherwise.
+     */
     function generateConversationEntryForCurrentConversation(serverSentEvent) {
         const parsedEventData = ConversationEntryUtil.parseServerSentEventData(serverSentEvent);
         console.log(parsedEventData);
@@ -41,11 +52,23 @@ export default function Conversation({ conversationId }) {
         return undefined;
     }
 
+    /**
+     * Adds a Conversation Entry object to the list of conversation entries. Updates the state of the list of conversation entries for the component(s) to be updated in-turn, reactively.
+     */
     function addConversationEntry(conversationEntry) {
         conversationEntries.push(conversationEntry);
         setConversationEntries([...conversationEntries]);
     }
 
+    /**
+     * Handle a CONVERSATION_MESSAGE server-sent event.
+     * @param {Object} event - Event data payload from server-sent event.
+     *
+     * This includes:
+     *  1. Parse, populate, and create ConversationEntry object based on its entry type
+     *      NOTE: Skip processing CONVERSATION_MESSAGE if the newly created ConversationEntry is undefined or invalid or not from the current conversation.
+     *  2. Updates in-memory list of conversation entries and the updated list gets reactively passed on to MessagingBody.
+     */
     function handleConversationMessageServerSentEvent(event) {
         try {
             console.log(`Successfully handling conversation message server sent event`);
@@ -72,6 +95,17 @@ export default function Conversation({ conversationId }) {
         }
     }
 
+    /**
+     * Handle a ROUTING_RESULT server-sent event.
+     * @param {Object} event - Event data payload from server-sent event.
+     *
+     * This includes:
+     *  1. Parse, populate, and create ConversationEntry object based on its entry type.
+     *      NOTE: Skip processing ROUTING_RESULT if the newly created ConversationEntry is undefined or invalid or not from the current conversation.
+     *  2. Updates in-memory list of conversation entries and the updated list gets reactively passed on to MessagingBody.
+     *
+     *  NOTE: Update the chat client based on the latest routing result. E.g. if the routing type is transfer, set an internal flag like `isTransferring` to 'true' and use that to show a transferring indicator in the ui.
+     */
     function handleRoutingResultServerSentEvent(event) {
         try {
             console.log(`Successfully handling routing result server sent event`);
@@ -119,6 +153,15 @@ export default function Conversation({ conversationId }) {
         }
     }
 
+    /**
+     * Handle a PARTICIPANT_CHANGED server-sent event.
+     * @param {Object} event - Event data payload from server-sent event.
+     *
+     * This includes:
+     *  1. Parse, populate, and create ConversationEntry object based on its entry type.
+     *      NOTE: Skip processing PARTICIPANT_CHANGED if the newly created ConversationEntry is undefined or invalid or not from the current conversation.
+     *  2. Updates in-memory list of conversation entries and the updated list gets reactively passed on to MessagingBody.
+     */
     function handleParticipantChangedServerSentEvent(event) {
         try {
             console.log(`Successfully handling participant changed server sent event`);
@@ -138,6 +181,7 @@ export default function Conversation({ conversationId }) {
 
     return (
         <>
+            <MessagingHeader />
             <MessagingBody conversationEntries={conversationEntries} />
         </>
     );

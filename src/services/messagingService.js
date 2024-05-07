@@ -1,6 +1,6 @@
 import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getScrt2Url } from "./dataProvider";
-import { getItemInWebStorageByKey } from "../helpers/webstorageUtils";
+import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 
 /**
  * Send an HTTP request using fetch with a specified path, method, mode, headers, and body.
@@ -33,7 +33,8 @@ function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
 		}
 	).then(async (response) => {
 		if (response.status === 401) {
-			//clearWebStorage();
+			// Unauthorized request. Clear the web storage.
+			clearWebStorage();
 		}
 		if (!response.ok) {
 			let responseObject;

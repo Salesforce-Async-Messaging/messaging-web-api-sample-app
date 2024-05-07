@@ -2,8 +2,8 @@ import { CONVERSATION_CONSTANTS } from "./constants";
 
 /**
  * Parses JSON data from a server-sent event.
- * @param {Object} event - Server-sent event.
- * @returns {Object} - Parsed server-sent event data.
+ * @param {object} event - Server-sent event.
+ * @returns {object} - Parsed server-sent event data.
  * @throws {Error} if event data is invalid.
  */
 export function parseServerSentEventData(event) {
@@ -20,23 +20,36 @@ export function parseServerSentEventData(event) {
     }
 };
 
+/**
+ * Parses JSON entry payload field from a server-sent event data.
+ * @param {object} data - Server-sent event.
+ * @returns {object} - Parsed server-sent event data.
+ * @throws {Error} if event data is invalid.
+ */
 export function createConversationEntry(data) {
-    if (typeof data === "object") {
-        const entryPayload = JSON.parse(data.conversationEntry.entryPayload);
-
-        return {
-            conversationId: data.conversationId,
-            messageId: data.conversationEntry.identifier,
-            content: entryPayload.abstractMessage || entryPayload,
-            messageType: entryPayload.abstractMessage ? entryPayload.abstractMessage.messageType : (entryPayload.routingType || entryPayload.entries[0].operation) ,
-            entryType: entryPayload.entryType,
-            sender: data.conversationEntry.sender,
-            actorName: data.conversationEntry.senderDisplayName ? (data.conversationEntry.senderDisplayName || data.conversationEntry.sender.role) : (entryPayload.entries[0].displayName || entryPayload.entries[0].participant.role),
-            actorType: data.conversationEntry.sender.role,
-            transcriptedTimestamp: data.conversationEntry.transcriptedTimestamp,
-            messageReason: entryPayload.messageReason
-        };
+    try {
+        if (typeof data === "object") {
+            const entryPayload = JSON.parse(data.conversationEntry.entryPayload);
+    
+            return {
+                conversationId: data.conversationId,
+                messageId: data.conversationEntry.identifier,
+                content: entryPayload.abstractMessage || entryPayload,
+                messageType: entryPayload.abstractMessage ? entryPayload.abstractMessage.messageType : (entryPayload.routingType || entryPayload.entries[0].operation) ,
+                entryType: entryPayload.entryType,
+                sender: data.conversationEntry.sender,
+                actorName: data.conversationEntry.senderDisplayName ? (data.conversationEntry.senderDisplayName || data.conversationEntry.sender.role) : (entryPayload.entries[0].displayName || entryPayload.entries[0].participant.role),
+                actorType: data.conversationEntry.sender.role,
+                transcriptedTimestamp: data.conversationEntry.transcriptedTimestamp,
+                messageReason: entryPayload.messageReason
+            };
+        } else {
+            throw new Error(`Expected an object to create a new conversation entry but instead, received ${data}`);
+        }
+    } catch (err) {
+        throw new Error(`Something went wrong while creating a conversation entry: ${err}`);
     }
+    
 };
 
 //============================================================== STATIC TEXT MESSAGE functions ==============================================================
