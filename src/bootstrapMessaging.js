@@ -12,7 +12,7 @@ import MessagingWindow from "./components/messagingWindow";
 import Draggable from "./ui-effects/draggable";
 
 export default function BootstrapMessaging() {
-    let [shouldShowMessagingButton, setShowMessagingButton] = useState(true);
+    let [shouldShowMessagingButton, setShowMessagingButton] = useState(false);
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
     let [scrt2URL, setSCRT2URL] = useState('');
@@ -120,28 +120,28 @@ export default function BootstrapMessaging() {
                 <label>Org Id</label>
                 <input
                     type="text"
-                    // value={orgId}
-                    defaultValue="00DSG000001NruH"
+                    value={orgId}
+                    // defaultValue="00DSG000001NruH"
                     onChange={e => setOrgId(e.target.value.trim())}>
                 </input>
                 <label>Deployment Developer Name</label>
                 <input
                     type="text"
-                    // value={deploymentDevName}
-                    defaultValue="Web1"
+                    value={deploymentDevName}
+                    // defaultValue="Web1"
                     onChange={e => setDeploymentDevName(e.target.value.trim())}>
                 </input>
                 <label>SCRT2 Url</label>
                 <input
                     type="text"
-                    // value={scrt2URL}
-                    defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
+                    value={scrt2URL}
+                    // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
                     onChange={e => setSCRT2URL(e.target.value.trim())}>
                 </input>
                 <button
                     className="deploymentDetailsFormSubmitButton"
                     onClick={handleDeploymentDetailsFormSubmit}
-                    // disabled={shouldDisableFormSubmitButton()}
+                    disabled={shouldDisableFormSubmitButton()}
                 >
                     Submit
                 </button>
