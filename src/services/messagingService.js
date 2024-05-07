@@ -1,6 +1,6 @@
 import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getScrt2Url } from "./dataProvider";
-import { getItemInWebStorageByKey } from "../helpers/webstorageUtils";
+import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 
 /**
  * Send an HTTP request using fetch with a specified path, method, mode, headers, and body.
@@ -33,7 +33,8 @@ function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
 		}
 	).then(async (response) => {
 		if (response.status === 401) {
-			//clearWebStorage();
+			// Unauthorized request. Clear the web storage.
+			clearWebStorage();
 		}
 		if (!response.ok) {
 			let responseObject;
@@ -171,4 +172,30 @@ function listConversation(includeClosedConversations = true){
 	});
 };
 
-export { getUnauthenticatedAccessToken, createConversation };
+/**
+ * Close conversation and clean up JWT:
+ * - clear JWT variable on inAppService.
+ * - remove JWT from web storage (if web storage is available).
+ *
+ * This endpoint is typically used for anonymous users.
+ *
+ * TODO: insert api doc link
+ *
+ * @param {String} conversationId - ID of the conversation to close. Required.
+ * @returns {Promise}
+ */
+function closeConversation (conversationId) {
+    const scrt2Url = getScrt2Url();
+	const esDeveloperName = getDeploymentDeveloperName();
+	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/${conversationId}?esDeveloperName=${esDeveloperName}`;
+
+    return sendFetchRequest(
+        apiPath,
+        "DELETE",
+        "cors",
+        null,
+        null
+    );
+};
+
+export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversation, closeConversation };

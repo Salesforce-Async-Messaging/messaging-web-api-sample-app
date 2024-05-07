@@ -1,10 +1,11 @@
 import "./messagingWindow.css";
-import MessagingBody from "./messagingBody";
+import Conversation from "../services/conversation";
 
-export default function MessagingWindow() {
+export default function MessagingWindow({ conversationId }) {
+
     return(
         <div className="messagingWindow">
-            <MessagingBody />
+            <Conversation conversationId={conversationId} />
         </div>
     );
 }

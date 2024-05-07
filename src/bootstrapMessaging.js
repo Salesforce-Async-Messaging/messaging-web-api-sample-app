@@ -3,14 +3,13 @@
 import { useState } from "react";
 import './bootstrapMessaging.css';
 import MessagingButton from "./components/messagingButton";
-import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
-import { subscribeToEventSource } from './services/eventSourceService';
-import * as EventSourcePolyfill from "./helpers/eventsource-polyfill";
+import { getUnauthenticatedAccessToken, createConversation, closeConversation } from './services/messagingService';
 import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
 import MessagingWindow from "./components/messagingWindow";
+import Draggable from "./ui-effects/draggable";
 
 export default function BootstrapMessaging() {
     let [shouldShowMessagingButton, setShowMessagingButton] = useState(false);
@@ -23,8 +22,11 @@ export default function BootstrapMessaging() {
 
     function initializeMessagingClient() {
         // Initialize helpers.
+        // Store the Org Id in-memory for other components to use.
         setOrganizationId(orgId);
+        // Store the Deployment Developer Name in-memory for other components to use.
         setDeploymentDeveloperName(deploymentDevName);
+        // Store the SCRT2 Url for other components to use.
         setScrt2Url(scrt2URL);
         // Initialize Web Storage.
         initializeWebStorage(orgId);
@@ -55,6 +57,11 @@ export default function BootstrapMessaging() {
         }
     }
 
+    function shouldDisableFormSubmitButton() {
+        // TODO: add more validtations around individual inputs below.
+        return orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0;
+    }
+
     function parseAccessTokenResponse(response) {
         if (typeof response === "object") {
             setJwt(response.accessToken);
@@ -79,14 +86,10 @@ export default function BootstrapMessaging() {
                 createConversation(conversationId)
                 .then(() => {
                     console.log(`Successfully created a new conversation with conversation-id: ${conversationId}`);
-                    
-                    subscribeToEventSource({
-                        ["CONVERSATION_MESSAGE"]: handleConversationMessageServerSentEvent
-                    });
                     setShouldShowMessagingWindow(true);
                 })
                 .catch((err) => {
-                    console.log(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
+                    console.error(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
                     clearWebStorage();
                 });
             })
@@ -97,11 +100,16 @@ export default function BootstrapMessaging() {
         }
     }
 
-    function handleConversationMessageServerSentEvent(event) {
-        try {
-            console.log(`Successfully handling conversation message server sent events: ${event}`);
-        } catch(err) {
-            console.error(`Something went wrong in handling conversation message server sent events: ${err}`);
+    function handleEndConversation(evt) {
+        if (evt) {
+            closeConversation(conversationId)
+            .then(() => {
+                console.log(`Successfully closed the conversation with conversation-id: ${conversationId}`);
+            })
+            .catch((err) => {
+                console.error(`Something went wrong in closing the conversation with conversation-id: ${err}`);
+            })
+            .finally(clearWebStorage());
         }
     }
 
@@ -133,7 +141,7 @@ export default function BootstrapMessaging() {
                 <button
                     className="deploymentDetailsFormSubmitButton"
                     onClick={handleDeploymentDetailsFormSubmit}
-                    disabled={orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0}
+                    disabled={shouldDisableFormSubmitButton()}
                 >
                     Submit
                 </button>
@@ -143,7 +151,11 @@ export default function BootstrapMessaging() {
                     clickHandler={handleMessagingButtonClick}
                     disableButton={shouldDisableMessagingButton} />}
             {shouldShowMessagingWindow &&
-                <MessagingWindow />}
+                <Draggable intitialPosition={{ x: 1000, y: 500 }}>
+                    <MessagingWindow conversationId={conversationId} />
+                </Draggable>
+            }
+            <button onClick={handleEndConversation}>End Conversation</button>
         </>
     );
 }

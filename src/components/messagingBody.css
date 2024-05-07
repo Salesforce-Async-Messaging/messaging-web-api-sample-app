@@ -1,7 +1,21 @@
 .messagingBody {
     height: 85%;
     border-bottom: 1px solid #ddd;
-    overflow: hidden;
+    overflow: auto;
     background: whitesmoke;
     border-radius: inherit;
+}
+
+.conversationStartTimeText {
+    color: rgb(98 91 91);
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.conversationEntriesListView {
+    height: inherit;
+    padding: 5px 10px;
+    margin-top: 0;
 }
