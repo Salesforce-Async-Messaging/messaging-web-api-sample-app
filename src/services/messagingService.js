@@ -113,7 +113,6 @@ function createConversation(conversationId, routingAttributes) {
 		if (!response.ok) {
 			throw response;
 		}
-		//response.json(); // v2 endpoint not returning any data unlike v1
 	});
 }
 

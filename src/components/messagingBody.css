@@ -6,7 +6,7 @@
     border-radius: inherit;
 }
 
-.conversationStartTimeText {
+.conversationStartTimeText, .conversationEndTimeText {
     color: rgb(98 91 91);
     margin-top: 10px;
     font-size: 12px;
@@ -15,7 +15,7 @@
 }
 
 .conversationEntriesListView {
-    height: inherit;
+    height: auto;
     padding: 5px 10px;
     margin-top: 0;
 }

@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import './bootstrapMessaging.css';
-import MessagingButton from "./components/messagingButton";
-import { getUnauthenticatedAccessToken, createConversation, closeConversation } from './services/messagingService';
+import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
 import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
+
+// Import children components to render.
+import MessagingButton from "./components/messagingButton";
 import MessagingWindow from "./components/messagingWindow";
 import Draggable from "./ui-effects/draggable";
 
@@ -19,7 +21,14 @@ export default function BootstrapMessaging() {
     let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [conversationId, setConversationId] = useState(undefined);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
+    let [showMessagingButtonSpinner, setShowMessagingButtonSpinner] = useState(false);
 
+    /**
+     * Initialize the messaging client by
+     * 1. internally initializing the Embedded Service deployment paramaters in-memory.
+     * 2. initializing Salesforce Organization Id in the browser web storage.
+     * 3. generate a new unique conversation-id and initialize in-memory.
+     */
     function initializeMessagingClient() {
         // Initialize helpers.
         // Store the Org Id in-memory for other components to use.
@@ -28,40 +37,99 @@ export default function BootstrapMessaging() {
         setDeploymentDeveloperName(deploymentDevName);
         // Store the SCRT2 Url for other components to use.
         setScrt2Url(scrt2URL);
-        // Initialize Web Storage.
+        // Initialize Browser Web Storage (i.e. localStorage and/or sessionStorage) with a storage key including the Salesforce Organization Id.
         initializeWebStorage(orgId);
-        // Initialize a new conversation-id.
+        // Initialize a new unique conversation-id in-memory.
         setConversationId(util.generateUUID());
     }
 
+    /**
+     * Validates whether the supplied string is a valid Salesforce Organization Id.
+     * @returns {boolean}
+     */
+    function isValidOrganizationId(id) {
+        return typeof id === "string" && (id.length === 18 || id.length === 15) && id.substring(0, 3) === "00D";
+    }
+
+    /**
+     * Validates whether the supplied string is a valid Salesforce Embedded Service Deployment Developer Name.
+     * @returns {boolean}
+     */
+    function isValidDeploymentDeveloperName(name) {
+        return typeof name === "string" && name.length > 0;
+    }
+
+    /**
+     * Determines whether the supplied url is a Salesforce Url.
+     * @returns {boolean}
+     */
+    function isSalesforceUrl(url) {
+        try {
+            return typeof url === "string" && url.length > 0 && url.slice(-19) === "salesforce-scrt.com";
+        } catch (err) {
+            console.error(`Something went wrong in validating whether the url is a Salesforce url: ${err}`);
+            return false;
+        }
+    }
+
+    /**
+     * Validates whether the supplied string has a valid protocol and is a Salesforce Url.
+     * @returns {boolean}
+     */
+    function isValidUrl(url) {
+        try {
+            const urlToValidate = new URL(url);
+            return isSalesforceUrl(url) && urlToValidate.protocol === "https:";
+        } catch (err) {
+            console.error(`Something went wrong in validating the url provided: ${err}`);
+            return false;
+        }
+    }
+
+    /**
+     * Handle a click action from the Deployment-Details-Form Submit Button. If the inputted parameters are valid, initialize the Messaging Client and render the Messaging Button.
+     * @param {object} evt - button click event
+     */
     function handleDeploymentDetailsFormSubmit(evt) {
         if (evt) {
-            if(typeof orgId !== "string" || orgId.length !== 15 || !orgId.includes("00D")) {
+            if(!isValidOrganizationId(orgId)) {
                 alert(`Invalid OrganizationId Input Value: ${orgId}`);
                 setShowMessagingButton(false);
                 return;
             }
-		    if(typeof deploymentDevName !== "string" || !deploymentDevName.length) {
+		    if(!isValidDeploymentDeveloperName(deploymentDevName)) {
                 alert(`Expected a valid ESW Config Dev Name value to be a string but received: ${deploymentDevName}.`);
                 setShowMessagingButton(false);
                 return;
             }
-		    if(typeof scrt2URL !== "string" || !scrt2URL.length || !scrt2URL.includes("https://")) {
+		    if(!isValidUrl(scrt2URL)) {
                 alert(`Expected a valid SCRT 2.0 URL value to be a string but received: ${scrt2URL}.`);
                 setShowMessagingButton(false);
                 return;
             }
 
+            // Initialize the Messaging Client.
             initializeMessagingClient();
+            // Render the Messaging Button.
             setShowMessagingButton(true);
         }
     }
 
+    /**
+     * Determines whether the Deployment-Details-Form Submit Button should be enabled/disabled.
+     * @returns {boolean} TRUE - disabled the button and FALSE - otherwise
+     */
     function shouldDisableFormSubmitButton() {
-        // TODO: add more validtations around individual inputs below.
         return orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0;
     }
 
+    /**
+     * Parse the unauthenticatedAccessToken REST endpoint response and initialize the
+     * 1. Salesforce AccessToken(JWT) in-memory and Browser Web Storage.
+     * 2. Last Event Id in-memory. The Id is used to help establish connections to server-sent events (SSE) to receive messages and events from the server.
+     * 3. Embedded Service Deployment configuration settings im-memory.
+     * @param {response|object}
+     */
     function parseAccessTokenResponse(response) {
         if (typeof response === "object") {
             setJwt(response.accessToken);
@@ -71,9 +139,17 @@ export default function BootstrapMessaging() {
         }
     }
 
+    /**
+     * Handle a click action from the Messaging Button.
+     * 1. Make a request to unauthenticatedAccessToken REST endpoint to get a Salesforce AccessToken(JWT), using which other Salesforce REST endpoint requests are made.
+     * 2. If Salesforce AccessToken(JWT) is successfully retrieved, make a request to createConversation REST endpoint using the Salesforce JWT to create a new messaging conversation.
+     * 3. If a conversation is created successfully, render the Messaging Window.
+     * @param {object} evt - button click event
+     */
     function handleMessagingButtonClick(evt) {
         if (evt) {
             console.log("Messaging Button clicked.");
+            setShowMessagingButtonSpinner(true);
 
             getUnauthenticatedAccessToken()
             .then((response) => {
@@ -86,7 +162,8 @@ export default function BootstrapMessaging() {
                 createConversation(conversationId)
                 .then(() => {
                     console.log(`Successfully created a new conversation with conversation-id: ${conversationId}`);
-                    setShouldShowMessagingWindow(true);
+                    showMessagingWindow(true);
+                    setShowMessagingButtonSpinner(false);
                 })
                 .catch((err) => {
                     console.error(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
@@ -100,42 +177,43 @@ export default function BootstrapMessaging() {
         }
     }
 
-    function handleEndConversation(evt) {
-        if (evt) {
-            closeConversation(conversationId)
-            .then(() => {
-                console.log(`Successfully closed the conversation with conversation-id: ${conversationId}`);
-            })
-            .catch((err) => {
-                console.error(`Something went wrong in closing the conversation with conversation-id: ${err}`);
-            })
-            .finally(clearWebStorage());
+    /**
+     * Determines whether to render the Messaging Window based on the supplied parameter.
+     * TRUE - render the Messaging WINDOW and FALSE - Do not render the Messaging Window & Messaging Button
+     * @param {object} evt - button click event
+     */
+    function showMessagingWindow(shouldShow) {
+        setShouldShowMessagingWindow(Boolean(shouldShow));
+        if (!shouldShow) {
+            setShouldShowMessagingWindow(Boolean(shouldShow));
+            // Enable Messaging Button again when Messaging Window is closed.
+            setShouldDisableMessagingButton(false);
+            // Hide Messaging Button to re-initialize the client with form submit.
+            setShowMessagingButton(false);
         }
     }
 
     return (
         <>
+            <h1>Messaging for Web - Sample App</h1>
             <div className="deploymentDetailsForm">
-                <h3>Input your Embedded Service API-type deployment details below</h3>
-                <label>Org Id</label>
+                <h4>Input your Embedded Service Custom Client-type deployment details below</h4>
+                <label>Organization Id</label>
                 <input
                     type="text"
                     value={orgId}
-                    // defaultValue="00DSG000001NruH"
                     onChange={e => setOrgId(e.target.value.trim())}>
                 </input>
                 <label>Deployment Developer Name</label>
                 <input
                     type="text"
                     value={deploymentDevName}
-                    // defaultValue="Web1"
                     onChange={e => setDeploymentDevName(e.target.value.trim())}>
                 </input>
-                <label>SCRT2 Url</label>
+                <label>Url</label>
                 <input
                     type="text"
                     value={scrt2URL}
-                    // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
                     onChange={e => setSCRT2URL(e.target.value.trim())}>
                 </input>
                 <button
@@ -149,13 +227,15 @@ export default function BootstrapMessaging() {
             {shouldShowMessagingButton &&
                 <MessagingButton
                     clickHandler={handleMessagingButtonClick}
-                    disableButton={shouldDisableMessagingButton} />}
+                    disableButton={shouldDisableMessagingButton}
+                    showSpinner={showMessagingButtonSpinner} />}
             {shouldShowMessagingWindow &&
                 <Draggable intitialPosition={{ x: 1000, y: 500 }}>
-                    <MessagingWindow conversationId={conversationId} />
+                    <MessagingWindow
+                        conversationId={conversationId}
+                        showMessagingWindow={showMessagingWindow} />
                 </Draggable>
             }
-            <button onClick={handleEndConversation}>End Conversation</button>
         </>
     );
 }

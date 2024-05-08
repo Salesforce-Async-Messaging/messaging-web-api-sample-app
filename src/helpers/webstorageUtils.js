@@ -83,7 +83,7 @@ export const initializeWebStorage = (organizationId) => {
         sessionStorage.setItem(storageKey, storageObj);
     }
 
-    console.log("Web Storage initialized");
+    console.log("Browser Web Storage initialized.");
 };
 
 /**

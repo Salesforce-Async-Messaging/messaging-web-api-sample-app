@@ -24,3 +24,49 @@
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+/**
+ * Styles related to the spinner shown on Messaging Button
+ */
+.messagingButtonLoadingUI {
+    --color: white;
+    --size-mid: 4vmin;
+    --size-dot: 1.5vmin;
+    --size-bar: 0.4vmin;
+    --size-square: 3vmin;
+    position: relative;
+    width: 50%;
+    display: block;
+    bottom: 30px;
+}
+
+.messagingButtonLoadingUI::before,
+.messagingButtonLoadingUI::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+}
+
+.messagingButtonLoadingUI.loadingBalls::before {
+	width: var(--size-mid);
+	height: var(--size-mid);
+	border: 4px solid white;
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: loadingAnimation 1s linear infinite;
+}
+
+.messagingButtonLoadingUI.loadingBalls::after {
+	width: calc(var(--size-mid) - 2px);
+	height: calc(var(--size-mid) - 2px);
+	border: 2px solid transparent;
+	border-top-color: white;
+	border-radius: 50%;
+	animation: loadingAnimation 0.6s linear reverse infinite;
+}
+
+@keyframes loadingAnimation {
+	100% {
+		transform: rotate(1turn);
+	}
+}

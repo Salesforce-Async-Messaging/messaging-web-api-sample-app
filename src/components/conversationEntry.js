@@ -1,7 +1,9 @@
 import "./conversationEntry.css";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
-import ParticipantChange from "./participantChange";
+
+// Import children components to plug in and render.
 import TextMessage from "./textMessage";
+import ParticipantChange from "./participantChange";
 
 export default function ConversationEntry({conversationEntry}) {
 
