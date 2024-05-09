@@ -1,5 +1,5 @@
 import "./messagingWindow.css";
-import Conversation from "../services/conversation";
+import Conversation from "./conversation";
 
 export default function MessagingWindow({ conversationId }) {
 

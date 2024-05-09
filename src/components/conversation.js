@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import * as EventSourcePolyfill from "../helpers/eventsource-polyfill";
+import * as EventSourcePolyfill from "../helpers/eventsource-polyfill.js";
+
+// import MessagingHeader from "./messagingHeader";
 import MessagingBody from "./messagingBody";
+import MessagingInputFooter from "./messagingInputFooter";
+
 import { getJwt, setLastEventId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
-import MessagingHeader from "./messagingHeader";
 
 export default function Conversation({ conversationId }) {
     // Initialize a list of conversation entries.
@@ -82,13 +85,14 @@ export default function Conversation({ conversationId }) {
                 return;
             }
 
-            if (conversationEntry.isMessageFromEndUser) {
+            if (ConversationEntryUtil.isMessageFromEndUser(conversationEntry)) {
                 conversationEntry.isEndUserMessage = true;
-                console.log(`You sent a message successfully`);
+                console.log(`End user successfully sent a message.`);
             } else {
                 conversationEntry.isEndUserMessage = false;
-                console.log(`Successfully recieved a message from ${conversationEntry.actorType}`);
+                console.log(`Successfully received a message from ${conversationEntry.actorType}`);
             }
+
             addConversationEntry(conversationEntry);
         } catch(err) {
             console.error(`Something went wrong in handling conversation message server sent event: ${err}`);
@@ -181,8 +185,9 @@ export default function Conversation({ conversationId }) {
 
     return (
         <>
-            <MessagingHeader />
+            {/* <MessagingHeader /> */}
             <MessagingBody conversationEntries={conversationEntries} />
+            <MessagingInputFooter conversationId={conversationId} />
         </>
     );
 }
