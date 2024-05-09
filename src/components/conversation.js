@@ -199,6 +199,7 @@ export default function Conversation(props) {
 
             // Do not render conversation ended text if the conversation entry is not for the current conversation.
             if (props.conversationId === parsedEventData.conversationId) {
+                // Update state to conversation closed status.
                 updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
             }
         } catch (err) {
@@ -226,8 +227,6 @@ export default function Conversation(props) {
             closeConversation(props.conversationId)
             .then(() => {
                 console.log(`Successfully closed the conversation with conversation-id: ${props.conversationId}`);
-                // Update state to conversation closed status.
-                //updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
                 // Clear the Browser Web Storage.
                 clearWebStorage();
                 // Close the Event Source (SSE).
