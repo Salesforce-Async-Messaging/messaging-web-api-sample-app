@@ -3,10 +3,13 @@
     margin: 0px;
     font-size: 10px;
     font-weight: 400;
+}
+
+.textMessageSenderContent[class~="incoming"] {
     text-align: left;
 }
 
-.textMessageSenderContent[class="outgoing"] {
+.textMessageSenderContent[class~="outgoing"] {
     text-align: right;
 }
 
@@ -19,13 +22,16 @@
     max-width: 350px;
     width: -webkit-fit-content;
     background-color: rgb(158 154 154);
-    float: left;
     border-radius: 20px;
     margin: 1px auto;
     padding: 8px 14px;
 }
 
-.textMessageBubble[class="outgoing"] {
+.textMessageBubble[class~="incoming"] {
+    float: left;
+}
+
+.textMessageBubble[class~="outgoing"] {
     float: right;
 }
 

@@ -59,6 +59,9 @@ const handleEventSourceListeners = (listenerOperationName, eventListenerMap) => 
  * @returns {Promise}
  */
 export const createEventSource = (fullApiPath, eventListenerMap) => {
+    if (!window.EventSourcePolyfill || typeof window.EventSourcePolyfill !== "function") {
+        throw new Error(`EventSourcePolyfill is not a constructor.`);
+    }
     if (typeof fullApiPath !== "string" || !fullApiPath.length) {
         throw new Error(`Expected full API path parameter to be a valid string, but received: ${fullApiPath}.`);
     }
@@ -103,9 +106,6 @@ export const subscribeToEventSource = (eventListenerMap) => {
         try {
             /**
              * Directly connect to event router endpoint on scrt2 domain instead of going through ia-message.
-             *
-             * [W-15336001] Firefox seems to cache SSE requests and this leads to SSE request failure on secondary tabs ("NS_BINDING_ABORTED" error) during Session Continuity across tabs.
-             * Add a Cache Bust (https://www.keycdn.com/support/what-is-cache-busting) to the request as a query parameter, as simple as a timestamp, to force the browser(s) to request newer version of the resource.
              */
             createEventSource(
                 getScrt2Url().concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
@@ -114,7 +114,7 @@ export const subscribeToEventSource = (eventListenerMap) => {
                 resolve,
                 error => {
                     /**
-                     * If this reject function is called, there are likely two possibilities:
+                     * If this reject function is called, there are likely three possibilities:
                      * 1. a syntactic error in creating the EventSource
                      * 2. too many reconnect attempts
                      * 3. JWT has expired

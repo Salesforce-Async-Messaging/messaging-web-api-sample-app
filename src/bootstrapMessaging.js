@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
+// Import children components to render.
+import MessagingWindow from "./components/messagingWindow";
+import MessagingButton from "./components/messagingButton";
+
 import './bootstrapMessaging.css';
-import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
+
 import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
+import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
 
-// Import children components to render.
-import MessagingButton from "./components/messagingButton";
-import MessagingWindow from "./components/messagingWindow";
 import Draggable from "./ui-effects/draggable";
 
 export default function BootstrapMessaging() {
@@ -18,8 +21,8 @@ export default function BootstrapMessaging() {
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
     let [scrt2URL, setSCRT2URL] = useState('');
-    let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [conversationId, setConversationId] = useState(undefined);
+    let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
     let [showMessagingButtonSpinner, setShowMessagingButtonSpinner] = useState(false);
 

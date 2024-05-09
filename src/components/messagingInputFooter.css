@@ -1,0 +1,9 @@
+.messagingFooter {
+    width: 100%;
+    display: flex;
+}
+
+.messagingFooter textarea {
+    width: inherit;
+    align-content: center;
+}

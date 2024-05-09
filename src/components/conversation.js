@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import * as EventSourcePolyfill from "../helpers/eventsource-polyfill";
-import { setLastEventId } from "../services/dataProvider";
-import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { closeConversation } from "../services/messagingService";
-import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
-import { CONVERSATION_CONSTANTS } from "../helpers/constants";
-import { clearWebStorage } from "../helpers/webstorageUtils";
+import * as EventSourcePolyfill from "../helpers/eventsource-polyfill.js";
 
 // Import children components to plug in and render.
 import MessagingHeader from "./messagingHeader";
 import MessagingBody from "./messagingBody";
+import MessagingInputFooter from "./messagingInputFooter";
+
+import { getJwt, setLastEventId } from "../services/dataProvider";
+import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
+import { closeConversation } from "../services/messagingService";
+import { sendTextMessage } from '../services/messagingService';
+import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
+import { CONVERSATION_CONSTANTS } from "../helpers/constants";
+import { clearWebStorage } from "../helpers/webstorageUtils";
 
 export default function Conversation(props) {
     // Initialize a list of conversation entries.
@@ -85,13 +88,14 @@ export default function Conversation(props) {
                 return;
             }
 
-            if (conversationEntry.isMessageFromEndUser) {
+            if (ConversationEntryUtil.isMessageFromEndUser(conversationEntry)) {
                 conversationEntry.isEndUserMessage = true;
-                console.log(`You sent a message successfully`);
+                console.log(`End user successfully sent a message.`);
             } else {
                 conversationEntry.isEndUserMessage = false;
-                console.log(`Successfully recieved a message from ${conversationEntry.actorType}`);
+                console.log(`Successfully received a message from ${conversationEntry.actorType}`);
             }
+
             addConversationEntry(conversationEntry);
         } catch(err) {
             console.error(`Something went wrong in handling conversation message server sent event: ${err}`);
@@ -262,6 +266,8 @@ export default function Conversation(props) {
             <MessagingBody
                 conversationEntries={conversationEntries}
                 conversationStatus={conversationStatus} />
+            <MessagingInputFooter conversationId={conversationId} 
+                sendTextMessage={sendTextMessage}/>
         </>
     );
 }
