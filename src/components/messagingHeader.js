@@ -4,21 +4,6 @@ import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 
 export default function MessagingHeader(props) {
     /**
-     * Determine whether the header Close ('X') button should be disabled, based on the current conversation status.
-     * @returns {boolean}
-     */
-    function shouldDisableCloseButton() {
-        switch(props.conversationStatus) {
-            case CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION:
-            case CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION:
-                return false;
-            case CONVERSATION_CONSTANTS.ConversationStatus.NOT_STARTED_CONVERSATION:
-            default:
-                return true;
-        }
-    }
-
-    /**
      * Handle Close ('X') button click based on the current conversation status.
      * If the conversation is open, invoke the parent's handlers to end the current conversation.
      * If the conversation is either closed or not yet started, invoke the parent's handler to close the messaging window.
@@ -49,8 +34,7 @@ export default function MessagingHeader(props) {
             <button
                 className="messagingHeaderCloseButton"
                 title={generateCloseButtonTitle()}
-                onClick={handleCloseButtonClick}
-                disabled={shouldDisableCloseButton()}>
+                onClick={handleCloseButtonClick}>
                 <FaCircleXmark className="messagingHeaderCloseButtonIcon"/>
             </button>
         </div>
