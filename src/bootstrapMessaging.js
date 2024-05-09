@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import './bootstrapMessaging.css';
+
+import MessagingWindow from "./components/messagingWindow";
 import MessagingButton from "./components/messagingButton";
-import { getUnauthenticatedAccessToken, createConversation, closeConversation } from './services/messagingService';
+
+import './bootstrapMessaging.css';
+
 import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
+import { getUnauthenticatedAccessToken, createConversation, closeConversation } from './services/messagingService';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
 import { STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
-import MessagingWindow from "./components/messagingWindow";
+
 import Draggable from "./ui-effects/draggable";
 
 export default function BootstrapMessaging() {
@@ -16,8 +20,8 @@ export default function BootstrapMessaging() {
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
     let [scrt2URL, setSCRT2URL] = useState('');
-    let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [conversationId, setConversationId] = useState(undefined);
+    let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
 
     function initializeMessagingClient() {
@@ -121,21 +125,18 @@ export default function BootstrapMessaging() {
                 <input
                     type="text"
                     value={orgId}
-                    // defaultValue="00DSG000001NruH"
                     onChange={e => setOrgId(e.target.value.trim())}>
                 </input>
                 <label>Deployment Developer Name</label>
                 <input
                     type="text"
                     value={deploymentDevName}
-                    // defaultValue="Web1"
                     onChange={e => setDeploymentDevName(e.target.value.trim())}>
                 </input>
                 <label>SCRT2 Url</label>
                 <input
                     type="text"
                     value={scrt2URL}
-                    // defaultValue="https://sachinsdb6.test1.my.pc-rnd.salesforce-scrt.com"
                     onChange={e => setSCRT2URL(e.target.value.trim())}>
                 </input>
                 <button

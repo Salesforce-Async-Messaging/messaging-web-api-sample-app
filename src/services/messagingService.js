@@ -1,4 +1,4 @@
-import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS } from "../helpers/constants";
+import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONSTANTS } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getScrt2Url } from "./dataProvider";
 import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 
@@ -172,6 +172,53 @@ function listConversation(includeClosedConversations = true){
 	});
 };
 
+/*
+ * Publish a text message to a conversation.
+ * 
+ * TODO: insert api doc link
+ * 
+ * @param {String} conversationId - ID of conversation to send a text message to.
+ * @param {String} text - String content to send to conversation.
+ * @param {String} messageId - ID of the conversation entry.
+ * @param {String} inReplyToMessageId - ID of message this message is a response for.
+ * @param {boolean} isNewMessagingSession - Optional. Whether this message should create a new session. Used by session pre-chat forms.
+ * @param {Object} routingAttributes - Optional. Pre-chat data to be used while routing the new session request. Used by session pre-chat forms.
+ * @param {String} language - Optional. TODO.
+ * @returns {Promise}
+ */
+function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language) {
+	const scrt2Url = getScrt2Url();
+	const esDeveloperName = getDeploymentDeveloperName();
+	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/${conversationId}/message`;
+
+	return sendFetchRequest(
+		apiPath,
+		"POST",
+		"cors",
+		null,
+        {
+			message: {
+				...(inReplyToMessageId && { inReplyToMessageId }),
+				id: messageId,
+				messageType: CONVERSATION_CONSTANTS.MessageTypes.STATIC_CONTENT_MESSAGE,
+				staticContent: {
+					formatType: CONVERSATION_CONSTANTS.FormatTypes.TEXT,
+					text
+				},
+			},
+			...(routingAttributes && { routingAttributes }),
+			...(isNewMessagingSession && { isNewMessagingSession }),
+			esDeveloperName,
+			...(language && { language })
+        }
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		response.json();
+	});
+}
+
 /**
  * Close conversation and clean up JWT:
  * - clear JWT variable on inAppService.
@@ -198,4 +245,4 @@ function closeConversation (conversationId) {
     );
 };
 
-export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversation, closeConversation };
+export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversation, sendTextMessage, closeConversation };
