@@ -7,6 +7,7 @@ import MessagingInputFooter from "./messagingInputFooter";
 
 import { getJwt, setLastEventId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
+import { sendTextMessage } from '../services/messagingService';
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 
@@ -187,7 +188,8 @@ export default function Conversation({ conversationId }) {
         <>
             {/* <MessagingHeader /> */}
             <MessagingBody conversationEntries={conversationEntries} />
-            <MessagingInputFooter conversationId={conversationId} />
+            <MessagingInputFooter conversationId={conversationId} 
+                sendTextMessage={sendTextMessage}/>
         </>
     );
 }

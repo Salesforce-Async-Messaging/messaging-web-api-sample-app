@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import "./messagingInputFooter.css";
 
-import { sendTextMessage } from '../services/messagingService';
 import { util } from "../helpers/common";
 
 export default function MessagingInputFooter(props) {
@@ -47,7 +46,7 @@ export default function MessagingInputFooter(props) {
         let routingAttributes;
         let language;
 
-        sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
+        props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
             .then(() => {
                 console.log(`Successfully sent message to conversation: ${conversationId}`);
 
