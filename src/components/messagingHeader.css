@@ -3,6 +3,7 @@
     height: 50px;
     background-color: rgb(98 91 91);
     border-radius: 15px 15px 0px 0px;
+    font-family: inherit;
 }
 
 .messagingHeaderCloseButton {

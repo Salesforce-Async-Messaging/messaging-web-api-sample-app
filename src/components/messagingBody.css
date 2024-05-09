@@ -1,9 +1,10 @@
 .messagingBody {
-    height: 90%;
+    height: 500px;
     border-bottom: 1px solid #ddd;
     overflow: auto;
     background: whitesmoke;
     border-radius: inherit;
+    font-family: inherit;
 }
 
 .conversationStartTimeText, .conversationEndTimeText {

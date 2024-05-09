@@ -1,5 +1,6 @@
 import "./messagingHeader.css";
 import { FaCircleXmark } from "react-icons/fa6";
+
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 
 export default function MessagingHeader(props) {

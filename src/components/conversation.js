@@ -6,10 +6,9 @@ import MessagingHeader from "./messagingHeader";
 import MessagingBody from "./messagingBody";
 import MessagingInputFooter from "./messagingInputFooter";
 
-import { getJwt, setLastEventId } from "../services/dataProvider";
+import { setLastEventId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { closeConversation } from "../services/messagingService";
-import { sendTextMessage } from '../services/messagingService';
+import { sendTextMessage ,closeConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 import { clearWebStorage } from "../helpers/webstorageUtils";
@@ -32,7 +31,11 @@ export default function Conversation(props) {
         }
 
         return () => {
-            closeEventSource().then(console.log("Closed the Event Source (SSE)."));
+            closeEventSource()
+            .then(console.log("Closed the Event Source (SSE)."))
+            .catch((err) => {
+                console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
+            });
         };
     }, []);
 
@@ -237,11 +240,11 @@ export default function Conversation(props) {
                 closeEventSource()
                 .then(console.log("Closed the Event Source (SSE)."))
                 .catch((err) => {
-                    console.error(`Something went wrong in closing Event Source (SSE).`);
+                    console.error(`Something went wrong in closing Event Source (SSE): ${err}`);
                 })
             })
             .catch((err) => {
-                console.error(`Something went wrong in closing the conversation with conversation-id: ${err}`);
+                console.error(`Something went wrong in closing the conversation with conversation-id ${props.conversationId}: ${err}`);
             });
         }
     }
@@ -266,8 +269,9 @@ export default function Conversation(props) {
             <MessagingBody
                 conversationEntries={conversationEntries}
                 conversationStatus={conversationStatus} />
-            <MessagingInputFooter conversationId={conversationId} 
-                sendTextMessage={sendTextMessage}/>
+            <MessagingInputFooter conversationId={props.conversationId} 
+                sendTextMessage={sendTextMessage}
+                conversationStatus={conversationStatus} />
         </>
     );
 }
