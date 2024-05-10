@@ -1,5 +1,5 @@
 import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONSTANTS } from "../helpers/constants";
-import { getOrganizationId, getDeploymentDeveloperName, getScrt2Url } from "./dataProvider";
+import { getOrganizationId, getDeploymentDeveloperName, getSalesforceMessagingUrl } from "./dataProvider";
 import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 
 /**
@@ -59,10 +59,10 @@ function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
 function getUnauthenticatedAccessToken() {
 	const orgId = getOrganizationId();
 	const esDeveloperName = getDeploymentDeveloperName();
-	const scrt2Url = getScrt2Url();
+	const messagingUrl = getSalesforceMessagingUrl();
 	const capabilitiesVersion = APP_CONSTANTS.APP_CAPABILITIES_VERSION;
 	const platform = APP_CONSTANTS.APP_PLATFORM;
-	const apiPath = `${scrt2Url}/iamessage/api/v2/authorization/unauthenticated/access-token`;
+	const apiPath = `${messagingUrl}/iamessage/api/v2/authorization/unauthenticated/access-token`;
 
 	return sendFetchRequest(
 		apiPath,
@@ -95,8 +95,8 @@ function getUnauthenticatedAccessToken() {
  */
 function createConversation(conversationId, routingAttributes) {
 	const esDeveloperName = getDeploymentDeveloperName();
-	const scrt2Url = getScrt2Url();
-	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation`;
+	const messagingUrl = getSalesforceMessagingUrl();
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation`;
 
 	return sendFetchRequest(
 		apiPath,
@@ -113,7 +113,6 @@ function createConversation(conversationId, routingAttributes) {
 		if (!response.ok) {
 			throw response;
 		}
-		//response.json(); // v2 endpoint not returning any data unlike v1
 	});
 }
 
@@ -125,8 +124,8 @@ function createConversation(conversationId, routingAttributes) {
  * @returns {Promise}
  */
 function getContinuityJwt() {
-	const scrt2Url = getScrt2Url();
-	const apiPath = `${scrt2Url}/iamessage/api/v2/authorization/continuation-access-token`;
+	const messagingUrl = getSalesforceMessagingUrl();
+	const apiPath = `${messagingUrl}/iamessage/api/v2/authorization/continuation-access-token`;
 
 	return sendFetchRequest(
 		apiPath,
@@ -155,8 +154,8 @@ function getContinuityJwt() {
  * @returns {Promise}
  */
 function listConversation(includeClosedConversations = true){
-	const scrt2Url = getScrt2Url();
-	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
+	const messagingUrl = getSalesforceMessagingUrl();
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
 
 	return sendFetchRequest(
 		apiPath,
@@ -187,9 +186,9 @@ function listConversation(includeClosedConversations = true){
  * @returns {Promise}
  */
 function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language) {
-	const scrt2Url = getScrt2Url();
+	const messagingUrl = getSalesforceMessagingUrl();
 	const esDeveloperName = getDeploymentDeveloperName();
-	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/${conversationId}/message`;
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/message`;
 
 	return sendFetchRequest(
 		apiPath,
@@ -232,9 +231,9 @@ function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, is
  * @returns {Promise}
  */
 function closeConversation (conversationId) {
-    const scrt2Url = getScrt2Url();
+    const messagingUrl = getSalesforceMessagingUrl();
 	const esDeveloperName = getDeploymentDeveloperName();
-	const apiPath = `${scrt2Url}/iamessage/api/v2/conversation/${conversationId}?esDeveloperName=${esDeveloperName}`;
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}?esDeveloperName=${esDeveloperName}`;
 
     return sendFetchRequest(
         apiPath,

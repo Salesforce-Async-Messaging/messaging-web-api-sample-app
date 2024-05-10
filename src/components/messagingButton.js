@@ -2,10 +2,15 @@ import './messagingButton.css';
  
 export default function MessagingButton(props) {
     
-    return <button
+    return (
+        <>
+            <button
                 className="messagingButton"
                 onClick={props.clickHandler}
                 disabled={props.disableButton}>
                     Let's Chat
-            </button>;
+                {props.showSpinner && <span className="messagingButtonLoadingUI loadingBalls"></span>}
+            </button>
+        </>
+    );
 }

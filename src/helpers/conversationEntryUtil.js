@@ -53,55 +53,100 @@ export function createConversationEntry(data) {
 };
 
 //============================================================== STATIC TEXT MESSAGE functions ==============================================================
-export function isConversationEntryAMessage(conversationEntry) {
+/**
+ * Validates whether the supplied object is a conversation-entry with entry type as CONVERSATION_MESSAGE.
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the conversation-entry is a CONVERSATION_MESSAGE and FALSE - otherwise.
+ */
+export function isConversationEntryMessage(conversationEntry) {
     if (conversationEntry) {
         return conversationEntry.entryType === CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE;
     }
     return false;
 };
 
+/**
+ * Validates whether the supplied CONVERSATION_MESSAGE is originating from an end-user participant.
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is sent by the end-user participant and FALSE - otherwise.
+ */
 export function isMessageFromEndUser(conversationEntry) {
-    if (isConversationEntryAMessage(conversationEntry)) {
+    if (isConversationEntryMessage(conversationEntry)) {
         return conversationEntry.actorType === CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER;
     }
     return false;
-}
+};
 
-export function isConversationEntryAStaticContentMessage(conversationEntry) {
-    if (isConversationEntryAMessage(conversationEntry)) {
+/**
+ * Validates whether the supplied CONVERSATION_MESSAGE is a STATIC_CONTENT_MESSAGE (i.e. messageType === "STATIC_CONTENT_MESSAGE").
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is a STATIC_CONTENT_MESSAGE and FALSE - otherwise.
+ */
+export function isConversationEntryStaticContentMessage(conversationEntry) {
+    if (isConversationEntryMessage(conversationEntry)) {
         return conversationEntry.content && conversationEntry.content.messageType === CONVERSATION_CONSTANTS.MessageTypes.STATIC_CONTENT_MESSAGE;
     }
     return false;
-}
+};
 
+/**
+ * Gets the supplied STATIC_CONTENT_MESSAGE's payload.
+ * @param {object} conversationEntry
+ * @returns {object|undefined}
+ */
 export function getStaticContentPayload(conversationEntry) {
-    if (isConversationEntryAStaticContentMessage(conversationEntry)) {
+    if (isConversationEntryStaticContentMessage(conversationEntry)) {
         return conversationEntry.content && conversationEntry.content.staticContent;
     }
     return undefined;
-}
+};
 
+/**
+ * Validates whether the supplied STATIC_CONTENT_MESSAGE is a Text Message (i.e. formatType === "Text").
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the STATIC_CONTENT_MESSAGE is a Text Message and FALSE - otherwise.
+ */
 export function isTextMessage(conversationEntry) {
-    if (isConversationEntryAStaticContentMessage(conversationEntry)) {
+    if (isConversationEntryStaticContentMessage(conversationEntry)) {
         return getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.TEXT;
     }
-}
+};
 
+/**
+ * Gets the supplied Text Message's text.
+ * @param {object} conversationEntry
+ * @returns {string}
+ */
 export function getTextMessageContent(conversationEntry) {
     if (isTextMessage(conversationEntry)) {
         return getStaticContentPayload(conversationEntry).text;
     }
-    return undefined;
-}
+    return "";
+};
 //============================================================== PARTICIPANT CHANGE functions ==============================================================
+/**
+ * Validates whether the supplied object is a conversation-entry with entry type as PARTICIPANT_CHANGED.
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the conversation-entry is a PARTICIPANT_CHANGED event and FALSE - otherwise.
+ */
 export function isParticipantChangeEvent(conversationEntry) {
     return conversationEntry.entryType === CONVERSATION_CONSTANTS.EntryTypes.PARTICIPANT_CHANGED;
-}
+};
 
+/**
+ * Validates whether the supplied PARTICIPANT_CHANGED conversation-entry's participant joined the conversation. 
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the participant joined and FALSE - if the participant left.
+ */
 export function hasParticipantJoined(conversationEntry) {
     return isParticipantChangeEvent(conversationEntry) && conversationEntry.content.entries[0].operation === CONVERSATION_CONSTANTS.ParticipantChangedOperations.ADD;
-}
+};
 
+/**
+ * Gets the supplied PARTICIPANT_CHANGED conversation-entry's participant name.
+ * @param {object} conversationEntry
+ * @returns {string}
+ */
 export function getParticipantChangeEventPartcipantName(conversationEntry) {
     return isParticipantChangeEvent(conversationEntry) && (conversationEntry.content.entries[0].displayName || conversationEntry.content.entries[0].participant.role);
-}
+};

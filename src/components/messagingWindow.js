@@ -1,11 +1,15 @@
 import "./messagingWindow.css";
-import Conversation from "./conversation";
 
-export default function MessagingWindow({ conversationId }) {
+// Import children components to render.
+import Conversation from "../components/conversation";
+
+export default function MessagingWindow(props) {
 
     return(
         <div className="messagingWindow">
-            <Conversation conversationId={conversationId} />
+            <Conversation
+                conversationId={props.conversationId}
+                showMessagingWindow={props.showMessagingWindow} />
         </div>
     );
 }

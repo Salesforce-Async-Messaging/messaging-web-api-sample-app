@@ -1,36 +1,41 @@
 import { useEffect, useState } from "react";
 import * as EventSourcePolyfill from "../helpers/eventsource-polyfill.js";
 
-// import MessagingHeader from "./messagingHeader";
+// Import children components to plug in and render.
+import MessagingHeader from "./messagingHeader";
 import MessagingBody from "./messagingBody";
 import MessagingInputFooter from "./messagingInputFooter";
 
-import { getJwt, setLastEventId } from "../services/dataProvider";
+import { setLastEventId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { sendTextMessage } from '../services/messagingService';
+import { sendTextMessage, closeConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
+import { clearWebStorage } from "../helpers/webstorageUtils";
 
-export default function Conversation({ conversationId }) {
+export default function Conversation(props) {
     // Initialize a list of conversation entries.
     let [conversationEntries, setConversationEntries] = useState([]);
+    // Initialize the conversation status.
+    let [conversationStatus, setConversationStatus] = useState(CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION);
 
     useEffect(() => {
-        subscribeToEventSource({
-            [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]: handleConversationMessageServerSentEvent,
-            [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_ROUTING_RESULT]: handleRoutingResultServerSentEvent,
-            [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_PARTICIPANT_CHANGED]: handleParticipantChangedServerSentEvent
-        })
-        .then(console.log("Subscribed to the Event Source (SSE)."));
-
-        if (getJwt()) {
-            // Messaging JWT (i.e. Acess Token) exists in the web storage -> Existing conversation
-        } else {
-            // Messaging JWT (i.e. Access Token) does not exist in the web storage -> New conversation
+        if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
+            subscribeToEventSource({
+                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]: handleConversationMessageServerSentEvent,
+                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_ROUTING_RESULT]: handleRoutingResultServerSentEvent,
+                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_PARTICIPANT_CHANGED]: handleParticipantChangedServerSentEvent,
+                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_CLOSE_CONVERSATION]: handleCloseConversationServerSentEvent
+            })
+            .then(console.log("Subscribed to the Event Source (SSE)."));
         }
 
         return () => {
-            closeEventSource().then(console.log("Closed the Event Source (SSE)."));
+            closeEventSource()
+            .then(console.log("Closed the Event Source (SSE)."))
+            .catch((err) => {
+                console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
+            });
         };
     }, []);
 
@@ -45,14 +50,13 @@ export default function Conversation({ conversationId }) {
      */
     function generateConversationEntryForCurrentConversation(serverSentEvent) {
         const parsedEventData = ConversationEntryUtil.parseServerSentEventData(serverSentEvent);
-        console.log(parsedEventData);
         const conversationEntry = ConversationEntryUtil.createConversationEntry(parsedEventData);
 
         // Handle server sent events only for the current conversation
-        if (parsedEventData.conversationId === conversationId) {
+        if (parsedEventData.conversationId === props.conversationId) {
             return conversationEntry;
         }
-        console.log(`Current conversation-id: ${conversationId} does not match the conversation-id in server sent event: ${parsedEventData.conversationId}. Ignoring the event.`);
+        console.log(`Current conversation-id: ${props.conversationId} does not match the conversation-id in server sent event: ${parsedEventData.conversationId}. Ignoring the event.`);
         return undefined;
     }
 
@@ -66,7 +70,7 @@ export default function Conversation({ conversationId }) {
 
     /**
      * Handle a CONVERSATION_MESSAGE server-sent event.
-     * @param {Object} event - Event data payload from server-sent event.
+     * @param {object} event - Event data payload from server-sent event.
      *
      * This includes:
      *  1. Parse, populate, and create ConversationEntry object based on its entry type
@@ -75,7 +79,7 @@ export default function Conversation({ conversationId }) {
      */
     function handleConversationMessageServerSentEvent(event) {
         try {
-            console.log(`Successfully handling conversation message server sent event`);
+            console.log(`Successfully handling conversation message server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -102,7 +106,7 @@ export default function Conversation({ conversationId }) {
 
     /**
      * Handle a ROUTING_RESULT server-sent event.
-     * @param {Object} event - Event data payload from server-sent event.
+     * @param {object} event - Event data payload from server-sent event.
      *
      * This includes:
      *  1. Parse, populate, and create ConversationEntry object based on its entry type.
@@ -113,7 +117,7 @@ export default function Conversation({ conversationId }) {
      */
     function handleRoutingResultServerSentEvent(event) {
         try {
-            console.log(`Successfully handling routing result server sent event`);
+            console.log(`Successfully handling routing result server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -160,7 +164,7 @@ export default function Conversation({ conversationId }) {
 
     /**
      * Handle a PARTICIPANT_CHANGED server-sent event.
-     * @param {Object} event - Event data payload from server-sent event.
+     * @param {object} event - Event data payload from server-sent event.
      *
      * This includes:
      *  1. Parse, populate, and create ConversationEntry object based on its entry type.
@@ -169,7 +173,7 @@ export default function Conversation({ conversationId }) {
      */
     function handleParticipantChangedServerSentEvent(event) {
         try {
-            console.log(`Successfully handling participant changed server sent event`);
+            console.log(`Successfully handling participant changed server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -184,12 +188,90 @@ export default function Conversation({ conversationId }) {
         }
     }
 
+    /**
+     * Handle a CONVERSATION_CLOSED server-sent event.
+     *
+     * @param {object} event - Event data payload from server-sent event.
+     */
+    function handleCloseConversationServerSentEvent(event) {
+        try {
+            console.log(`Successfully handling close conversation server sent event.`);
+            // Update in-memory to the latest lastEventId
+            if (event && event.lastEventId) {
+                setLastEventId(event.lastEventId);
+            }
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+
+            // Do not render conversation ended text if the conversation entry is not for the current conversation.
+            if (props.conversationId === parsedEventData.conversationId) {
+                // Update state to conversation closed status.
+                updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
+            }
+        } catch (err) {
+            console.error(`Something went wrong while handling conversation closed server sent event in conversation ${props.conversationId}: ${err}`);
+        }
+    }
+
+    /**
+     * Update conversation status state based on the event from a child component i.e. MessagingHeader.
+     * Updating conversation status state re-renders the current component as well as the child components and the child components can reactively use the updated conversation status to make any changes.
+     *
+     * @param {string} status - e.g. CLOSED.
+     */
+    function updateConversationStatus(status) {
+        setConversationStatus(status);
+    }
+
+    /**
+     * Close messaging window handler for the event from a child component i.e. MessagingHeader.
+     * When such event is received, invoke the parent's handler to close the messaging window if the conversation status is closed or not yet started.
+     */
+    function endConversation() {
+        if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
+            // End the conversation if it is currently opened.
+            closeConversation(props.conversationId)
+            .then(() => {
+                console.log(`Successfully closed the conversation with conversation-id: ${props.conversationId}`);
+                // Update state to conversation closed status.
+                updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
+                clearWebStorage();
+                closeEventSource()
+                .then(console.log("Closed the Event Source (SSE)."))
+                .catch((err) => {
+                    console.error(`Something went wrong in closing Event Source (SSE): ${err}`);
+                })
+            })
+            .catch((err) => {
+                console.error(`Something went wrong in closing the conversation with conversation-id ${props.conversationId}: ${err}`);
+            });
+        }
+    }
+
+    /**
+     * Close messaging window handler for the event from a child component i.e. MessagingHeader.
+     * When such event is received, invoke the parent's handler to close the messaging window if the conversation status is closed or not yet started.
+     */
+    function closeMessagingWindow() {
+        if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION || conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.NOT_STARTED_CONVERSATION) {
+            props.showMessagingWindow(false);
+        }
+    }
+
     return (
         <>
-            {/* <MessagingHeader /> */}
-            <MessagingBody conversationEntries={conversationEntries} />
-            <MessagingInputFooter conversationId={conversationId} 
-                sendTextMessage={sendTextMessage}/>
+            <MessagingHeader
+                conversationId={props.conversationId}
+                conversationStatus={conversationStatus}
+                endConversation={endConversation}
+                closeMessagingWindow={closeMessagingWindow} />
+            <MessagingBody
+                conversationEntries={conversationEntries}
+                conversationStatus={conversationStatus} />
+            <MessagingInputFooter
+                conversationId={props.conversationId}
+                conversationStatus={conversationStatus} 
+                sendTextMessage={sendTextMessage} />
         </>
     );
 }

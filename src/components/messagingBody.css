@@ -1,12 +1,13 @@
 .messagingBody {
-    height: 90%;
+    height: 500px;
     border-bottom: 1px solid #ddd;
     overflow: auto;
     background: whitesmoke;
     border-radius: inherit;
+    font-family: inherit;
 }
 
-.conversationStartTimeText {
+.conversationStartTimeText, .conversationEndTimeText {
     color: rgb(98 91 91);
     margin-top: 10px;
     font-size: 12px;
@@ -15,7 +16,7 @@
 }
 
 .conversationEntriesListView {
-    height: inherit;
+    height: auto;
     padding: 5px 10px;
     margin-top: 0;
 }

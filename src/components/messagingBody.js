@@ -1,8 +1,19 @@
+import { useEffect } from "react";
 import "./messagingBody.css";
-import ConversationEntry from "./conversationEntry";
 import { util } from "../helpers/common";
+import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 
-export default function MessagingBody({ conversationEntries }) {
+// Import children components to plug in and render.
+import ConversationEntry from "./conversationEntry";
+
+export default function MessagingBody({ conversationEntries, conversationStatus }) {
+
+    useEffect(() => {
+        if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION) {
+            // Render conversation closed message.
+        }
+    }, [conversationStatus]);
+
     /**
      * Builds a list of conversation entries where each conversation-entry represents an object of type defined in constants#CONVERSATION_CONSTANTS.EntryTypes.
      * @returns {string}
@@ -17,7 +28,7 @@ export default function MessagingBody({ conversationEntries }) {
      * Generates a text with conversation start date and time.
      * @returns {string}
      */
-    function generateConversationStartTime() {
+    function generateConversationStartTimeText() {
         if (conversationEntries.length) {
             const conversationStartTimestamp = conversationEntries[0].transcriptedTimestamp;
             const startDate = util.getFormattedDate(conversationStartTimestamp);
@@ -28,12 +39,26 @@ export default function MessagingBody({ conversationEntries }) {
         return "";
     }
 
+    /**
+     * Generates a text with conversation end date and time.
+     * @returns {string}
+     */
+    function generateConversationEndTimeText() {
+        const conversationEndTimestamp = Date.now();
+        const endDate = util.getFormattedDate(conversationEndTimestamp);
+        const endTime = util.getFormattedTime(conversationEndTimestamp);
+        const conversationEndTimeText = `Conversation ended: ${endDate} at ${endTime}`;
+
+        return conversationEndTimeText;
+    }
+
     return (
         <div className="messagingBody">
-            {conversationEntries.length > 0 && <p className="conversationStartTimeText">{generateConversationStartTime()}</p>}
+            {conversationEntries.length > 0 && <p className="conversationStartTimeText">{generateConversationStartTimeText()}</p>}
             <ul className="conversationEntriesListView">
                 {conversationEntriesListView}
             </ul>
+            {conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION && <p className="conversationEndTimeText">{generateConversationEndTimeText()}</p>}
         </div>
     );
 }
