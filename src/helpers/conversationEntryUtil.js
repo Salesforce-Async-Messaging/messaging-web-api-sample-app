@@ -58,7 +58,7 @@ export function createConversationEntry(data) {
  * @param {object} conversationEntry
  * @returns {boolean} - TRUE - if the conversation-entry is a CONVERSATION_MESSAGE and FALSE - otherwise.
  */
-export function isConversationEntryAMessage(conversationEntry) {
+export function isConversationEntryMessage(conversationEntry) {
     if (conversationEntry) {
         return conversationEntry.entryType === CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE;
     }
@@ -71,19 +71,19 @@ export function isConversationEntryAMessage(conversationEntry) {
  * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is sent by the end-user participant and FALSE - otherwise.
  */
 export function isMessageFromEndUser(conversationEntry) {
-    if (isConversationEntryAMessage(conversationEntry)) {
+    if (isConversationEntryMessage(conversationEntry)) {
         return conversationEntry.actorType === CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER;
     }
     return false;
 };
 
 /**
- * Validates whether the supplied CONVERSATION_MESSAGE is a STATIC_CONTENT_MESSAGE.
+ * Validates whether the supplied CONVERSATION_MESSAGE is a STATIC_CONTENT_MESSAGE (i.e. messageType === "STATIC_CONTENT_MESSAGE").
  * @param {object} conversationEntry
  * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is a STATIC_CONTENT_MESSAGE and FALSE - otherwise.
  */
-export function isConversationEntryAStaticContentMessage(conversationEntry) {
-    if (isConversationEntryAMessage(conversationEntry)) {
+export function isConversationEntryStaticContentMessage(conversationEntry) {
+    if (isConversationEntryMessage(conversationEntry)) {
         return conversationEntry.content && conversationEntry.content.messageType === CONVERSATION_CONSTANTS.MessageTypes.STATIC_CONTENT_MESSAGE;
     }
     return false;
@@ -95,19 +95,19 @@ export function isConversationEntryAStaticContentMessage(conversationEntry) {
  * @returns {object|undefined}
  */
 export function getStaticContentPayload(conversationEntry) {
-    if (isConversationEntryAStaticContentMessage(conversationEntry)) {
+    if (isConversationEntryStaticContentMessage(conversationEntry)) {
         return conversationEntry.content && conversationEntry.content.staticContent;
     }
     return undefined;
 };
 
 /**
- * Validates whether the supplied STATIC_CONTENT_MESSAGE is a Text Message.
+ * Validates whether the supplied STATIC_CONTENT_MESSAGE is a Text Message (i.e. formatType === "Text").
  * @param {object} conversationEntry
  * @returns {boolean} - TRUE - if the STATIC_CONTENT_MESSAGE is a Text Message and FALSE - otherwise.
  */
 export function isTextMessage(conversationEntry) {
-    if (isConversationEntryAStaticContentMessage(conversationEntry)) {
+    if (isConversationEntryStaticContentMessage(conversationEntry)) {
         return getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.TEXT;
     }
 };

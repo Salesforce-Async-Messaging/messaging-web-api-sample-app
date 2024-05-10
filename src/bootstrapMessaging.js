@@ -8,10 +8,10 @@ import MessagingButton from "./components/messagingButton";
 
 import './bootstrapMessaging.css';
 
-import { setOrganizationId, setDeploymentDeveloperName, setScrt2Url, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
+import { setOrganizationId, setDeploymentDeveloperName, setSalesforceMessagingUrl, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
 import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
 import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
-import { STORAGE_KEYS } from './helpers/constants';
+import { APP_CONSTANTS, STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
 
 import Draggable from "./ui-effects/draggable";
@@ -20,7 +20,7 @@ export default function BootstrapMessaging() {
     let [shouldShowMessagingButton, setShowMessagingButton] = useState(false);
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
-    let [scrt2URL, setSCRT2URL] = useState('');
+    let [messagingURL, setMessagingURL] = useState('');
     let [conversationId, setConversationId] = useState(undefined);
     let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
@@ -34,14 +34,11 @@ export default function BootstrapMessaging() {
      */
     function initializeMessagingClient() {
         // Initialize helpers.
-        // Store the Org Id in-memory for other components to use.
         setOrganizationId(orgId);
-        // Store the Deployment Developer Name in-memory for other components to use.
         setDeploymentDeveloperName(deploymentDevName);
-        // Store the SCRT2 Url for other components to use.
-        setScrt2Url(scrt2URL);
-        // Initialize Browser Web Storage (i.e. localStorage and/or sessionStorage) with a storage key including the Salesforce Organization Id.
+        setSalesforceMessagingUrl(messagingURL);
         initializeWebStorage(orgId);
+
         // Initialize a new unique conversation-id in-memory.
         setConversationId(util.generateUUID());
     }
@@ -51,7 +48,7 @@ export default function BootstrapMessaging() {
      * @returns {boolean}
      */
     function isValidOrganizationId(id) {
-        return typeof id === "string" && (id.length === 18 || id.length === 15) && id.substring(0, 3) === "00D";
+        return typeof id === "string" && (id.length === 18 || id.length === 15) && id.substring(0, 3) === APP_CONSTANTS.ORGANIZATION_ID_PREFIX;
     }
 
     /**
@@ -68,7 +65,7 @@ export default function BootstrapMessaging() {
      */
     function isSalesforceUrl(url) {
         try {
-            return typeof url === "string" && url.length > 0 && url.slice(-19) === "salesforce-scrt.com";
+            return typeof url === "string" && url.length > 0 && url.slice(-19) === APP_CONSTANTS.SALESFORCE_MESSAGING_SCRT_URL;
         } catch (err) {
             console.error(`Something went wrong in validating whether the url is a Salesforce url: ${err}`);
             return false;
@@ -82,7 +79,7 @@ export default function BootstrapMessaging() {
     function isValidUrl(url) {
         try {
             const urlToValidate = new URL(url);
-            return isSalesforceUrl(url) && urlToValidate.protocol === "https:";
+            return isSalesforceUrl(url) && urlToValidate.protocol === APP_CONSTANTS.HTTPS_PROTOCOL;
         } catch (err) {
             console.error(`Something went wrong in validating the url provided: ${err}`);
             return false;
@@ -101,12 +98,12 @@ export default function BootstrapMessaging() {
                 return;
             }
 		    if(!isValidDeploymentDeveloperName(deploymentDevName)) {
-                alert(`Expected a valid ESW Config Dev Name value to be a string but received: ${deploymentDevName}.`);
+                alert(`Expected a valid Embedded Service Deployment Developer Name value to be a string but received: ${deploymentDevName}.`);
                 setShowMessagingButton(false);
                 return;
             }
-		    if(!isValidUrl(scrt2URL)) {
-                alert(`Expected a valid SCRT 2.0 URL value to be a string but received: ${scrt2URL}.`);
+		    if(!isValidUrl(messagingURL)) {
+                alert(`Expected a valid Salesforce Messaging URL value to be a string but received: ${messagingURL}.`);
                 setShowMessagingButton(false);
                 return;
             }
@@ -123,7 +120,7 @@ export default function BootstrapMessaging() {
      * @returns {boolean} TRUE - disabled the button and FALSE - otherwise
      */
     function shouldDisableFormSubmitButton() {
-        return orgId.length === 0 || deploymentDevName.length === 0 || scrt2URL.length === 0;
+        return orgId.length === 0 || deploymentDevName.length === 0 || messagingURL.length === 0;
     }
 
     /**
@@ -216,8 +213,8 @@ export default function BootstrapMessaging() {
                 <label>Url</label>
                 <input
                     type="text"
-                    value={scrt2URL}
-                    onChange={e => setSCRT2URL(e.target.value.trim())}>
+                    value={messagingURL}
+                    onChange={e => setMessagingURL(e.target.value.trim())}>
                 </input>
                 <button
                     className="deploymentDetailsFormSubmitButton"

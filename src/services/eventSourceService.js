@@ -1,4 +1,4 @@
-import { getOrganizationId, getScrt2Url, getJwt, getLastEventId } from './dataProvider';
+import { getOrganizationId, getSalesforceMessagingUrl, getJwt, getLastEventId } from './dataProvider';
 
 /**
  * Instance of an EventSourcePolyfill object to add or remove event listeners on.
@@ -105,10 +105,10 @@ export const subscribeToEventSource = (eventListenerMap) => {
     return new Promise((resolve, reject) => {
         try {
             /**
-             * Directly connect to event router endpoint on scrt2 domain instead of going through ia-message.
+             * Directly connect to event router endpoint on Salesforce Messaging domain instead of going through ia-message.
              */
             createEventSource(
-                getScrt2Url().concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
+                getSalesforceMessagingUrl().concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
                 eventListenerMap
             ).then(
                 resolve,

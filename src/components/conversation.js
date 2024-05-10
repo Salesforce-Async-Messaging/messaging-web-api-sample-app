@@ -8,7 +8,7 @@ import MessagingInputFooter from "./messagingInputFooter";
 
 import { setLastEventId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { sendTextMessage ,closeConversation } from "../services/messagingService";
+import { sendTextMessage, closeConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 import { clearWebStorage } from "../helpers/webstorageUtils";
@@ -50,7 +50,6 @@ export default function Conversation(props) {
      */
     function generateConversationEntryForCurrentConversation(serverSentEvent) {
         const parsedEventData = ConversationEntryUtil.parseServerSentEventData(serverSentEvent);
-        console.log(parsedEventData);
         const conversationEntry = ConversationEntryUtil.createConversationEntry(parsedEventData);
 
         // Handle server sent events only for the current conversation
@@ -236,9 +235,7 @@ export default function Conversation(props) {
                 console.log(`Successfully closed the conversation with conversation-id: ${props.conversationId}`);
                 // Update state to conversation closed status.
                 updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
-                // Clear the Browser Web Storage.
                 clearWebStorage();
-                // Close the Event Source (SSE).
                 closeEventSource()
                 .then(console.log("Closed the Event Source (SSE)."))
                 .catch((err) => {
@@ -271,9 +268,10 @@ export default function Conversation(props) {
             <MessagingBody
                 conversationEntries={conversationEntries}
                 conversationStatus={conversationStatus} />
-            <MessagingInputFooter conversationId={props.conversationId} 
-                sendTextMessage={sendTextMessage}
-                conversationStatus={conversationStatus} />
+            <MessagingInputFooter
+                conversationId={props.conversationId}
+                conversationStatus={conversationStatus} 
+                sendTextMessage={sendTextMessage} />
         </>
     );
 }

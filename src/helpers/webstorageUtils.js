@@ -68,7 +68,7 @@ export const getItemInPayloadByKey = (payload, key) => {
 };
 
 /**
- * Initialize the web storage object for both localStorage & sessionStorage.
+ * Initialize Browser Web Storage (i.e. localStorage and/or sessionStorage) with a storage key including the Salesforce Organization Id.
  */
 export const initializeWebStorage = (organizationId) => {
     storageKey = `${organizationId}_WEB_STORAGE`;
