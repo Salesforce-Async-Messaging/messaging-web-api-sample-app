@@ -36,5 +36,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": "A repository holding a sample app created using React JS library to demonstrate Messaging for In-App and Web Public (aka v2.0) REST APIs.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app.git"
+  },
+  "author": "Salesforce Embedded Service for Web",
+  "license": ""
 }
