@@ -197,20 +197,20 @@ export default function BootstrapMessaging() {
         <>
             <h1>Messaging for Web - Sample App</h1>
             <div className="deploymentDetailsForm">
-                <h4>Input your Embedded Service Custom Client-type deployment details below</h4>
-                <label>Organization Id</label>
+                <h4>Input your Embedded Service (Custom Client) deployment details below</h4>
+                <label>Organization ID</label>
                 <input
                     type="text"
                     value={orgId}
                     onChange={e => setOrgId(e.target.value.trim())}>
                 </input>
-                <label>Deployment Developer Name</label>
+                <label>Developer Name</label>
                 <input
                     type="text"
                     value={deploymentDevName}
                     onChange={e => setDeploymentDevName(e.target.value.trim())}>
                 </input>
-                <label>Url</label>
+                <label>URL</label>
                 <input
                     type="text"
                     value={messagingURL}
