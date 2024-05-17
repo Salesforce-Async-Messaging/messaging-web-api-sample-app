@@ -1,6 +1,6 @@
 # Salesforce Messaging for Web API Sample App
 
-A repository holding a sample app created using React JS library to demonstrate Messaging for In-App and Web Public (aka v2.0) REST APIs.
+A repository holding a sample app created using React JS library to demonstrate the Messaging experience using Messaging for In-App and Web Public (aka v2.0) REST APIs.
 
 ## REST API Documentation
 https://developer.salesforce.com/docs/service/messaging-api
@@ -45,12 +45,12 @@ $ npm start
 - You may also see any lint errors in the console.
 - After the app is running, open [http://localhost:3000](http://localhost:3000) in your browser to get started.
 
-### Test Sample App
+## Test Sample App
 - Once the Sample App page is launched either Remotely or via Local Setup, input your Embedded Service deployment details in the form and submit.
   - The deployment details can be found under the Code Snippet panel under Embedded Service deployment setup in Salesforce.
 - Click on the 'Let's Chat' Button to get started with a new conversation.
 
-### Mirroring the repository (for internal use only)
+## Mirroring the repository (for internal use only)
 [Internal Repo](https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app)
 [Public Repo (Mirror)](https://github.com/Salesforce-Async-Messaging/messaging-web-api-sample-app)
 ```
