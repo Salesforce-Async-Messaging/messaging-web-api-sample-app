@@ -3,7 +3,7 @@
 A repository holding a sample app created using React JS library to demonstrate the Messaging experience using Messaging for In-App and Web Public (aka v2.0) REST APIs.
 
 ## REST API Documentation
-https://developer.salesforce.com/docs/service/messaging-api
+[https://developer.salesforce.com/docs/service/messaging-api](https://developer.salesforce.com/docs/service/messaging-api)
 
 ## Prerequisites
 Ensure you have an Embedded Service deployment for Messaging for In-App and Web created of type Custom Client.
