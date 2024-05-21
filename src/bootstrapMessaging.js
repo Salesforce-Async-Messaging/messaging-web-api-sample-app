@@ -166,13 +166,18 @@ export default function BootstrapMessaging() {
                     setShowMessagingButtonSpinner(false);
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}. ${err}`);
+                    console.error(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}: ${err && err.message ? err.message : err}`);
+                    alert(`Something went wrong in creating a new conversation. Please try again by submitting the correct Embedded Service Deployment details. Check browser developer console for more information.`);
                     clearWebStorage();
+                    showMessagingWindow(false);
+                    
                 });
             })
             .catch((err) => {
-                console.error(`Something went wrong in fetching an Unauthenticated access token: ${err}`);
+                console.error(`Something went wrong in fetching an Unauthenticated access token: ${err && err.message ? err.message : err}`);
+                alert(`Something went wrong in fetching a Salesforce access token. Please try again by submitting the correct Embedded Service Deployment details. Check browser developer console for more information.`);
                 clearWebStorage();
+                showMessagingWindow(false);
             });
         }
     }
@@ -185,9 +190,10 @@ export default function BootstrapMessaging() {
     function showMessagingWindow(shouldShow) {
         setShouldShowMessagingWindow(Boolean(shouldShow));
         if (!shouldShow) {
-            setShouldShowMessagingWindow(Boolean(shouldShow));
             // Enable Messaging Button again when Messaging Window is closed.
             setShouldDisableMessagingButton(false);
+            // Remove the spinner on the Messaging Button.
+            setShowMessagingButtonSpinner(false);
             // Hide Messaging Button to re-initialize the client with form submit.
             setShowMessagingButton(false);
         }
