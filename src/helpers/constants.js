@@ -3,7 +3,7 @@
  * @type {Object}
  */
 export const APP_CONSTANTS = {
-    APP_CAPABILITIES_VERSION: "248",
+    APP_CAPABILITIES_VERSION: "1",
     APP_PLATFORM: "Web",
     ORGANIZATION_ID_PREFIX: "00D",
     SALESFORCE_MESSAGING_SCRT_URL: "salesforce-scrt.com",
