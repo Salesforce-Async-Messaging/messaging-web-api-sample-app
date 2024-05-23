@@ -12,8 +12,8 @@ Ensure you have an Embedded Service deployment for Messaging for In-App and Web 
 Go to [https://salesforce-async-messaging.github.io/messaging-web-api-sample-app/build/index.html](https://salesforce-async-messaging.github.io/messaging-web-api-sample-app/build/index.html)
 
 ## Local Development and Testing Setup
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-For issues with the sample app, please contact the team Embedded Service for Web at Salesforce.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).\
+For issues with the sample app, please contact Salesforce Support.
 
 ### Local Environment requirements
 For local app development and testing, make sure you have `npm` or `yarn` installed.
