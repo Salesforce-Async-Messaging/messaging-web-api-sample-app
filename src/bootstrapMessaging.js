@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Import children components to render.
 import MessagingWindow from "./components/messagingWindow";
@@ -8,9 +8,9 @@ import MessagingButton from "./components/messagingButton";
 
 import './bootstrapMessaging.css';
 
-import { setOrganizationId, setDeploymentDeveloperName, setSalesforceMessagingUrl, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
+import { setOrganizationId, setDeploymentDeveloperName, setSalesforceMessagingUrl, setDeploymentConfiguration, setLastEventId, setJwt, storeConversationId, getConversationId } from './services/dataProvider';
 import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
-import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
+import { initializeWebStorage, setItemInWebStorage, clearWebStorage, getItemInWebStorageByKey, getItemInPayloadByKey } from './helpers/webstorageUtils';
 import { APP_CONSTANTS, STORAGE_KEYS } from './helpers/constants';
 import { util } from "./helpers/common";
 
@@ -25,6 +25,53 @@ export default function BootstrapMessaging() {
     let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
     let [showMessagingButtonSpinner, setShowMessagingButtonSpinner] = useState(false);
+    let [isExistingConversation, setIsExistingConversation] = useState(false);
+
+    useEffect(() => {
+        const messaging_webstorage_key = Object.keys(localStorage).filter(item => item.startsWith('MESSAGING_SAMPLE_APP_WEB_STORAGE_'))[0];
+
+        if (messaging_webstorage_key) {
+            const webStoragePayload = localStorage.getItem(messaging_webstorage_key);
+            const orgId = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.ORGANIZATION_ID);
+            const deploymentDevName = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME);
+            const messagingUrl = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.MESAGING_URL);
+            
+            setOrgId(orgId);
+            setDeploymentDevName(deploymentDevName);
+            setMessagingURL(messagingUrl);
+
+            // Initialize helpers.
+            initializeWebStorage(orgId);
+            setOrganizationId(orgId);
+            setDeploymentDeveloperName(deploymentDevName);
+            setSalesforceMessagingUrl(messagingUrl);
+
+            const messagingJwt = getItemInWebStorageByKey(STORAGE_KEYS.JWT);
+            if (messagingJwt) {
+                // Existing conversation.
+                setIsExistingConversation(true);
+                setShowMessagingButton(true);
+                setShouldDisableMessagingButton(true);
+                setShouldShowMessagingWindow(true);
+            } else {
+                // New conversation.
+                setIsExistingConversation(false);
+                // Initialize a new unique conversation-id in-memory.
+                storeConversationId(util.generateUUID());
+                setConversationId(getConversationId());
+            }
+        } else {
+            // New conversation.
+            setIsExistingConversation(false);
+            // Initialize a new unique conversation-id in-memory.
+            storeConversationId(util.generateUUID());
+            setConversationId(getConversationId());
+        }
+
+        return () => {
+            showMessagingWindow(false);
+        };
+    }, []);
 
     /**
      * Initialize the messaging client by
@@ -34,13 +81,16 @@ export default function BootstrapMessaging() {
      */
     function initializeMessagingClient() {
         // Initialize helpers.
+        initializeWebStorage(orgId);
         setOrganizationId(orgId);
         setDeploymentDeveloperName(deploymentDevName);
         setSalesforceMessagingUrl(messagingURL);
-        initializeWebStorage(orgId);
 
+        // New conversation.
+        setIsExistingConversation(false);
         // Initialize a new unique conversation-id in-memory.
-        setConversationId(util.generateUUID());
+        storeConversationId(util.generateUUID());
+        setConversationId(getConversationId());
     }
 
     /**
@@ -238,7 +288,7 @@ export default function BootstrapMessaging() {
             {shouldShowMessagingWindow &&
                 <Draggable intitialPosition={{ x: 1000, y: 500 }}>
                     <MessagingWindow
-                        conversationId={conversationId}
+                        isExistingConversation={isExistingConversation}
                         showMessagingWindow={showMessagingWindow} />
                 </Draggable>
             }

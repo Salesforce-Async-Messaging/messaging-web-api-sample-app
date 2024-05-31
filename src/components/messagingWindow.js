@@ -8,7 +8,7 @@ export default function MessagingWindow(props) {
     return(
         <div className="messagingWindow">
             <Conversation
-                conversationId={props.conversationId}
+                isExistingConversation={props.isExistingConversation}
                 showMessagingWindow={props.showMessagingWindow} />
         </div>
     );

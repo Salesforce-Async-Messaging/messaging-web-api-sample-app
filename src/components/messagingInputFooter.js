@@ -5,6 +5,7 @@ import { VscSend } from "react-icons/vsc";
 
 import { util } from "../helpers/common";
 import { CONVERSATION_CONSTANTS } from '../helpers/constants';
+import { getConversationId } from '../services/dataProvider';
 
 export default function MessagingInputFooter(props) {
     // Initialize the Textarea value to empty.
@@ -79,7 +80,7 @@ export default function MessagingInputFooter(props) {
      */
     function handleSendMessage() {
         // Required parameters.
-        const conversationId = props.conversationId;
+        const conversationId = getConversationId();
         const messageId = util.generateUUID();
         const value = textareaContent;
         // Optional parameters.

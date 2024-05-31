@@ -1,7 +1,11 @@
+import { setItemInWebStorage } from "../helpers/webstorageUtils";
+import { STORAGE_KEYS } from "../helpers/constants";
+
 // Store the Org Id in-memory for other components to use.
 let orgId;
 function setOrganizationId(organizationId) {
     orgId = organizationId;
+    setItemInWebStorage(STORAGE_KEYS.ORGANIZATION_ID, orgId);
 }
 function getOrganizationId() {
     return orgId;
@@ -11,6 +15,7 @@ function getOrganizationId() {
 let deploymentDevName;
 function setDeploymentDeveloperName(devName) {
     deploymentDevName = devName;
+    setItemInWebStorage(STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME, deploymentDevName);
 }
 function getDeploymentDeveloperName() {
     return deploymentDevName;
@@ -20,6 +25,7 @@ function getDeploymentDeveloperName() {
 let messagingUrl;
 function setSalesforceMessagingUrl(url) {
     messagingUrl = url;
+    setItemInWebStorage(STORAGE_KEYS.MESAGING_URL, messagingUrl);
 }
 function getSalesforceMessagingUrl() {
     return messagingUrl;
@@ -52,6 +58,14 @@ function getJwt() {
     return jwt;
 }
 
+let conversationId;
+function storeConversationId(convId) {
+    conversationId = convId;
+}
+function getConversationId() {
+    return conversationId;
+}
+
 export {
     setOrganizationId,
     getOrganizationId,
@@ -64,5 +78,7 @@ export {
     setLastEventId,
     getLastEventId,
     setJwt,
-    getJwt
+    getJwt,
+    storeConversationId,
+    getConversationId
 };

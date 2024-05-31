@@ -153,7 +153,7 @@ function getContinuityJwt() {
  * @param {Boolean} includeClosedConversations - Whether to include closed conversations in list. Optional.
  * @returns {Promise}
  */
-function listConversation(includeClosedConversations = true){
+function listConversations(includeClosedConversations = false){
 	const messagingUrl = getSalesforceMessagingUrl();
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
 
@@ -162,14 +162,52 @@ function listConversation(includeClosedConversations = true){
 		"GET",
 		"cors",
 		null,
-		{}
+		null
 	).then(response => {
 		if (!response.ok) {
 			throw response;
 		}
-		response.json();
+		return response.json();
 	});
 };
+
+function listConversationEntries(conversationId) {
+	const messagingUrl = getSalesforceMessagingUrl();
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/entries?limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_ENTRIES_API_ENTRIES_LIMIT}`;
+
+	return sendFetchRequest(
+		apiPath,
+		"GET",
+		"cors",
+		null,
+		null
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		return response.json();
+	})
+	.then(responseJson => {
+		// Transform the response to look like a conversation entry received via a server-sent event.
+		const transformedData = [];
+
+		if (typeof responseJson !== "object") {
+			throw new Error(`Expected to receive JSON response, instead received ${responseJson}.`);
+		}
+		if (!Array.isArray(responseJson.conversationEntries)) {
+			throw new Error(`Expected entries to be an Array, instead was: ${responseJson.conversationEntries}.`);
+		}
+		responseJson.conversationEntries.forEach(conversationEntry => {
+			conversationEntry.entryPayload = JSON.stringify(conversationEntry.entryPayload);
+			transformedData.push({
+				conversationId,
+				conversationEntry
+			});
+		});
+
+		return transformedData;
+	});
+}
 
 /*
  * Publish a text message to a conversation.
@@ -244,4 +282,4 @@ function closeConversation (conversationId) {
     );
 };
 
-export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversation, sendTextMessage, closeConversation };
+export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversations, listConversationEntries, sendTextMessage, closeConversation };

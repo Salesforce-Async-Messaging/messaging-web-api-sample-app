@@ -6,12 +6,12 @@ import MessagingHeader from "./messagingHeader";
 import MessagingBody from "./messagingBody";
 import MessagingInputFooter from "./messagingInputFooter";
 
-import { setLastEventId } from "../services/dataProvider";
+import { setJwt, setLastEventId, storeConversationId, getConversationId } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { sendTextMessage, closeConversation } from "../services/messagingService";
+import { sendTextMessage, getContinuityJwt, listConversations, listConversationEntries, closeConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
-import { CONVERSATION_CONSTANTS } from "../helpers/constants";
-import { clearWebStorage } from "../helpers/webstorageUtils";
+import { CONVERSATION_CONSTANTS, STORAGE_KEYS } from "../helpers/constants";
+import { setItemInWebStorage, clearWebStorage } from "../helpers/webstorageUtils";
 
 export default function Conversation(props) {
     // Initialize a list of conversation entries.
@@ -20,24 +20,69 @@ export default function Conversation(props) {
     let [conversationStatus, setConversationStatus] = useState(CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION);
 
     useEffect(() => {
-        if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
-            subscribeToEventSource({
-                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]: handleConversationMessageServerSentEvent,
-                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_ROUTING_RESULT]: handleRoutingResultServerSentEvent,
-                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_PARTICIPANT_CHANGED]: handleParticipantChangedServerSentEvent,
-                [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_CLOSE_CONVERSATION]: handleCloseConversationServerSentEvent
-            })
-            .then(console.log("Subscribed to the Event Source (SSE)."));
+        let conversationStatePromise;
+
+        if (props.isExistingConversation) {
+            // Handle existing conversation.
+            conversationStatePromise = handleExistingConversation();
+        } else {
+            // Handle new conversation.
+            conversationStatePromise = handleNewConversation();
         }
+        conversationStatePromise
+        .then(() => {
+            //if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
+                handleSubscribeToEventSource();
+            //}
+        });
 
         return () => {
-            closeEventSource()
-            .then(console.log("Closed the Event Source (SSE)."))
-            .catch((err) => {
-                console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
+            conversationStatePromise
+            .then(() => {
+                closeEventSource()
+                .then(console.log("Closed the Event Source (SSE)."))
+                .catch((err) => {
+                    console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
+                });
             });
         };
     }, []);
+
+    function handleNewConversation() {
+        return Promise.resolve();
+    }
+
+    function handleExistingConversation() {
+        return handleGetContinuityJwt()
+                .then(() => {
+                    return handleListConversations()
+                    .then(() => {
+                        console.log(`Successfully listed the conversations.`);
+                    })
+                    .catch((err) => {
+                        handleMessagingErrors(err);
+                    });
+                })
+                .catch((err) => {
+                    handleMessagingErrors(err);
+                });
+    }
+
+    function handleSubscribeToEventSource() {
+        return subscribeToEventSource({
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]: handleConversationMessageServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_ROUTING_RESULT]: handleRoutingResultServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_PARTICIPANT_CHANGED]: handleParticipantChangedServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_CLOSE_CONVERSATION]: handleCloseConversationServerSentEvent
+                })
+                .then(() => {
+                    console.log("Subscribed to the Event Source (SSE).");
+                    if (props.isExistingConversation) {
+                        handleListConversationEntries()
+                        .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`));
+                    }
+                });
+    }
 
     /**
      * Generate a Conversation Entry object from the server sent event.
@@ -48,15 +93,14 @@ export default function Conversation(props) {
      * 2. Create a Conversation Entry object from the parsed event data.
      * 3. Return the Conversation Entry if the conversationEntry is for the current conversation and undefined, otherwise.
      */
-    function generateConversationEntryForCurrentConversation(serverSentEvent) {
-        const parsedEventData = ConversationEntryUtil.parseServerSentEventData(serverSentEvent);
+    function generateConversationEntryForCurrentConversation(parsedEventData) {
         const conversationEntry = ConversationEntryUtil.createConversationEntry(parsedEventData);
 
         // Handle server sent events only for the current conversation
-        if (parsedEventData.conversationId === props.conversationId) {
+        if (parsedEventData.conversationId === getConversationId()) {
             return conversationEntry;
         }
-        console.log(`Current conversation-id: ${props.conversationId} does not match the conversation-id in server sent event: ${parsedEventData.conversationId}. Ignoring the event.`);
+        console.log(`Current conversation-id: ${getConversationId()} does not match the conversation-id in server sent event: ${parsedEventData.conversationId}. Ignoring the event.`);
         return undefined;
     }
 
@@ -85,7 +129,8 @@ export default function Conversation(props) {
                 setLastEventId(event.lastEventId);
             }
 
-            const conversationEntry = generateConversationEntryForCurrentConversation(event);
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            const conversationEntry = generateConversationEntryForCurrentConversation(parsedEventData);
             if (!conversationEntry) {
                 return;
             }
@@ -122,7 +167,9 @@ export default function Conversation(props) {
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
             }
-            const conversationEntry = generateConversationEntryForCurrentConversation(event);
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            const conversationEntry = generateConversationEntryForCurrentConversation(parsedEventData);
             if (!conversationEntry) {
                 return;
             }
@@ -178,7 +225,9 @@ export default function Conversation(props) {
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
             }
-            const conversationEntry = generateConversationEntryForCurrentConversation(event);
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            const conversationEntry = generateConversationEntryForCurrentConversation(parsedEventData);
             if (!conversationEntry) {
                 return;
             }
@@ -204,12 +253,12 @@ export default function Conversation(props) {
             const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
 
             // Do not render conversation ended text if the conversation entry is not for the current conversation.
-            if (props.conversationId === parsedEventData.conversationId) {
+            if (getConversationId() === parsedEventData.conversationId) {
                 // Update state to conversation closed status.
                 updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
             }
         } catch (err) {
-            console.error(`Something went wrong while handling conversation closed server sent event in conversation ${props.conversationId}: ${err}`);
+            console.error(`Something went wrong while handling conversation closed server sent event in conversation ${getConversationId()}: ${err}`);
         }
     }
 
@@ -230,20 +279,15 @@ export default function Conversation(props) {
     function endConversation() {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
             // End the conversation if it is currently opened.
-            closeConversation(props.conversationId)
+            closeConversation(getConversationId())
             .then(() => {
-                console.log(`Successfully closed the conversation with conversation-id: ${props.conversationId}`);
+                console.log(`Successfully closed the conversation with conversation-id: ${getConversationId()}`);
                 // Update state to conversation closed status.
                 updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
-                clearWebStorage();
-                closeEventSource()
-                .then(console.log("Closed the Event Source (SSE)."))
-                .catch((err) => {
-                    console.error(`Something went wrong in closing Event Source (SSE): ${err}`);
-                })
+                cleanupMessagingData();
             })
             .catch((err) => {
-                console.error(`Something went wrong in closing the conversation with conversation-id ${props.conversationId}: ${err}`);
+                console.error(`Something went wrong in closing the conversation with conversation-id ${getConversationId()}: ${err}`);
             });
         }
     }
@@ -258,10 +302,93 @@ export default function Conversation(props) {
         }
     }
 
+    function handleGetContinuityJwt() {
+        return getContinuityJwt()
+                .then((response) => {
+                    setJwt(response.accessToken);
+                    setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
+                });
+    }
+
+    function handleListConversations() {
+        return listConversations()
+                .then((response) => {
+                    if (response && response.openConversationsFound > 0 && response.conversations.length) {
+                        const openConversations = response.conversations;
+                        if (openConversations.length > 1) {
+				            console.warn(`Expected the user to be participating in 1 open conversation but instead found ${openConversations.length}. Loading the conversation with latest startTimestamp.`);
+				            openConversations.sort((conversationA, conversationB) => conversationB.startTimestamp - conversationA.startTimestamp);
+                        }
+                        // Update conversation-id with the one from service.
+                        storeConversationId(openConversations[0].conversationId);
+                        updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION);
+                    } else {
+                        // No open conversations found.
+                        cleanupMessagingData();
+                    }
+                });
+    }
+
+    function handleListConversationEntries() {
+        return listConversationEntries(getConversationId())
+                .then((response) => {
+                    if (Array.isArray(response)) {
+                        response.reverse().forEach(entry => {
+                            const conversationEntry = generateConversationEntryForCurrentConversation(entry);
+                            if (!conversationEntry) {
+                                return;
+                            }
+    
+                            switch (conversationEntry.entryType) {
+                                case CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE:
+                                    conversationEntry.isEndUserMessage = ConversationEntryUtil.isMessageFromEndUser(conversationEntry);
+                                    addConversationEntry(conversationEntry);
+                                    break;
+                                case CONVERSATION_CONSTANTS.EntryTypes.PARTICIPANT_CHANGED:
+                                case CONVERSATION_CONSTANTS.EntryTypes.ROUTING_RESULT:
+                                    addConversationEntry(conversationEntry);
+                                    break;
+                                default:
+                                    console.log(`Unrecognized conversation entry type: ${conversationEntry.entryType}.`);
+                            }
+                        });
+                    } else {
+                        console.error(`Expecting a response of type Array from listConversationEntries but instead received: ${response}`);
+                    }
+                })
+                .catch((err) => {
+                    console.error(`Something went wrong while processing entries from listConversationEntries response: ${err}`);
+                });
+    }
+
+    function cleanupMessagingData() {
+        clearWebStorage();
+
+        closeEventSource()
+        .then(console.log("Closed the Event Source (SSE)."))
+        .catch((err) => {
+            console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
+        });
+    }
+
+    function handleMessagingErrors(err) {
+        if (typeof err === "object") {
+            console.log(`Something went wrong: ${err && err.message ? err.message : err}`);
+            switch (err.status) {
+                case 401:
+                    updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
+                    cleanupMessagingData();
+                    break;
+                case 400:
+                    console.error(`Invalid request parameters: ${err.message}`);
+                    break;
+            }
+        }
+    }
+
     return (
         <>
             <MessagingHeader
-                conversationId={props.conversationId}
                 conversationStatus={conversationStatus}
                 endConversation={endConversation}
                 closeMessagingWindow={closeMessagingWindow} />
@@ -269,7 +396,6 @@ export default function Conversation(props) {
                 conversationEntries={conversationEntries}
                 conversationStatus={conversationStatus} />
             <MessagingInputFooter
-                conversationId={props.conversationId}
                 conversationStatus={conversationStatus} 
                 sendTextMessage={sendTextMessage} />
         </>
