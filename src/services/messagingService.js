@@ -52,7 +52,7 @@ function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
 /**
  * Get a JWT for an anonymous user. This JWT is used for unauthenticated conversations.
  *
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=generateAccessTokenForUnauthenticatedUser
  *
  * @returns {Promise}
  */
@@ -88,7 +88,7 @@ function getUnauthenticatedAccessToken() {
 /**
  * Create a new conversation.
  *
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=createConversation
  *
  * @param {Object} routingAttributes - Optional. Prechat data to be used while routing the conversation request.
  * @returns {Promise}
@@ -119,7 +119,7 @@ function createConversation(conversationId, routingAttributes) {
 /**
  * Get a JWT with the same subjectId but new clientId as the existing Messaging JWT that was issued previously. This function is used for session continuity in the same tab (page reload) and/or across tabs.
  *
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=generateContinuationToken
  *
  * @returns {Promise}
  */
@@ -148,7 +148,7 @@ function getContinuityJwt() {
  * - number of closed conversations
  * - array of conversations
  *
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=listConversations
  *
  * @param {Boolean} includeClosedConversations - Whether to include closed conversations in list. Optional.
  * @returns {Promise}
@@ -171,9 +171,27 @@ function listConversations(includeClosedConversations = false){
 	});
 };
 
-function listConversationEntries(conversationId) {
+/**
+ * Get a list of conversation entries for a given conversationId.
+ * Returns:
+ * - array of conversation entries
+ *
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=listConversationEntries
+ *
+ * @param {String} conversationId - The ID of the conversation to get entries for.
+ * @param {Number} startTimestamp - The start time for the window of time being requested. Optional.
+ * @param {Number} endTimestamp - The end time for the window of time being requested. Optional.
+ * @param {String} direction - Query direction either "FromStart" or "FromEnd" of the conversation. Optional.
+ * @returns {Promise}
+ */
+function listConversationEntries(conversationId, startTimestamp, endTimestamp, direction) {
 	const messagingUrl = getSalesforceMessagingUrl();
-	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/entries?limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_ENTRIES_API_ENTRIES_LIMIT}`;
+	const limitUrlQueryParam = `${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_ENTRIES_API_ENTRIES_LIMIT ? `limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_ENTRIES_API_ENTRIES_LIMIT}` : ``}`;
+	const startTimestampUrlQueryParam = `${startTimestamp ? `&startTimestamp=${startTimestamp}` : ``}`;
+	const endTimestampUrlQueryParam = `${endTimestamp ? `&endTimestamp=${endTimestamp}` : ``}`;
+	const directionUrlQueryParam = `${direction ? `&direction=${direction}` : ``}`;
+	const entryTypeFilterUrlQueryParam = `${APP_CONSTANTS.SUPPORTED_ENTRY_TYPES ? `&entryTypeFilter=${APP_CONSTANTS.SUPPORTED_ENTRY_TYPES}` : ``}`;
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/entries?${limitUrlQueryParam}${startTimestampUrlQueryParam}${endTimestampUrlQueryParam}${directionUrlQueryParam}${entryTypeFilterUrlQueryParam}`;
 
 	return sendFetchRequest(
 		apiPath,

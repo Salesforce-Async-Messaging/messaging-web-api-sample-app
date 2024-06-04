@@ -1,34 +1,36 @@
-import { setItemInWebStorage } from "../helpers/webstorageUtils";
+import { setItemInWebStorage, getItemInWebStorageByKey } from "../helpers/webstorageUtils";
 import { STORAGE_KEYS } from "../helpers/constants";
 
-// Store the Org Id in-memory for other components to use.
-let orgId;
-function setOrganizationId(organizationId) {
-    orgId = organizationId;
-    setItemInWebStorage(STORAGE_KEYS.ORGANIZATION_ID, orgId);
+// Store the Org Id for other components to use.
+function storeOrganizationId(organizationId) {
+    setItemInWebStorage(STORAGE_KEYS.ORGANIZATION_ID, organizationId);
 }
 function getOrganizationId() {
-    return orgId;
+    return getItemInWebStorageByKey(STORAGE_KEYS.ORGANIZATION_ID);
 }
 
-// Store the Embedded Service Deployment Developer Name in-memory for other components to use.
-let deploymentDevName;
-function setDeploymentDeveloperName(devName) {
-    deploymentDevName = devName;
+// Store the Embedded Service Deployment Developer Name for other components to use.
+function storeDeploymentDeveloperName(deploymentDevName) {
     setItemInWebStorage(STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME, deploymentDevName);
 }
 function getDeploymentDeveloperName() {
-    return deploymentDevName;
+    return getItemInWebStorageByKey(STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME);
 }
 
-// Store the Salesforce Url from the Embedded Service Deployment in-memory for other components to use.
-let messagingUrl;
-function setSalesforceMessagingUrl(url) {
-    messagingUrl = url;
+// Store the Salesforce Url from the Embedded Service Deployment for other components to use.
+function storeSalesforceMessagingUrl(messagingUrl) {
     setItemInWebStorage(STORAGE_KEYS.MESAGING_URL, messagingUrl);
 }
 function getSalesforceMessagingUrl() {
-    return messagingUrl;
+    return getItemInWebStorageByKey(STORAGE_KEYS.MESAGING_URL);
+}
+
+// Store the Salesforce Access Token (JWT) for other components to use.
+function setJwt(jwt) {
+    setItemInWebStorage(STORAGE_KEYS.JWT, jwt);
+}
+function getJwt() {
+    return getItemInWebStorageByKey(STORAGE_KEYS.JWT);
 }
 
 // Store the configuration settings of the Embedded Service Deployment in-memory for other components to use.
@@ -49,15 +51,7 @@ function getLastEventId() {
     return lastEventId;
 }
 
-// Store the Salesforce Access Token (JWT) in-memory for other components to use.
-let jwt;
-function setJwt(JWT) {
-    jwt = JWT;
-}
-function getJwt() {
-    return jwt;
-}
-
+// Store the conversation-id for the current conversation in-memory for other components to use.
 let conversationId;
 function storeConversationId(convId) {
     conversationId = convId;
@@ -66,12 +60,21 @@ function getConversationId() {
     return conversationId;
 }
 
+// Clears the in-memory messaging data variables.
+function clearInMemoryData() {
+    deploymentConfiguration = undefined;
+    conversationId = undefined;
+    lastEventId = undefined;
+
+    console.log("Cleared in-memory data.");
+}
+
 export {
-    setOrganizationId,
+    storeOrganizationId,
     getOrganizationId,
-    setDeploymentDeveloperName,
+    storeDeploymentDeveloperName,
     getDeploymentDeveloperName,
-    setSalesforceMessagingUrl,
+    storeSalesforceMessagingUrl,
     getSalesforceMessagingUrl,
     setDeploymentConfiguration,
     getDeploymentConfiguration,
@@ -80,5 +83,6 @@ export {
     setJwt,
     getJwt,
     storeConversationId,
-    getConversationId
+    getConversationId,
+    clearInMemoryData
 };
