@@ -87,7 +87,7 @@ export default function Conversation(props) {
     function handleGetUnauthenticatedJwt() {
         if (getJwt()) {
             console.warn("Messaging access token (JWT) already exists in the web storage. Discontinuing to create a new Unauthenticated access token.");
-            return Promise.resolve();
+            return handleExistingConversation().then(Promise.reject());
         }
 
         return getUnauthenticatedAccessToken()
@@ -121,8 +121,8 @@ export default function Conversation(props) {
      */
     function handleCreateNewConversation() {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
-            console.warn("A conversation is currently open. Discontinuing to create a new conversation.");
-            return Promise.resolve();
+            console.warn("Cannot create a new conversation while a conversation is currently open.");
+            return Promise.reject();
         }
 
         // Initialize a new unique conversation-id in-memory.
@@ -158,8 +158,6 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a Continuation Access Token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
-                    cleanupMessagingData();
-                    props.showMessagingWindow(false);
                 });
     }
 
@@ -193,8 +191,6 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a list of conversations: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
-                    cleanupMessagingData();
-                    props.showMessagingWindow(false);
                 });
     }
 
@@ -508,18 +504,22 @@ export default function Conversation(props) {
                 switch (err.status) {
                     case 401:
                         console.error(`Unauthenticated request: ${err.message}`);
-                        updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
                         cleanupMessagingData();
                         props.showMessagingWindow(false);
                         break;
                     case 400:
                         console.error(`Invalid request parameters. Please check your data before retrying: ${err.message}`);
                         break;
+                    case 429:
+                        console.warn(`Too many requests issued from the app. Try again in sometime: ${err.message}`);
+                        break;
                     case 500:
                         console.error(`Something went wrong in the request, please try again: ${err.message}`);
                         break;
                     default:
                         console.error(`Unhandled/Unknown http error: ${err}`);
+                        cleanupMessagingData();
+                        props.showMessagingWindow(false);
                 }
                 return;
             }

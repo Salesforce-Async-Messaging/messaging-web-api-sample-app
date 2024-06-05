@@ -9,7 +9,7 @@ import MessagingButton from "./components/messagingButton";
 import './bootstrapMessaging.css';
 
 import { storeOrganizationId, storeDeploymentDeveloperName, storeSalesforceMessagingUrl } from './services/dataProvider';
-import { initializeWebStorage, getItemInWebStorageByKey, getItemInPayloadByKey } from './helpers/webstorageUtils';
+import { determineStorageType, initializeWebStorage, getItemInWebStorageByKey, getItemInPayloadByKey } from './helpers/webstorageUtils';
 import { APP_CONSTANTS, STORAGE_KEYS } from './helpers/constants';
 
 import Draggable from "./ui-effects/draggable";
@@ -25,17 +25,23 @@ export default function BootstrapMessaging() {
     let [isExistingConversation, setIsExistingConversation] = useState(false);
 
     useEffect(() => {
-        const messaging_webstorage_key = Object.keys(localStorage).filter(item => item.startsWith('MESSAGING_SAMPLE_APP_WEB_STORAGE_'))[0];
+        const storage = determineStorageType();
+        if (!storage) {
+            console.error(`Cannot initialize the app. Web storage is required for the app to function.`);
+            return;
+        }
+
+        const messaging_webstorage_key = Object.keys(storage).filter(item => item.startsWith('MESSAGING_SAMPLE_APP_WEB_STORAGE_'))[0];
 
         if (messaging_webstorage_key) {
-            const webStoragePayload = localStorage.getItem(messaging_webstorage_key);
+            const webStoragePayload = storage.getItem(messaging_webstorage_key);
             const orgId = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.ORGANIZATION_ID);
             const deploymentDevName = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME);
             const messagingUrl = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.MESAGING_URL);
 
             if (!isValidOrganizationId(orgId)) {
                 console.warn(`Invalid organization id exists in the web storage: ${orgId}. Cleaning up the invalid object from the web storage.`);
-                localStorage.removeItem(messaging_webstorage_key);
+                storage.removeItem(messaging_webstorage_key);
                 // New conversation.
                 setIsExistingConversation(false);
                 return;

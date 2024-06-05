@@ -5,6 +5,7 @@ export let storageKey;
  * True if this browser session allows access to local storage. Some users may have stricter browser security settings. Do nothing on error.
  */
 export const isLocalStorageAvailable = () => {
+    /*
     try {
         // Test getting an item to see if this triggers an error
         window.localStorage.getItem("test");
@@ -18,6 +19,14 @@ export const isLocalStorageAvailable = () => {
         return false;
     }
     // We should never reach this return statement, it exists to make the linter happy.
+    return false;
+    */
+
+    /**
+     * localStorage data spans across tabs in a browser and sessionStorage is unique per tab.
+     * Currently hardcoded to disable localStorage internally in the app by returning FALSE.
+     * If the app's support (e.g. Messaging Session Continuation) is required to be enabled across tabs in a browser, uncomment the code block above and remove the hardcoded 'return false' statement.
+     */
     return false;
 };
 
@@ -43,9 +52,9 @@ export const isSessionStorageAvailable = () => {
 
 /**
  * Determine the type of web storage (local vs. session) to be used
- * It will prioritize localStorage if specify, otherwise sessionStorage
+ * It will prioritize localStorage if specified, otherwise sessionStorage
  */
-const determineStorageType = (inLocalStorage = false) => {
+export const determineStorageType = (inLocalStorage = false) => {
     return isLocalStorageAvailable() && inLocalStorage ? localStorage : isSessionStorageAvailable() ? sessionStorage : undefined;
 };
 
