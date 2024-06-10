@@ -13,12 +13,18 @@ import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS, STORAGE_KEYS } from "../helpers/constants";
 import { setItemInWebStorage, clearWebStorage } from "../helpers/webstorageUtils";
 import { util } from "../helpers/common";
+import { prechatUtil } from "../helpers/prechatUtil.js";
+import Prechat from "./prechat.js";
 
 export default function Conversation(props) {
     // Initialize a list of conversation entries.
     let [conversationEntries, setConversationEntries] = useState([]);
     // Initialize the conversation status.
     let [conversationStatus, setConversationStatus] = useState(CONVERSATION_CONSTANTS.ConversationStatus.NOT_STARTED_CONVERSATION);
+    // Tracks whether Pre-Chat form should be shown.
+    let [showPrechatForm, setShowPrechatForm] = useState(false);
+    // Tracks the most recent conversation message that was failed to send.
+    let [failedMessage, setFailedMessage] = useState(undefined);
 
     useEffect(() => {
         let conversationStatePromise;
@@ -39,6 +45,16 @@ export default function Conversation(props) {
     }, []);
 
     /**
+     * Update conversation status state based on the event from a child component i.e. MessagingHeader.
+     * Updating conversation status state re-renders the current component as well as the child components and the child components can reactively use the updated conversation status to make any changes.
+     *
+     * @param {string} status - e.g. CLOSED.
+     */
+    function updateConversationStatus(status) {
+        setConversationStatus(status);
+    }
+
+    /**
      * Handles a new conversation.
      *
      * 1. Fetch an Unauthenticated Access Token i.e. Messaging JWT.
@@ -48,6 +64,12 @@ export default function Conversation(props) {
     function handleNewConversation() {
         return handleGetUnauthenticatedJwt()
                 .then(() => {
+                    if (prechatUtil.shouldDisplayPrechatForm()) {
+                        console.log("Pre-Chat is enabled. Continuing to render a Pre-Chat form.");
+                        setShowPrechatForm(true);
+                        return;
+                    }
+                    console.log("Pre-Chat is not enabled. Continuing to create a new conversation.");
                     return handleCreateNewConversation()
                             .then(() => {
                                 console.log(`Completed initializing a new conversation with conversationId: ${getConversationId()}`);
@@ -98,7 +120,7 @@ export default function Conversation(props) {
                         setJwt(response.accessToken);
                         setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
                         setLastEventId(response.lastEventId);
-                        setDeploymentConfiguration(response.context && response.context.configuration);
+                        setDeploymentConfiguration(response.context && response.context.configuration && response.context.configuration.embeddedServiceConfig);
                     }    
                 })
                 .catch((err) => {
@@ -119,7 +141,7 @@ export default function Conversation(props) {
      * 5. Performs a cleanup - clears messaging data and closes the Messaging Window, if the request is unsuccessful.
      * @returns {Promise}
      */
-    function handleCreateNewConversation() {
+    function handleCreateNewConversation(routingAttributes) {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
             console.warn("Cannot create a new conversation while a conversation is currently open.");
             return Promise.reject();
@@ -127,7 +149,7 @@ export default function Conversation(props) {
 
         // Initialize a new unique conversation-id in-memory.
         storeConversationId(util.generateUUID());
-        return createConversation(getConversationId())
+        return createConversation(getConversationId(), routingAttributes)
                 .then(() => {
                     console.log(`Successfully created a new conversation with conversation-id: ${getConversationId()}`);
                     updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION);
@@ -434,13 +456,24 @@ export default function Conversation(props) {
     }
 
     /**
-     * Update conversation status state based on the event from a child component i.e. MessagingHeader.
-     * Updating conversation status state re-renders the current component as well as the child components and the child components can reactively use the updated conversation status to make any changes.
-     *
-     * @param {string} status - e.g. CLOSED.
+     * Handle sending a static text message in a conversation.
+     * @param {string} conversationId - Identifier of the conversation.
+     * @param {string} value - Actual text of the message.
+     * @param {string} messageId - Unique identifier of the message.
+     * @param {string} inReplyToMessageId - Identifier of another message where this message is being replied to.
+     * @param {boolean} isNewMessagingSession - Whether it is a new messaging session.
+     * @param {object} routingAttributes - Pre-Chat fields and its values, if configured.
+     * @param {object} language - language code.
+     * 
+     * @returns {Promise}
      */
-    function updateConversationStatus(status) {
-        setConversationStatus(status);
+    function handleSendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language) {
+        return sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
+                .catch((err) => {
+                    console.error(`Something went wrong while sending a message to conversation ${conversationId}: ${err}`);
+                    setFailedMessage(Object.assign({}, {messageId, value, inReplyToMessageId, isNewMessagingSession, routingAttributes, language}));
+                    handleMessagingErrors(err);
+                });
     }
 
     /**
@@ -494,7 +527,7 @@ export default function Conversation(props) {
         updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
     }
 
-     /**
+    /**
      * Handles the errors from messaging endpoint requests.
      * If a request is failed due to an Unauthorized error (i.e. 401), peforms a cleanup and resets the app and console logs otherwise.
      */
@@ -513,6 +546,15 @@ export default function Conversation(props) {
                     case 429:
                         console.warn(`Too many requests issued from the app. Try again in sometime: ${err.message}`);
                         break;
+                    /**
+                     * HTTP error code returned by the API(s) when a message is sent and failed because no messaging session exists. This error indicates client
+                     * to surface the Pre-Chat form if configured to show for every new messaging session and then retry the failed message with routingAttributes.
+                     */
+                    case 417:
+                        if (prechatUtil.shouldDisplayPrechatForm() && prechatUtil.shouldDisplayPrechatEveryMessagingSession()) {
+                            console.log("Pre-Chat configured to show for every new messaging session. Continuing to display the Pre-Chat form.");
+                            setShowPrechatForm(true);
+                        }
                     case 500:
                         console.error(`Something went wrong in the request, please try again: ${err.message}`);
                         break;
@@ -528,18 +570,47 @@ export default function Conversation(props) {
         return;
     }
 
+    /**
+     * Handles submitting a Pre-Chat form to either start a new conversation or a new messaging session.
+     * @param {object} prechatData - Object containing key-value pairs of Pre-Chat form fields and their corresponding values.
+     */
+    function handlePrechatSubmit(prechatData) {
+        let prechatSubmitPromise;
+        console.log(`Pre-Chat fields values on submit: ${prechatData}.`);
+
+        // If there is a failed message being tracked while submitting Pre-Chat form, consider it is an existing conversation but a new messaging session. Resend the failed message with the routing attributes to begin a new messaging session.
+        if (failedMessage) {
+            prechatSubmitPromise = handleSendTextMessage(getConversationId(), failedMessage.value, failedMessage.messageId, failedMessage.inReplyToMessageId, true, prechatData, failedMessage.language);
+        } else {
+            // If there is no failed message being tracked while submitting Pre-Chat form, create a new conversation.
+            prechatSubmitPromise = handleCreateNewConversation(prechatData);
+        }
+        prechatSubmitPromise
+        .then(() => {
+            setShowPrechatForm(false);
+        });
+    }
+
     return (
         <>
             <MessagingHeader
                 conversationStatus={conversationStatus}
                 endConversation={endConversation}
                 closeMessagingWindow={closeMessagingWindow} />
-            <MessagingBody
-                conversationEntries={conversationEntries}
-                conversationStatus={conversationStatus} />
-            <MessagingInputFooter
-                conversationStatus={conversationStatus} 
-                sendTextMessage={sendTextMessage} />
+            {!showPrechatForm &&
+            <>
+                <MessagingBody
+                    conversationEntries={conversationEntries}
+                    conversationStatus={conversationStatus} />
+                <MessagingInputFooter
+                    conversationStatus={conversationStatus} 
+                    sendTextMessage={handleSendTextMessage} />
+            </>
+            }
+            {
+                showPrechatForm &&
+                <Prechat prechatSubmit={handlePrechatSubmit} />
+            }
         </>
     );
 }

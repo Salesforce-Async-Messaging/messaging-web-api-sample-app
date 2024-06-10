@@ -91,13 +91,9 @@ export default function MessagingInputFooter(props) {
 
         props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
             .then(() => {
-                console.log(`Successfully sent a message to conversation: ${conversationId}`);
-
+                console.log(`Successfully sent a text message to conversation: ${conversationId}`);
                 // Clear textarea value.
                 clearMessageContent();
-            })
-            .catch(error => {
-                console.error(`Something went wrong while sending a message to conversation ${conversationId}: ${error}`);
             });
     }
 

@@ -31,13 +31,13 @@ export default function BootstrapMessaging() {
             return;
         }
 
-        const messaging_webstorage_key = Object.keys(storage).filter(item => item.startsWith('MESSAGING_SAMPLE_APP_WEB_STORAGE_'))[0];
+        const messaging_webstorage_key = Object.keys(storage).filter(item => item.startsWith(APP_CONSTANTS.WEB_STORAGE_KEY))[0];
 
         if (messaging_webstorage_key) {
             const webStoragePayload = storage.getItem(messaging_webstorage_key);
             const orgId = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.ORGANIZATION_ID);
             const deploymentDevName = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME);
-            const messagingUrl = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.MESAGING_URL);
+            const messagingUrl = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.MESSAGING_URL);
 
             if (!isValidOrganizationId(orgId)) {
                 console.warn(`Invalid organization id exists in the web storage: ${orgId}. Cleaning up the invalid object from the web storage.`);
@@ -250,7 +250,7 @@ export default function BootstrapMessaging() {
                     disableButton={shouldDisableMessagingButton}
                     showSpinner={showMessagingButtonSpinner} />}
             {shouldShowMessagingWindow &&
-                <Draggable intitialPosition={{ x: 500, y: 500 }}>
+                <Draggable intitialPosition={{ x: 1000, y: 500 }}>
                     <MessagingWindow
                         isExistingConversation={isExistingConversation}
                         showMessagingWindow={showMessagingWindow}

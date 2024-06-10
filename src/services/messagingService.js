@@ -1,4 +1,4 @@
-import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONSTANTS } from "../helpers/constants";
+import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONSTANTS, SUPPORTED_ENTRY_TYPES } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getSalesforceMessagingUrl } from "./dataProvider";
 import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 
@@ -190,7 +190,7 @@ function listConversationEntries(conversationId, startTimestamp, endTimestamp, d
 	const startTimestampUrlQueryParam = `${startTimestamp ? `&startTimestamp=${startTimestamp}` : ``}`;
 	const endTimestampUrlQueryParam = `${endTimestamp ? `&endTimestamp=${endTimestamp}` : ``}`;
 	const directionUrlQueryParam = `${direction ? `&direction=${direction}` : ``}`;
-	const entryTypeFilterUrlQueryParam = `${APP_CONSTANTS.SUPPORTED_ENTRY_TYPES ? `&entryTypeFilter=${APP_CONSTANTS.SUPPORTED_ENTRY_TYPES}` : ``}`;
+	const entryTypeFilterUrlQueryParam = `${SUPPORTED_ENTRY_TYPES ? `&entryTypeFilter=${SUPPORTED_ENTRY_TYPES}` : ``}`;
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/entries?${limitUrlQueryParam}${startTimestampUrlQueryParam}${endTimestampUrlQueryParam}${directionUrlQueryParam}${entryTypeFilterUrlQueryParam}`;
 
 	return sendFetchRequest(
@@ -230,7 +230,7 @@ function listConversationEntries(conversationId, startTimestamp, endTimestamp, d
 /*
  * Publish a text message to a conversation.
  * 
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=sendMessage
  * 
  * @param {String} conversationId - ID of conversation to send a text message to.
  * @param {String} text - String content to send to conversation.
@@ -281,7 +281,7 @@ function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, is
  *
  * This endpoint is typically used for anonymous users.
  *
- * TODO: insert api doc link
+ * Refer https://developer.salesforce.com/docs/service/messaging-api/references/miaw-api-reference?meta=closeConversation
  *
  * @param {String} conversationId - ID of the conversation to close. Required.
  * @returns {Promise}
