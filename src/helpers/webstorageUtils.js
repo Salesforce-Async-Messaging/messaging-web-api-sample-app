@@ -1,15 +1,18 @@
 // storageKey holds top level storage key in the browser storage.
 export let storageKey;
+let storageName;
 
 /**
  * True if this browser session allows access to local storage. Some users may have stricter browser security settings. Do nothing on error.
  */
 export const isLocalStorageAvailable = () => {
+    /*
     try {
         // Test getting an item to see if this triggers an error
         window.localStorage.getItem("test");
 
         if (window.localStorage && typeof window.localStorage === "object") {
+            storageName = "localStorage";
             return true;
         }
     } catch {
@@ -18,6 +21,14 @@ export const isLocalStorageAvailable = () => {
         return false;
     }
     // We should never reach this return statement, it exists to make the linter happy.
+    return false;
+    */
+
+    /**
+     * localStorage data spans across tabs in a browser and sessionStorage is unique per tab.
+     * Currently hardcoded to disable localStorage internally in the app by returning FALSE.
+     * If the app's support (e.g. Messaging Session Continuation) is required to be enabled across tabs in a browser, uncomment the code block above and remove the hardcoded 'return false' statement.
+     */
     return false;
 };
 
@@ -30,6 +41,7 @@ export const isSessionStorageAvailable = () => {
         window.sessionStorage.getItem("test");
 
         if (window.sessionStorage && typeof window.sessionStorage === "object") {
+            storageName = "sessionStorage";
             return true;
         }
     } catch {
@@ -43,9 +55,9 @@ export const isSessionStorageAvailable = () => {
 
 /**
  * Determine the type of web storage (local vs. session) to be used
- * It will prioritize localStorage if specify, otherwise sessionStorage
+ * It will prioritize localStorage if specified, otherwise sessionStorage
  */
-const determineStorageType = (inLocalStorage = false) => {
+export const determineStorageType = (inLocalStorage = false) => {
     return isLocalStorageAvailable() && inLocalStorage ? localStorage : isSessionStorageAvailable() ? sessionStorage : undefined;
 };
 
@@ -71,7 +83,7 @@ export const getItemInPayloadByKey = (payload, key) => {
  * Initialize Browser Web Storage (i.e. localStorage and/or sessionStorage) with a storage key including the Salesforce Organization Id.
  */
 export const initializeWebStorage = (organizationId) => {
-    storageKey = `${organizationId}_WEB_STORAGE`;
+    storageKey = `MESSAGING_SAMPLE_APP_WEB_STORAGE_${organizationId}`;
 
     const storageObj = JSON.stringify({});
 
@@ -114,7 +126,7 @@ export const setItemInWebStorage = (key, value, inLocalStorage = true) => {
         const storageObj = (storage.getItem(storageKey) && JSON.parse(storage.getItem(storageKey))) || {};
         storageObj[key] = value;
         storage.setItem(storageKey, JSON.stringify(storageObj));
-        console.log(`${key} set in ${inLocalStorage ? "localStorage" : "sessionStorage"}`);
+        console.log(`${key} set in ${storageName}`);
     }
 };
 

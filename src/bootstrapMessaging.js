@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Import children components to render.
 import MessagingWindow from "./components/messagingWindow";
@@ -8,11 +8,9 @@ import MessagingButton from "./components/messagingButton";
 
 import './bootstrapMessaging.css';
 
-import { setOrganizationId, setDeploymentDeveloperName, setSalesforceMessagingUrl, setDeploymentConfiguration, setLastEventId, setJwt } from './services/dataProvider';
-import { getUnauthenticatedAccessToken, createConversation } from './services/messagingService';
-import { initializeWebStorage, setItemInWebStorage, clearWebStorage } from './helpers/webstorageUtils';
+import { storeOrganizationId, storeDeploymentDeveloperName, storeSalesforceMessagingUrl } from './services/dataProvider';
+import { determineStorageType, initializeWebStorage, getItemInWebStorageByKey, getItemInPayloadByKey } from './helpers/webstorageUtils';
 import { APP_CONSTANTS, STORAGE_KEYS } from './helpers/constants';
-import { util } from "./helpers/common";
 
 import Draggable from "./ui-effects/draggable";
 
@@ -21,26 +19,74 @@ export default function BootstrapMessaging() {
     let [orgId, setOrgId] = useState('');
     let [deploymentDevName, setDeploymentDevName] = useState('');
     let [messagingURL, setMessagingURL] = useState('');
-    let [conversationId, setConversationId] = useState(undefined);
     let [shouldDisableMessagingButton, setShouldDisableMessagingButton] = useState(false);
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
     let [showMessagingButtonSpinner, setShowMessagingButtonSpinner] = useState(false);
+    let [isExistingConversation, setIsExistingConversation] = useState(false);
+
+    useEffect(() => {
+        const storage = determineStorageType();
+        if (!storage) {
+            console.error(`Cannot initialize the app. Web storage is required for the app to function.`);
+            return;
+        }
+
+        const messaging_webstorage_key = Object.keys(storage).filter(item => item.startsWith('MESSAGING_SAMPLE_APP_WEB_STORAGE_'))[0];
+
+        if (messaging_webstorage_key) {
+            const webStoragePayload = storage.getItem(messaging_webstorage_key);
+            const orgId = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.ORGANIZATION_ID);
+            const deploymentDevName = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME);
+            const messagingUrl = getItemInPayloadByKey(webStoragePayload, STORAGE_KEYS.MESAGING_URL);
+
+            if (!isValidOrganizationId(orgId)) {
+                console.warn(`Invalid organization id exists in the web storage: ${orgId}. Cleaning up the invalid object from the web storage.`);
+                storage.removeItem(messaging_webstorage_key);
+                // New conversation.
+                setIsExistingConversation(false);
+                return;
+            }
+            
+            // Re-Initialize state variables from the values in the web storage. This also re-populates app's deployment parameters input form fields with the previously entered data, in case of a messaging session continuation (e.g. page reload).
+            setOrgId(orgId);
+            setDeploymentDevName(deploymentDevName);
+            setMessagingURL(messagingUrl);
+
+            // Initialize messaging client.
+            initializeMessagingClient(orgId, deploymentDevName, messagingUrl);
+
+            const messagingJwt = getItemInWebStorageByKey(STORAGE_KEYS.JWT);
+            if (messagingJwt) {
+                // Existing conversation.
+                setIsExistingConversation(true);
+                setShowMessagingButton(true);
+                setShouldDisableMessagingButton(true);
+                setShouldShowMessagingWindow(true);
+            } else {
+                // New conversation.
+                setIsExistingConversation(false);
+            }
+        } else {
+            // New conversation.
+            setIsExistingConversation(false);
+        }
+
+        return () => {
+            showMessagingWindow(false);
+        };
+    }, []);
 
     /**
      * Initialize the messaging client by
      * 1. internally initializing the Embedded Service deployment paramaters in-memory.
      * 2. initializing Salesforce Organization Id in the browser web storage.
-     * 3. generate a new unique conversation-id and initialize in-memory.
      */
-    function initializeMessagingClient() {
+    function initializeMessagingClient(ord_id, deployment_dev_name, messaging_url) {
         // Initialize helpers.
-        setOrganizationId(orgId);
-        setDeploymentDeveloperName(deploymentDevName);
-        setSalesforceMessagingUrl(messagingURL);
-        initializeWebStorage(orgId);
-
-        // Initialize a new unique conversation-id in-memory.
-        setConversationId(util.generateUUID());
+        initializeWebStorage(ord_id || orgId);
+        storeOrganizationId(ord_id || orgId);
+        storeDeploymentDeveloperName(deployment_dev_name || deploymentDevName);
+        storeSalesforceMessagingUrl(messaging_url || messagingURL);
     }
 
     /**
@@ -110,6 +156,8 @@ export default function BootstrapMessaging() {
 
             // Initialize the Messaging Client.
             initializeMessagingClient();
+            // New conversation.
+            setIsExistingConversation(false);
             // Render the Messaging Button.
             setShowMessagingButton(true);
         }
@@ -120,72 +168,24 @@ export default function BootstrapMessaging() {
      * @returns {boolean} TRUE - disabled the button and FALSE - otherwise
      */
     function shouldDisableFormSubmitButton() {
-        return orgId.length === 0 || deploymentDevName.length === 0 || messagingURL.length === 0;
-    }
-
-    /**
-     * Parse the unauthenticatedAccessToken REST endpoint response and initialize the
-     * 1. Salesforce AccessToken(JWT) in-memory and Browser Web Storage.
-     * 2. Last Event Id in-memory. The Id is used to help establish connections to server-sent events (SSE) to receive messages and events from the server.
-     * 3. Embedded Service Deployment configuration settings im-memory.
-     * @param {response|object}
-     */
-    function parseAccessTokenResponse(response) {
-        if (typeof response === "object") {
-            setJwt(response.accessToken);
-            setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
-            setLastEventId(response.lastEventId);
-            setDeploymentConfiguration(response.context && response.context.configuration);
-        }
+        return (orgId && orgId.length === 0) || (deploymentDevName && deploymentDevName.length === 0) || (messagingURL && messagingURL.length === 0);
     }
 
     /**
      * Handle a click action from the Messaging Button.
-     * 1. Make a request to unauthenticatedAccessToken REST endpoint to get a Salesforce AccessToken(JWT), using which other Salesforce REST endpoint requests are made.
-     * 2. If Salesforce AccessToken(JWT) is successfully retrieved, make a request to createConversation REST endpoint using the Salesforce JWT to create a new messaging conversation.
-     * 3. If a conversation is created successfully, render the Messaging Window.
      * @param {object} evt - button click event
      */
     function handleMessagingButtonClick(evt) {
         if (evt) {
             console.log("Messaging Button clicked.");
             setShowMessagingButtonSpinner(true);
-
-            getUnauthenticatedAccessToken()
-            .then((response) => {
-                console.log("Successfully fetched an Unautheticated access token.");
-                // Disable Messaging Button once an access-token (JWT) is retrieved.
-                setShouldDisableMessagingButton(true);
-                // Parse the response object which includes access-token (JWT), configutation data.
-                parseAccessTokenResponse(response);
-
-                createConversation(conversationId)
-                .then(() => {
-                    console.log(`Successfully created a new conversation with conversation-id: ${conversationId}`);
-                    showMessagingWindow(true);
-                    setShowMessagingButtonSpinner(false);
-                })
-                .catch((err) => {
-                    console.error(`Something went wrong in creating a new conversation with conversation-id: ${conversationId}: ${err && err.message ? err.message : err}`);
-                    alert(`Something went wrong in creating a new conversation. Please try again by submitting the correct Embedded Service Deployment details. Check browser developer console for more information.`);
-                    clearWebStorage();
-                    showMessagingWindow(false);
-                    
-                });
-            })
-            .catch((err) => {
-                console.error(`Something went wrong in fetching an Unauthenticated access token: ${err && err.message ? err.message : err}`);
-                alert(`Something went wrong in fetching a Salesforce access token. Please try again by submitting the correct Embedded Service Deployment details. Check browser developer console for more information.`);
-                clearWebStorage();
-                showMessagingWindow(false);
-            });
+            showMessagingWindow(true);
         }
     }
 
     /**
      * Determines whether to render the Messaging Window based on the supplied parameter.
-     * TRUE - render the Messaging WINDOW and FALSE - Do not render the Messaging Window & Messaging Button
-     * @param {object} evt - button click event
+     * @param {boolean} shouldShow - TRUE - render the Messaging WINDOW and FALSE - Do not render the Messaging Window & Messaging Button
      */
     function showMessagingWindow(shouldShow) {
         setShouldShowMessagingWindow(Boolean(shouldShow));
@@ -199,6 +199,17 @@ export default function BootstrapMessaging() {
         }
     }
 
+    /**
+     * Handles the app UI readiness i.e. Messaging Button updates based on whether the Messaging Window UI is rendered.
+     * @param {boolean} isReady - TRUE - disable the Messaging Button & remove the spinner and FALSE - otherwise.
+     */
+    function appUiReady(isReady) {
+        // Disable Messaging Button if the app is UI ready.
+        setShouldDisableMessagingButton(isReady);
+        // Remove the spinner on the Messaging Button if the app is UI ready.
+        setShowMessagingButtonSpinner(!isReady);
+    }
+
     return (
         <>
             <h1>Messaging for Web - Sample App</h1>
@@ -207,20 +218,23 @@ export default function BootstrapMessaging() {
                 <label>Organization ID</label>
                 <input
                     type="text"
-                    value={orgId}
-                    onChange={e => setOrgId(e.target.value.trim())}>
+                    value={orgId || ""}
+                    onChange={e => setOrgId(e.target.value.trim())}
+                    disabled={shouldShowMessagingButton}>
                 </input>
                 <label>Developer Name</label>
                 <input
                     type="text"
-                    value={deploymentDevName}
-                    onChange={e => setDeploymentDevName(e.target.value.trim())}>
+                    value={deploymentDevName || ""}
+                    onChange={e => setDeploymentDevName(e.target.value.trim())}
+                    disabled={shouldShowMessagingButton}>
                 </input>
                 <label>URL</label>
                 <input
                     type="text"
-                    value={messagingURL}
-                    onChange={e => setMessagingURL(e.target.value.trim())}>
+                    value={messagingURL || ""}
+                    onChange={e => setMessagingURL(e.target.value.trim())}
+                    disabled={shouldShowMessagingButton}>
                 </input>
                 <button
                     className="deploymentDetailsFormSubmitButton"
@@ -236,10 +250,11 @@ export default function BootstrapMessaging() {
                     disableButton={shouldDisableMessagingButton}
                     showSpinner={showMessagingButtonSpinner} />}
             {shouldShowMessagingWindow &&
-                <Draggable intitialPosition={{ x: 1000, y: 500 }}>
+                <Draggable intitialPosition={{ x: 500, y: 500 }}>
                     <MessagingWindow
-                        conversationId={conversationId}
-                        showMessagingWindow={showMessagingWindow} />
+                        isExistingConversation={isExistingConversation}
+                        showMessagingWindow={showMessagingWindow}
+                        deactivateMessagingButton={appUiReady} />
                 </Draggable>
             }
         </>

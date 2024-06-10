@@ -102,6 +102,12 @@ export const createEventSource = (fullApiPath, eventListenerMap) => {
  * @returns {Promise}
  */
 export const subscribeToEventSource = (eventListenerMap) => {
+    const messagingUrl = getSalesforceMessagingUrl();
+
+    if (!messagingUrl) {
+        return Promise.reject(new Error(`Expected a valid Messaging URL to establish a connection to the Event Source, but instead received ${messagingUrl}`));
+    }
+
     return new Promise((resolve, reject) => {
         try {
             /**

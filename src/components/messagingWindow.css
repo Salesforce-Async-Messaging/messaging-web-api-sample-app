@@ -13,3 +13,7 @@
     bottom: 50px;
     right: 10px;
 }
+
+.messagingWindow[class~="hide"] {
+    display: none;
+}

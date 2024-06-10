@@ -16,7 +16,7 @@ export default function Draggable({ intitialPosition, children }) {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
 
-    console.log(state);
+    //console.log(state); // print new coordinates
 
     return () => {
       document.removeEventListener("mousemove", onMouseMove);

@@ -1,22 +1,12 @@
 /**
- * Messaging app's functional constants.
- * @type {Object}
- */
-export const APP_CONSTANTS = {
-    APP_CAPABILITIES_VERSION: "1",
-    APP_PLATFORM: "Web",
-    ORGANIZATION_ID_PREFIX: "00D",
-    SALESFORCE_MESSAGING_SCRT_URL: "salesforce-scrt.com",
-    HTTPS_PROTOCOL: "https:"
-};
-
-/**
  * Web storage keys.
  * @type {Object}
  */
 export const STORAGE_KEYS = {
-    SCROLL_POSITION: "SCROLL_POSITION",
-    JWT: "JWT"
+    JWT: "JWT",
+    ORGANIZATION_ID: "ORGANIZATION_ID",
+    DEPLOYMENT_DEVELOPER_NAME: "DEPLOYMENT_DEVELOPER_NAME",
+    MESAGING_URL: "MESSAGING_URL"
 };
 
 /**
@@ -24,7 +14,10 @@ export const STORAGE_KEYS = {
  * @type {Object}
  */
 export const MESSAGING_API_CONSTANTS = {
-    LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT: 20
+    // Optional parameter to listConversations API: The maximum number of conversations to retrieve. Default is 20, Max is 50.
+    LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT: 20,
+    // Optional parameter to listConversationEntries API: The maximum number of entries to retrieve. Default is 20, Max is 50.
+    LIST_CONVERSATION_ENTRIES_API_ENTRIES_LIMIT: 50
 };
 
 /**
@@ -151,4 +144,18 @@ export const CONVERSATION_CONSTANTS = {
         SUBMISSION_ERROR: "SubmissionError",
         ROUTING_ERROR: "RoutingError"
     }
+};
+
+/**
+ * Messaging app's functional constants.
+ * @type {Object}
+ */
+export const APP_CONSTANTS = {
+    APP_CAPABILITIES_VERSION: "1",
+    APP_PLATFORM: "Web",
+    ORGANIZATION_ID_PREFIX: "00D",
+    SALESFORCE_MESSAGING_SCRT_URL: "salesforce-scrt.com",
+    HTTPS_PROTOCOL: "https:",
+    // Update this list to add/remove support for Entry types in the app. This can be used to render supported conversation entries, to be retrived from listConversationEntries API etc.
+    SUPPORTED_ENTRY_TYPES: [CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE, CONVERSATION_CONSTANTS.EntryTypes.PARTICIPANT_CHANGED, CONVERSATION_CONSTANTS.EntryTypes.ROUTING_RESULT]
 };

@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import AppLogo from './AppLogo.png'
 import './App.css';
 import BootstrapMessaging from './bootstrapMessaging';

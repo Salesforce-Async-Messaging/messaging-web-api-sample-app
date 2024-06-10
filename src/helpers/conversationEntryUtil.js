@@ -30,6 +30,12 @@ export function createConversationEntry(data) {
     try {
         if (typeof data === "object") {
             const entryPayload = JSON.parse(data.conversationEntry.entryPayload);
+
+            // Do not create a conversation-entry for unknown/unsupported entryType.
+            if (!Object.values(CONVERSATION_CONSTANTS.EntryTypes).includes(entryPayload.entryType)) {
+                console.warn(`Unexpected and/or unsupported entryType: ${entryPayload.entryType}`);
+                return;
+            }
     
             return {
                 conversationId: data.conversationId,

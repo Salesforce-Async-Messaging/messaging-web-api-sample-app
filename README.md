@@ -43,6 +43,7 @@ $ npm start
 - Runs the app in the development mode.\
 - The page will reload when you make changes.\
 - You may also see any lint errors in the console.
+- [Local Testing Only] - Disable Strict Mode in the React App by going to `src/index.js` and comment out `React.StrictMode` encapsulating the `<App />`
 - After the app is running, open [http://localhost:3000](http://localhost:3000) in your browser to get started.
 
 ## Test Sample App
