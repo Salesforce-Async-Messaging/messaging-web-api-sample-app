@@ -2,6 +2,7 @@ import { APP_CONSTANTS } from './constants';
 
 // storageKey holds top level storage key in the browser storage.
 export let storageKey;
+let storageName;
 
 /**
  * True if this browser session allows access to local storage. Some users may have stricter browser security settings. Do nothing on error.
@@ -13,6 +14,7 @@ export const isLocalStorageAvailable = () => {
         window.localStorage.getItem("test");
 
         if (window.localStorage && typeof window.localStorage === "object") {
+            storageName = "localStorage";
             return true;
         }
     } catch {
@@ -41,6 +43,7 @@ export const isSessionStorageAvailable = () => {
         window.sessionStorage.getItem("test");
 
         if (window.sessionStorage && typeof window.sessionStorage === "object") {
+            storageName = "sessionStorage";
             return true;
         }
     } catch {
@@ -125,7 +128,7 @@ export const setItemInWebStorage = (key, value, inLocalStorage = true) => {
         const storageObj = (storage.getItem(storageKey) && JSON.parse(storage.getItem(storageKey))) || {};
         storageObj[key] = value;
         storage.setItem(storageKey, JSON.stringify(storageObj));
-        console.log(`${key} set in ${inLocalStorage ? "localStorage" : "sessionStorage"}`);
+        console.log(`${key} set in ${storageName}`);
     }
 };
 
