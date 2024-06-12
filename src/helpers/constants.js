@@ -173,5 +173,13 @@ export const APP_CONSTANTS = {
  */
 export const DEPLOYMENT_CONFIGURATION_CONSTANTS = {
     PRECHAT_DISPLAY_EVERY_CONVERSATION: "Conversation",
-    PRECHAT_DISPLAY_EVERY_SESSION: "Session"
+    PRECHAT_DISPLAY_EVERY_SESSION: "Session",
+    SUPPORTED_PRECHAT_FORM_FIELDS: {
+        TEXT: "Text",
+        EMAIL: "Email",
+        NUMBER: "Number",
+        PHONE: "Phone",
+        CHECKBOX: "Checkbox",
+        CHOICELIST: "ChoiceList"
+    }
 };

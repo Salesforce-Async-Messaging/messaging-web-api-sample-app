@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./prechat.css";
 
 import { prechatUtil } from "../helpers/prechatUtil";
+import { DEPLOYMENT_CONFIGURATION_CONSTANTS } from "../helpers/constants";
 
 /**
  * Main Pre-Chat form component which holds the form fields.
@@ -90,7 +91,7 @@ function FormFields({visiblePrechatFields}) {
 function FormField({field}) {
     let choiceListValues;
 
-    if (field.type === "ChoiceList" && field.choiceListId) {
+    if (field.type === DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.CHOICELIST && field.choiceListId) {
         const choiceList = prechatUtil.getPrechatFormChoiceList(field.choiceListId);
         if (!choiceList || !choiceList.length || !choiceList[0].choiceListValues) {
             return;
@@ -130,15 +131,15 @@ function FormField({field}) {
     let fieldPlaceholder;
 
     switch (field.type) {
-        case "Text":
-        case "Email":
-        case "Number":
-        case "Checkbox":
+        case DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.TEXT:
+        case DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.EMAIL:
+        case DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.NUMBER:
+        case DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.CHECKBOX:
             fieldInputType = (field.type).toLowerCase();
             break;
-        case "Phone":
+        case DEPLOYMENT_CONFIGURATION_CONSTANTS.SUPPORTED_PRECHAT_FORM_FIELDS.PHONE:
             fieldInputType = "tel";
-            fieldPlaceholder="123-456-7890"
+            fieldPlaceholder = "123-456-7890"
             break;
         default:
             fieldInputType = "text";
