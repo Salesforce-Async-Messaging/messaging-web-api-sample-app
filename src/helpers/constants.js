@@ -6,7 +6,8 @@ export const STORAGE_KEYS = {
     JWT: "JWT",
     ORGANIZATION_ID: "ORGANIZATION_ID",
     DEPLOYMENT_DEVELOPER_NAME: "DEPLOYMENT_DEVELOPER_NAME",
-    MESAGING_URL: "MESSAGING_URL"
+    MESSAGING_URL: "MESSAGING_URL",
+    DEPLOYMENT_CONFIGURATION: "DEPLOYMENT_CONFIGURATION"
 };
 
 /**
@@ -147,6 +148,12 @@ export const CONVERSATION_CONSTANTS = {
 };
 
 /**
+ * Update this list to add/remove support for Entry types in the app. This can be used to render supported conversation entries, to be retrived from listConversationEntries API etc.
+ * @type {Array}
+ */
+export const SUPPORTED_ENTRY_TYPES = [CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE, CONVERSATION_CONSTANTS.EntryTypes.PARTICIPANT_CHANGED, CONVERSATION_CONSTANTS.EntryTypes.ROUTING_RESULT];
+
+/**
  * Messaging app's functional constants.
  * @type {Object}
  */
@@ -156,6 +163,23 @@ export const APP_CONSTANTS = {
     ORGANIZATION_ID_PREFIX: "00D",
     SALESFORCE_MESSAGING_SCRT_URL: "salesforce-scrt.com",
     HTTPS_PROTOCOL: "https:",
-    // Update this list to add/remove support for Entry types in the app. This can be used to render supported conversation entries, to be retrived from listConversationEntries API etc.
-    SUPPORTED_ENTRY_TYPES: [CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE, CONVERSATION_CONSTANTS.EntryTypes.PARTICIPANT_CHANGED, CONVERSATION_CONSTANTS.EntryTypes.ROUTING_RESULT]
+    // The storage key name under which messaging data is stored in local/session storage.
+    WEB_STORAGE_KEY: "MESSAGING_SAMPLE_APP_WEB_STORAGE_"
+};
+
+/**
+ * Constants related to Embedded Service Deployment configuration.
+ * @type {object}
+ */
+export const DEPLOYMENT_CONFIGURATION_CONSTANTS = {
+    PRECHAT_DISPLAY_EVERY_CONVERSATION: "Conversation",
+    PRECHAT_DISPLAY_EVERY_SESSION: "Session",
+    SUPPORTED_PRECHAT_FORM_FIELDS: {
+        TEXT: "Text",
+        EMAIL: "Email",
+        NUMBER: "Number",
+        PHONE: "Phone",
+        CHECKBOX: "Checkbox",
+        CHOICELIST: "ChoiceList"
+    }
 };

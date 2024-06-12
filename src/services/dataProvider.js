@@ -19,10 +19,10 @@ function getDeploymentDeveloperName() {
 
 // Store the Salesforce Url from the Embedded Service Deployment for other components to use.
 function storeSalesforceMessagingUrl(messagingUrl) {
-    setItemInWebStorage(STORAGE_KEYS.MESAGING_URL, messagingUrl);
+    setItemInWebStorage(STORAGE_KEYS.MESSAGING_URL, messagingUrl);
 }
 function getSalesforceMessagingUrl() {
-    return getItemInWebStorageByKey(STORAGE_KEYS.MESAGING_URL);
+    return getItemInWebStorageByKey(STORAGE_KEYS.MESSAGING_URL);
 }
 
 // Store the Salesforce Access Token (JWT) for other components to use.
@@ -33,13 +33,16 @@ function getJwt() {
     return getItemInWebStorageByKey(STORAGE_KEYS.JWT);
 }
 
-// Store the configuration settings of the Embedded Service Deployment in-memory for other components to use.
-let deploymentConfiguration;
+// Store the configuration settings of the Embedded Service Deployment for other components to use.
 function setDeploymentConfiguration(configuration) {
-    deploymentConfiguration = configuration;
+    setItemInWebStorage(STORAGE_KEYS.DEPLOYMENT_CONFIGURATION, JSON.stringify(configuration));
 }
 function getDeploymentConfiguration() {
-    return deploymentConfiguration;
+    const configuration = getItemInWebStorageByKey(STORAGE_KEYS.DEPLOYMENT_CONFIGURATION);
+    if (!configuration) {
+        return;
+    }
+    return JSON.parse(getItemInWebStorageByKey(STORAGE_KEYS.DEPLOYMENT_CONFIGURATION));
 }
 
 // Store the latest last-event-id from the Access Token API response or from an Event Source (SSE) event in-memory.
@@ -62,7 +65,6 @@ function getConversationId() {
 
 // Clears the in-memory messaging data variables.
 function clearInMemoryData() {
-    deploymentConfiguration = undefined;
     conversationId = undefined;
     lastEventId = undefined;
 

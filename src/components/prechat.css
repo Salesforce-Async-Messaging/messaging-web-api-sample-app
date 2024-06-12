@@ -1,0 +1,72 @@
+.messagingPrechat {
+    background: whitesmoke;
+    border-radius: inherit;
+}
+
+.prechatForm {
+    height: 500px;
+    border-bottom: 1px solid #ddd;
+    overflow: auto;
+    background: transparent;
+    border-radius: inherit;
+    font-family: inherit;
+}
+
+.prechatFormFieldsListView {
+    height: inherit;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.prechatFormFieldContainer {
+    min-width: 100px;
+    padding: 0 14px;
+    max-height: 100px;
+    margin: 15px 0;
+}
+
+.prechatFormFieldName {
+    color: black;
+    font-size: medium;
+    margin: 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.prechatFormField {
+    width: 100%;
+    border: 1px solid;
+}
+
+.checkbox {
+    width: 4%;
+    margin-right: auto;
+}
+
+select {
+    height: 35px;
+    border-radius: 5px;
+}
+
+.requiredFieldIndicator {
+    color: red;
+    display: contents;
+}
+
+.startConversationButton {
+    width: 75%;
+    height: 35px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #888c8c;
+    border: 1px;
+    font-weight: bold;
+}
+
+.startConversationButton:hover {
+    opacity: 0.8;
+    pointer-events: all;
+    cursor: pointer;
+}

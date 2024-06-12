@@ -1,3 +1,5 @@
+import { APP_CONSTANTS } from './constants';
+
 // storageKey holds top level storage key in the browser storage.
 export let storageKey;
 let storageName;
@@ -83,7 +85,7 @@ export const getItemInPayloadByKey = (payload, key) => {
  * Initialize Browser Web Storage (i.e. localStorage and/or sessionStorage) with a storage key including the Salesforce Organization Id.
  */
 export const initializeWebStorage = (organizationId) => {
-    storageKey = `MESSAGING_SAMPLE_APP_WEB_STORAGE_${organizationId}`;
+    storageKey = `${APP_CONSTANTS.WEB_STORAGE_KEY}${organizationId}`;
 
     const storageObj = JSON.stringify({});
 
