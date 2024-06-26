@@ -1,7 +1,6 @@
 import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONSTANTS, SUPPORTED_ENTRY_TYPES } from "../helpers/constants";
 import { getOrganizationId, getDeploymentDeveloperName, getSalesforceMessagingUrl } from "./dataProvider";
 import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
-import { util } from "../helpers/common";
 
 /**
  * Send an HTTP request using fetch with a specified path, method, mode, headers, and body.
@@ -276,29 +275,6 @@ function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, is
 }
 
 /**
- * Publish a started/stopped typing indicator entry to a conversation.
- *
- * @param {string} conversationId - ID of conversation to send a typing indicator to.
- * @param {string} typingIndicator - Indicate whether to typing started or stopped indicator.
- * @returns {Promise}
- */
-function sendTypingIndicator(conversationId, typingIndicator) {
-	const messagingUrl = getSalesforceMessagingUrl();
-	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/entry`;
-
-    return sendFetchRequest(
-        apiPath,
-        "POST",
-        "cors",
-        null,
-        {
-            entryType: typingIndicator,
-            id: util.generateUUID()
-        }
-    );
-};
-
-/**
  * Close conversation and clean up JWT:
  * - clear JWT variable on inAppService.
  * - remove JWT from web storage (if web storage is available).
@@ -310,7 +286,7 @@ function sendTypingIndicator(conversationId, typingIndicator) {
  * @param {String} conversationId - ID of the conversation to close. Required.
  * @returns {Promise}
  */
-function closeConversation(conversationId) {
+function closeConversation (conversationId) {
     const messagingUrl = getSalesforceMessagingUrl();
 	const esDeveloperName = getDeploymentDeveloperName();
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}?esDeveloperName=${esDeveloperName}`;
@@ -324,4 +300,4 @@ function closeConversation(conversationId) {
     );
 };
 
-export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversations, listConversationEntries, sendTextMessage, sendTypingIndicator, closeConversation };
+export { getUnauthenticatedAccessToken, createConversation, getContinuityJwt, listConversations, listConversationEntries, sendTextMessage, closeConversation };

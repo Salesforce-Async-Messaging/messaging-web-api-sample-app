@@ -41,12 +41,5 @@ export const util = {
         const formattedDateTime = this.formatDateTime(timestamp);
 
         return formattedDateTime.split(",")[1].trim();
-    },
-
-    /**
-     * Creates deep copy of conversationEntries for searching.
-     */
-    createDeepCopy(conversationEntries) {
-        return JSON.parse(JSON.stringify(conversationEntries));
     }
 };

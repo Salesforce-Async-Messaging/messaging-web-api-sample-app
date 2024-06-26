@@ -4,17 +4,12 @@ import "./messagingInputFooter.css";
 import { VscSend } from "react-icons/vsc";
 
 import { util } from "../helpers/common";
-import { CONVERSATION_CONSTANTS, CLIENT_CONSTANTS } from '../helpers/constants';
+import { CONVERSATION_CONSTANTS } from '../helpers/constants';
 import { getConversationId } from '../services/dataProvider';
-import CountdownTimer from "../helpers/countdownTimer";
 
 export default function MessagingInputFooter(props) {
     // Initialize the Textarea value to empty.
     let [textareaContent, setTextareaContent] = useState('');
-    
-    // Initialize whether end user is actively typing. 
-    // This holds a reference to a CountdownTimer object.
-    let [typingIndicatorTimer, setTypingIndicatorTimer] = useState(undefined);
 
     /**
      * Handle 'change' event in Textarea to reactively update the Textarea value.
@@ -23,22 +18,6 @@ export default function MessagingInputFooter(props) {
     function handleTextareaContentChange(event) {
         if (event && event.target && typeof event.target.value === "string") {
             setTextareaContent(event.target.value);
-        }
-
-        // Handle when end user is actively typing.
-        if (textareaContent !== "" && textareaContent.length !== 0) {
-            // If the end user has typed within the last 5 seconds, reset the timer for another 5 seconds.
-            // Otherwise, send a new started typing indicator and start a new countdown.
-            if (typingIndicatorTimer) {
-                typingIndicatorTimer.reset(Date.now());
-            } else {
-                handleSendTypingIndicator(CONVERSATION_CONSTANTS.EntryTypes.TYPING_STARTED_INDICATOR);
-                typingIndicatorTimer = new CountdownTimer(() => {
-                    handleSendTypingIndicator(CONVERSATION_CONSTANTS.EntryTypes.TYPING_STOPPED_INDICATOR);
-                    typingIndicatorTimer = undefined;
-                }, CLIENT_CONSTANTS.TYPING_INDICATOR_DISPLAY_TIMEOUT, Date.now());
-                typingIndicatorTimer.start();
-            }
         }
     }
 
@@ -116,22 +95,6 @@ export default function MessagingInputFooter(props) {
                 // Clear textarea value.
                 clearMessageContent();
             });
-    }
-
-    /**
-     * Handle calling a sendTypingIndicator when the timer fires with started/stopped indicator.
-     * @param {string} typingIndicator - whether to send a typing started or stopped indicator.
-     */
-    function handleSendTypingIndicator(typingIndicator) {
-        const conversationId = getConversationId();
-        
-        props.sendTypingIndicator(conversationId, typingIndicator)
-        .then(() => {
-            console.log(`Successfully sent ${typingIndicator} to conversation: ${conversationId}`);
-        })
-        .catch(error => {
-            console.error(`Something went wrong while sending a typing indicator to conversation ${conversationId}: ${error}`);
-        });
     }
 
     return(

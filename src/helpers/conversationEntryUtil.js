@@ -21,24 +21,6 @@ export function parseServerSentEventData(event) {
 };
 
 /**
- * Get the sender's display name from incoming typing started/stopped indicator events.
- * @param {Object} data - Data from typing indicator server-sent events.
- * @returns {String} - Parsed display name of sender.
- */
-export function getSenderDisplayName(data) {
-    return (data && data.conversationEntry && data.conversationEntry.senderDisplayName) || "";
-};
-
-/**
- * Get the sender's role from incoming typing started/stopped indicator events.
- * @param {Object} data - Data from typing indicator server-sent events.
- * @returns {String} - Parsed role of the sender.
- */
-export function getSenderRole(data) {
-    return (data && data.conversationEntry && data.conversationEntry.sender && data.conversationEntry.sender.role) || "";
-};
-
-/**
  * Parses JSON entry payload field from a server-sent event data.
  * @param {object} data - Server-sent event.
  * @returns {object} - Parsed server-sent event data.
@@ -76,18 +58,6 @@ export function createConversationEntry(data) {
     
 };
 
-/**
- * Validates whether the supplied CONVERSATION_MESSAGE is originating from an end-user participant.
- * @param {object} conversationEntry
- * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is sent by the end-user participant and FALSE - otherwise.
- */
-export function isMessageFromEndUser(conversationEntry) {
-    if (isConversationEntryMessage(conversationEntry)) {
-        return conversationEntry.actorType === CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER;
-    }
-    return false;
-};
-
 //============================================================== STATIC TEXT MESSAGE functions ==============================================================
 /**
  * Validates whether the supplied object is a conversation-entry with entry type as CONVERSATION_MESSAGE.
@@ -97,6 +67,18 @@ export function isMessageFromEndUser(conversationEntry) {
 export function isConversationEntryMessage(conversationEntry) {
     if (conversationEntry) {
         return conversationEntry.entryType === CONVERSATION_CONSTANTS.EntryTypes.CONVERSATION_MESSAGE;
+    }
+    return false;
+};
+
+/**
+ * Validates whether the supplied CONVERSATION_MESSAGE is originating from an end-user participant.
+ * @param {object} conversationEntry
+ * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is sent by the end-user participant and FALSE - otherwise.
+ */
+export function isMessageFromEndUser(conversationEntry) {
+    if (isConversationEntryMessage(conversationEntry)) {
+        return conversationEntry.actorType === CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER;
     }
     return false;
 };
@@ -147,33 +129,6 @@ export function getTextMessageContent(conversationEntry) {
     }
     return "";
 };
-
-//============================================================== CHOICES MESSAGE functions ==============================================================
-
-/**
- * Validates whether the supplied CONVERSATION_MESSAGE is a CHOICES_MESSAGE (i.e. messageType === "ChoicesMessage").
- * @param {object} conversationEntry
- * @returns {boolean} - TRUE - if the CONVERSATION_MESSAGE is a CHOICES_MESSAGE and FALSE - otherwise.
- */
-export function isConversationEntryChoicesMessage(conversationEntry) {
-    if (isConversationEntryMessage(conversationEntry)) {
-        return conversationEntry.content && conversationEntry.content.messageType === CONVERSATION_CONSTANTS.MessageTypes.CHOICES_MESSAGE;
-    }
-    return false;
-};
-
-/**
- * Validates whether the supplied CHOICES_MESSAGE is QUICK_REPLIES (i.e. formatType === "QuickReplies") or BUTTONS (i.e. formatType === "Buttons").
- * @param {object} conversationEntry
- * @returns {boolean} - TRUE - if the CHOICES_MESSAGE is a QUICK_REPLIES or BUTTONS format type and FALSE - otherwise.
- */
-export function isChoicesMessage(conversationEntry) {
-    if (isConversationEntryChoicesMessage(conversationEntry)) {
-        return getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.QUICK_REPLIES 
-            || getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.BUTTONS;
-    }
-};
-
 //============================================================== PARTICIPANT CHANGE functions ==============================================================
 /**
  * Validates whether the supplied object is a conversation-entry with entry type as PARTICIPANT_CHANGED.

@@ -5,17 +5,12 @@ import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 
 // Import children components to plug in and render.
 import ConversationEntry from "./conversationEntry";
-import TypingIndicator from "./typingIndicator";
 
-export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator }) {
+export default function MessagingBody({ conversationEntries, conversationStatus }) {
 
     useEffect(() => {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION) {
-            // TODO: Render conversation closed message.
-
-            // Remove typing indicator.
-            typingParticipants = [];
-            showTypingIndicator = false;
+            // Render conversation closed message.
         }
     }, [conversationStatus]);
 
@@ -63,9 +58,6 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
             <ul className="conversationEntriesListView">
                 {conversationEntriesListView}
             </ul>
-
-            {showTypingIndicator && <TypingIndicator typingParticipants={typingParticipants}/>}
-
             {conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION && <p className="conversationEndTimeText">{generateConversationEndTimeText()}</p>}
         </div>
     );
