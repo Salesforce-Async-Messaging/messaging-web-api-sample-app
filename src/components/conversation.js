@@ -8,13 +8,14 @@ import MessagingInputFooter from "./messagingInputFooter";
 
 import { setJwt, setLastEventId, storeConversationId, getConversationId, getJwt, clearInMemoryData, setDeploymentConfiguration } from "../services/dataProvider";
 import { subscribeToEventSource, closeEventSource } from '../services/eventSourceService';
-import { sendTextMessage, getContinuityJwt, listConversations, listConversationEntries, closeConversation, getUnauthenticatedAccessToken, createConversation } from "../services/messagingService";
+import { sendTypingIndicator, sendTextMessage, getContinuityJwt, listConversations, listConversationEntries, closeConversation, getUnauthenticatedAccessToken, createConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
-import { CONVERSATION_CONSTANTS, STORAGE_KEYS } from "../helpers/constants";
+import { CONVERSATION_CONSTANTS, STORAGE_KEYS, CLIENT_CONSTANTS } from "../helpers/constants";
 import { setItemInWebStorage, clearWebStorage } from "../helpers/webstorageUtils";
 import { util } from "../helpers/common";
 import { prechatUtil } from "../helpers/prechatUtil.js";
 import Prechat from "./prechat.js";
+import CountdownTimer from "../helpers/countdownTimer.js";
 
 export default function Conversation(props) {
     // Initialize a list of conversation entries.
@@ -25,6 +26,12 @@ export default function Conversation(props) {
     let [showPrechatForm, setShowPrechatForm] = useState(false);
     // Tracks the most recent conversation message that was failed to send.
     let [failedMessage, setFailedMessage] = useState(undefined);
+
+    // Initialize current participants that are actively typing (except end user).
+    // Each key is the participant's `senderName` or `role` and each value is a reference to a CountdownTimer object.
+    let [currentTypingParticipants, setCurrentTypingParticipants] = useState({});
+    // Initialize whether at least 1 participant (not including end user) is typing.
+    let [isAnotherParticipantTyping, setIsAnotherParticipantTyping] = useState(false);
 
     useEffect(() => {
         let conversationStatePromise;
@@ -267,6 +274,10 @@ export default function Conversation(props) {
                     [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]: handleConversationMessageServerSentEvent,
                     [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_ROUTING_RESULT]: handleRoutingResultServerSentEvent,
                     [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_PARTICIPANT_CHANGED]: handleParticipantChangedServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_TYPING_STARTED_INDICATOR]: handleTypingStartedIndicatorServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_TYPING_STOPPED_INDICATOR]: handleTypingStoppedIndicatorServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_DELIVERY_ACKNOWLEDGEMENT]: handleConversationDeliveryAcknowledgementServerSentEvent,
+                    [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_READ_ACKNOWLEDGEMENT]: handleConversationReadAcknowledgementServerSentEvent,
                     [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_CLOSE_CONVERSATION]: handleCloseConversationServerSentEvent
                 })
                 .then(() => {
@@ -330,6 +341,10 @@ export default function Conversation(props) {
 
             if (ConversationEntryUtil.isMessageFromEndUser(conversationEntry)) {
                 conversationEntry.isEndUserMessage = true;
+
+                // Since message is echoed back by the server, mark the conversation entry as sent.
+                conversationEntry.isSent = true;
+
                 console.log(`End user successfully sent a message.`);
             } else {
                 conversationEntry.isEndUserMessage = false;
@@ -427,6 +442,172 @@ export default function Conversation(props) {
             addConversationEntry(conversationEntry);
         } catch (err) {
             console.error(`Something went wrong in handling participant changed server sent event: ${err}`);
+        }
+    }
+
+    /**
+     * Handle a TYPING_STARTED_INDICATOR server-sent event.
+     * @param {object} event - Event data payload from server-sent event.
+     */
+    function handleTypingStartedIndicatorServerSentEvent(event) {
+        try {
+            // Update in-memory to the latest lastEventId
+            if (event && event.lastEventId) {
+                setLastEventId(event.lastEventId);
+            }
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            // Handle typing indicators only for the current conversation
+            if (getConversationId() === parsedEventData.conversationId) {
+                const senderName = ConversationEntryUtil.getSenderDisplayName(parsedEventData) || ConversationEntryUtil.getSenderRole(parsedEventData);
+                const typingParticipantTimer = currentTypingParticipants[senderName] && currentTypingParticipants[senderName].countdownTimer;
+
+                // If we have received typing indicator from this sender within the pass 5 seconds, reset the timer
+                // Otherwise, start a new timer
+                if (ConversationEntryUtil.getSenderRole(parsedEventData) !== CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER) {
+                    console.log(`Successfully handling typing started indicator server sent event.`);
+
+                    if (typingParticipantTimer) {
+                        typingParticipantTimer.reset(Date.now());
+                    } else {
+                        currentTypingParticipants[senderName] = {
+                            countdownTimer: new CountdownTimer(() => {
+                                delete currentTypingParticipants[senderName];
+
+                                if (!Object.keys(currentTypingParticipants).length) {
+                                    setIsAnotherParticipantTyping(false);
+                                }
+                            }, CLIENT_CONSTANTS.TYPING_INDICATOR_DISPLAY_TIMEOUT, Date.now()),
+                            role: parsedEventData.conversationEntry.sender.role
+                        };
+
+                        currentTypingParticipants[senderName].countdownTimer.start();
+                    }
+
+                    setIsAnotherParticipantTyping(true);
+                }
+            }
+        } catch (err) {
+            console.error(`Something went wrong in handling typing started indicator server sent event: ${err}`);
+        }
+    }
+
+    /**
+     * Handle a TYPING_STOPPED_INDICATOR server-sent event.
+     * @param {object} event - Event data payload from server-sent event.
+     */
+    function handleTypingStoppedIndicatorServerSentEvent(event) {
+        try {
+            // Update in-memory to the latest lastEventId
+            if (event && event.lastEventId) {
+                setLastEventId(event.lastEventId);
+            }           
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            // Handle typing indicators only for the current conversation
+            if (getConversationId() === parsedEventData.conversationId) {
+                const senderName = ConversationEntryUtil.getSenderDisplayName(parsedEventData) || ConversationEntryUtil.getSenderRole(parsedEventData);
+                const typingParticipantTimer = currentTypingParticipants[senderName] && currentTypingParticipants[senderName].countdownTimer;
+
+                // If we have received typing indicator from this sender within the pass 5 seconds, reset the timer
+                // Otherwise, start a new timer
+                if (ConversationEntryUtil.getSenderRole(parsedEventData) !== CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER) {
+                    console.log(`Successfully handling typing stopped indicator server sent event.`);
+
+                    if (typingParticipantTimer) {
+                        typingParticipantTimer.reset(Date.now());
+                    } else {
+                        currentTypingParticipants[senderName] = {
+                            countdownTimer: new CountdownTimer(() => {
+                                delete currentTypingParticipants[senderName];
+
+                                if (!Object.keys(currentTypingParticipants).length) {
+                                    setIsAnotherParticipantTyping(false);
+                                }
+                            }, CLIENT_CONSTANTS.TYPING_INDICATOR_DISPLAY_TIMEOUT, Date.now()),
+                            role: parsedEventData.conversationEntry.sender.role
+                        };
+
+                        currentTypingParticipants[senderName].countdownTimer.start();
+                    }
+
+                    setIsAnotherParticipantTyping(true);
+                }
+            }
+        } catch (err) {
+            console.error(`Something went wrong in handling typing stopped indicator server sent event: ${err}`);
+        }
+    }
+
+    /**
+     * Handle a server-sent event CONVERSATION_DELIVERY_ACKNOWLEDGEMENT:
+     * - Parse server-sent event and update a conversation entry (if it exists) with data from the event.
+     * - Store delivery acknowledgement timestamp on conversation entry to show receipt timestamp.
+     * @param {object} event - Event data payload from server-sent event.
+     */
+    function handleConversationDeliveryAcknowledgementServerSentEvent(event) {
+        try {
+            console.log(`Successfully handling conversation delivery acknowledgement server sent event.`);
+            // Update in-memory to the latest lastEventId
+            if (event && event.lastEventId) {
+                setLastEventId(event.lastEventId);
+            }
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            // Handle delivery acknowledgements only for the current conversation
+            if (getConversationId() === parsedEventData.conversationId) {
+                if (parsedEventData.conversationEntry && parsedEventData.conversationEntry.relatedRecords.length && parsedEventData.conversationEntry.entryPayload.length) {
+                    // Store acknowledgement timestamp and identifier of message that was delivered.
+                    const deliveredMessageId = parsedEventData.conversationEntry.relatedRecords[0];
+                    const deliveryAcknowledgementTimestamp = JSON.parse(parsedEventData.conversationEntry.entryPayload).acknowledgementTimestamp;
+
+                    // Make deep copy of conversation entries to find matching messageId. 
+                    util.createDeepCopy(conversationEntries).filter((conversationEntry) => {
+                        if (conversationEntry.messageId === deliveredMessageId) {
+                            conversationEntry.isDelivered = true;
+                            conversationEntry.deliveryAcknowledgementTimestamp = deliveryAcknowledgementTimestamp;
+                        }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error(`Something went wrong in handling conversation delivery acknowledgement server sent event: ${err}`);
+        }
+    }
+
+    /**
+     * Handle a server-sent event CONVERSATION_READ_ACKNOWLEDGEMENT:
+     * - Parse server-sent event and update a conversation entry (if it exists) with data from the event.
+     * - Store read acknowledgement timestamp on conversation entry to show receipt timestamp.
+     * @param {object} event - Event data payload from server-sent event.
+     */
+    function handleConversationReadAcknowledgementServerSentEvent(event) {
+        try {
+            console.log(`Successfully handling conversation read acknowledgement server sent event.`);
+            // Update in-memory to the latest lastEventId
+            if (event && event.lastEventId) {
+                setLastEventId(event.lastEventId);
+            }
+
+            const parsedEventData = ConversationEntryUtil.parseServerSentEventData(event);
+            // Handle read acknowledgements only for the current conversation
+            if (getConversationId() === parsedEventData.conversationId) {
+                if (parsedEventData.conversationEntry && parsedEventData.conversationEntry.relatedRecords.length && parsedEventData.conversationEntry.entryPayload.length) {
+                    // Store acknowledgement timestamp and identifier of message that was read.
+                    const readMessageId = parsedEventData.conversationEntry.relatedRecords[0];
+                    const readAcknowledgementTimestamp = JSON.parse(parsedEventData.conversationEntry.entryPayload).acknowledgementTimestamp;
+
+                    // Make deep copy of conversation entries to find matching messageId. 
+                    util.createDeepCopy(conversationEntries).filter((conversationEntry) => {
+                        if (conversationEntry.messageId === readMessageId) {
+                            conversationEntry.isRead = true;
+                            conversationEntry.readAcknowledgementTimestamp = readAcknowledgementTimestamp;
+                        }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error(`Something went wrong in handling conversation read acknowledgement server sent event: ${err}`);
         }
     }
 
@@ -601,10 +782,13 @@ export default function Conversation(props) {
             <>
                 <MessagingBody
                     conversationEntries={conversationEntries}
-                    conversationStatus={conversationStatus} />
+                    conversationStatus={conversationStatus} 
+                    typingParticipants={currentTypingParticipants}
+                    showTypingIndicator={isAnotherParticipantTyping} />
                 <MessagingInputFooter
                     conversationStatus={conversationStatus} 
-                    sendTextMessage={handleSendTextMessage} />
+                    sendTextMessage={handleSendTextMessage} 
+                    sendTypingIndicator={sendTypingIndicator} />
             </>
             }
             {
