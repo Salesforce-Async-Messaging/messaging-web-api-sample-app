@@ -171,6 +171,7 @@ export function isChoicesMessage(conversationEntry) {
         return getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.QUICK_REPLIES 
             || getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.BUTTONS;
     }
+    return false;
 };
 
 //============================================================== PARTICIPANT CHANGE functions ==============================================================

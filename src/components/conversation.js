@@ -462,7 +462,7 @@ export default function Conversation(props) {
                 const senderName = ConversationEntryUtil.getSenderDisplayName(parsedEventData) || ConversationEntryUtil.getSenderRole(parsedEventData);
                 const typingParticipantTimer = currentTypingParticipants[senderName] && currentTypingParticipants[senderName].countdownTimer;
 
-                // If we have received typing indicator from this sender within the pass 5 seconds, reset the timer
+                // If we have received typing indicator from this sender within the past 5 seconds, reset the timer
                 // Otherwise, start a new timer
                 if (ConversationEntryUtil.getSenderRole(parsedEventData) !== CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER) {
                     console.log(`Successfully handling typing started indicator server sent event.`);
@@ -507,31 +507,11 @@ export default function Conversation(props) {
             // Handle typing indicators only for the current conversation
             if (getConversationId() === parsedEventData.conversationId) {
                 const senderName = ConversationEntryUtil.getSenderDisplayName(parsedEventData) || ConversationEntryUtil.getSenderRole(parsedEventData);
-                const typingParticipantTimer = currentTypingParticipants[senderName] && currentTypingParticipants[senderName].countdownTimer;
+    
+                delete currentTypingParticipants[senderName];
 
-                // If we have received typing indicator from this sender within the pass 5 seconds, reset the timer
-                // Otherwise, start a new timer
-                if (ConversationEntryUtil.getSenderRole(parsedEventData) !== CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER) {
-                    console.log(`Successfully handling typing stopped indicator server sent event.`);
-
-                    if (typingParticipantTimer) {
-                        typingParticipantTimer.reset(Date.now());
-                    } else {
-                        currentTypingParticipants[senderName] = {
-                            countdownTimer: new CountdownTimer(() => {
-                                delete currentTypingParticipants[senderName];
-
-                                if (!Object.keys(currentTypingParticipants).length) {
-                                    setIsAnotherParticipantTyping(false);
-                                }
-                            }, CLIENT_CONSTANTS.TYPING_INDICATOR_DISPLAY_TIMEOUT, Date.now()),
-                            role: parsedEventData.conversationEntry.sender.role
-                        };
-
-                        currentTypingParticipants[senderName].countdownTimer.start();
-                    }
-
-                    setIsAnotherParticipantTyping(true);
+                if (!Object.keys(currentTypingParticipants).length) {
+                    setIsAnotherParticipantTyping(false);
                 }
             }
         } catch (err) {
