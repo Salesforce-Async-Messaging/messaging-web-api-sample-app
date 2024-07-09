@@ -1,6 +1,7 @@
 # Salesforce Messaging for Web API Sample App
 
 A repository holding a sample app created using React JS library to demonstrate the Messaging experience using Messaging for In-App and Web Public (aka v2.0) REST APIs.
+Make sure to always refer to our [Wiki](https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app/wiki/Current-App-Support) for the supported features in the app.
 
 ## REST API Documentation
 [https://developer.salesforce.com/docs/service/messaging-api](https://developer.salesforce.com/docs/service/messaging-api)
