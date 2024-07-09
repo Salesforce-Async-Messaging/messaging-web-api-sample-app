@@ -44,6 +44,8 @@ export const CONVERSATION_CONSTANTS = {
         CONVERSATION_MESSAGE: "CONVERSATION_MESSAGE",
         CONVERSATION_PARTICIPANT_CHANGED: "CONVERSATION_PARTICIPANT_CHANGED",
         CONVERSATION_ROUTING_RESULT: "CONVERSATION_ROUTING_RESULT",
+        CONVERSATION_TYPING_STARTED_INDICATOR: "CONVERSATION_TYPING_STARTED_INDICATOR",
+        CONVERSATION_TYPING_STOPPED_INDICATOR: "CONVERSATION_TYPING_STOPPED_INDICATOR",
         CONVERSATION_DELIVERY_ACKNOWLEDGEMENT: "CONVERSATION_DELIVERY_ACKNOWLEDGEMENT",
         CONVERSATION_READ_ACKNOWLEDGEMENT: "CONVERSATION_READ_ACKNOWLEDGEMENT",
         CONVERSATION_CLOSE_CONVERSATION: "CONVERSATION_CLOSE_CONVERSATION"
@@ -74,7 +76,9 @@ export const CONVERSATION_CONSTANTS = {
         PARTICIPANT_CHANGED: "ParticipantChanged",
         ROUTING_RESULT: "RoutingResult",
         DELIVERY_ACKNOWLEDGEMENT: "DeliveryAcknowledgement",
-        READ_ACKNOWLEDGEMENT: "ReadAcknowledgement"
+        READ_ACKNOWLEDGEMENT: "ReadAcknowledgement",
+        TYPING_STARTED_INDICATOR: "TypingStartedIndicator",
+        TYPING_STOPPED_INDICATOR: "TypingStoppedIndicator"
     },
     /**
      * The semantic type of a Message entry type, i.e. what a message does.
@@ -82,7 +86,9 @@ export const CONVERSATION_CONSTANTS = {
      * @type {String}
      */
     MessageTypes: {
-        STATIC_CONTENT_MESSAGE: "StaticContentMessage"
+        STATIC_CONTENT_MESSAGE: "StaticContentMessage",
+        CHOICES_MESSAGE: "ChoicesMessage",
+        CHOICES_RESPONSE_MESSAGE: "ChoicesResponseMessage"
     },
     /**
      * The rendering format of a Message entry type, i.e. how it looks.
@@ -90,7 +96,10 @@ export const CONVERSATION_CONSTANTS = {
      * @type {String}
      */
     FormatTypes: {
-        TEXT: "Text"
+        TEXT: "Text",
+        BUTTONS: "Buttons",
+        QUICK_REPLIES: "QuickReplies",
+        SELECTIONS: "Selections"
     },
     /**
      * The role of the sender of events published by Conversation Service in SCRT 2.0.
@@ -182,4 +191,12 @@ export const DEPLOYMENT_CONFIGURATION_CONSTANTS = {
         CHECKBOX: "Checkbox",
         CHOICELIST: "ChoiceList"
     }
+};
+
+/**
+ * Messaging app's client-side constants.
+ * @type {Object}
+ */
+export const CLIENT_CONSTANTS = {
+    TYPING_INDICATOR_DISPLAY_TIMEOUT: 5000
 };

@@ -1,0 +1,65 @@
+.typingIndicatorContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.typingIndicatorBubbleContainer {
+    padding-right: 10px;
+    padding-left: 10px;
+} 
+
+.typingIndicatorBubble {
+    float: left;
+    min-width: 50px;
+    max-width: 350px;
+    width: -webkit-fit-content;
+    background-color: rgb(158 154 154);
+    border-radius: 20px;
+    margin: 1px auto;
+    padding: 4px 14px;
+}
+
+.typingIndicatorSenderContent {
+    color: rgb(153, 153, 153);
+    margin: 0px;
+    font-size: 10px;
+    font-weight: 400;
+    text-align: left;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+ 
+ .loadingBall {
+    display: inline-flex;
+    text-align: center;
+    margin: 0px 1.5px;
+    max-width: 100%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: white;
+    animation-delay: -0.5s;
+    animation: typingIndicatorAnimation 2.5s infinite ease-in-out;
+}
+
+.second {
+    animation-delay: 3s;
+}
+
+.third {
+    animation-delay: 4s;
+}
+
+@keyframes typingIndicatorAnimation {
+    0% {
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
