@@ -37,7 +37,7 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * Types of events published by Conversation Service in SCRT 2.0.
-     * See `ConversationEventType`: TODO: insert doc link
+     * Refer https://developer.salesforce.com/docs/service/messaging-api/references/about/server-sent-events-structure.html
      * @type {String}
      */
     EventTypes: {
@@ -68,7 +68,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * Types of conversation entries.
-     * See `EntryType`: TODO: insert doc link
      * @type {String}
      */
     EntryTypes: {
@@ -82,7 +81,7 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The semantic type of a Message entry type, i.e. what a message does.
-     * See `MessageType`: TODO: insert doc link
+     * Refer https://developer.salesforce.com/docs/service/messaging-api/references/about/message-types-format-types.html#message-types
      * @type {String}
      */
     MessageTypes: {
@@ -92,7 +91,7 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The rendering format of a Message entry type, i.e. how it looks.
-     * See `FormatType`: TODO: insert doc link
+     * Refer https://developer.salesforce.com/docs/service/messaging-api/references/about/message-types-format-types.html#format-types
      * @type {String}
      */
     FormatTypes: {
@@ -103,7 +102,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The role of the sender of events published by Conversation Service in SCRT 2.0.
-     * See `ParticipantRole`: TODO: insert doc link
      * @type {String}
      */
     ParticipantRoles: {
@@ -116,7 +114,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The operation (i.e. join/leave) of the ParticipantChanged entry type.
-     * See `ParticipantChangedOperation`: TODO: insert doc link
      * @type {String}
      */
     ParticipantChangedOperations: {
@@ -125,7 +122,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The routing type, set from the RoutingContext and sent in RoutingResult entries.
-     * See `RoutingType`: TODO: insert doc link
      * @type {String}
      */
     RoutingTypes: {
@@ -134,7 +130,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * The current routing status of the conversation, returned from the ConversationStatus API.
-     * See `RoutingStatus`: TODO: insert doc link
      * @type {String}
      */
     RoutingStatus: {
@@ -145,7 +140,6 @@ export const CONVERSATION_CONSTANTS = {
     },
     /**
      * How routing failed or succeeded, sent in RoutingResult entries.
-     * See `RoutingFailureType`: TODO: insert doc link
      * @type {String}
      */
     RoutingFailureTypes: {
