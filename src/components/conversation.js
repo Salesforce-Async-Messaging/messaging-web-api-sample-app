@@ -108,8 +108,17 @@ export default function Conversation(props) {
                             .then(() => {
                                 console.log(`Successfully listed the conversations.`);
                                 handleListConversationEntries()
-                                .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`));
+                                .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`))
+                                .catch(err => {
+                                    console.error(`${err}`);
+                                });
+                            })
+                            .catch(err => {
+                                console.error(`${err}`);
                             });
+                })
+                .catch(err => {
+                    console.error(`${err}`);
                 });
     }
 
@@ -198,6 +207,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a Continuation Access Token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to fetch a Continuation access token.");
                 });
     }
 
@@ -231,6 +241,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a list of conversations: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to list the conversations.");
                 });
     }
 
@@ -271,6 +282,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong while processing entries from listConversationEntries response:  ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to list the conversation entries for the current conversation.");
                 });
     }
 
