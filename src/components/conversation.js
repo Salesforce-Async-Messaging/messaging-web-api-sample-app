@@ -40,7 +40,10 @@ export default function Conversation(props) {
         conversationStatePromise
         .then(() => {
             handleSubscribeToEventSource()
-            .then(props.uiReady(true)); // Let parent (i.e. MessagingWindow) know the app is UI ready so that the parent can decide to show the actual Messaging window UI.
+            .then(props.uiReady(true)) // Let parent (i.e. MessagingWindow) know the app is UI ready so that the parent can decide to show the actual Messaging window UI.
+            .catch(() => {
+                props.showMessagingWindow(false);
+            })
         });
 
         return () => {
@@ -80,7 +83,13 @@ export default function Conversation(props) {
                     return handleCreateNewConversation()
                             .then(() => {
                                 console.log(`Completed initializing a new conversation with conversationId: ${getConversationId()}`);
+                            })
+                            .catch(err => {
+                                console.error(`${err}`);
                             });
+                })
+                .catch(err => {
+                    console.error(`${err}`);
                 });
     }
 
@@ -99,8 +108,17 @@ export default function Conversation(props) {
                             .then(() => {
                                 console.log(`Successfully listed the conversations.`);
                                 handleListConversationEntries()
-                                .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`));
+                                .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`))
+                                .catch(err => {
+                                    console.error(`${err}`);
+                                });
+                            })
+                            .catch(err => {
+                                console.error(`${err}`);
                             });
+                })
+                .catch(err => {
+                    console.error(`${err}`);
                 });
     }
 
@@ -135,6 +153,7 @@ export default function Conversation(props) {
                     handleMessagingErrors(err);
                     cleanupMessagingData();
                     props.showMessagingWindow(false);
+                    throw new Error("Failed to fetch an Unauthenticated access token.");
                 });
     }
 
@@ -167,6 +186,7 @@ export default function Conversation(props) {
                     handleMessagingErrors(err);
                     cleanupMessagingData();
                     props.showMessagingWindow(false);
+                    throw new Error("Failed to create a new conversation.");
                 });
     }
 
@@ -187,6 +207,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a Continuation Access Token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to fetch a Continuation access token.");
                 });
     }
 
@@ -220,6 +241,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong in fetching a list of conversations: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to list the conversations.");
                 });
     }
 
@@ -260,6 +282,7 @@ export default function Conversation(props) {
                 .catch((err) => {
                     console.error(`Something went wrong while processing entries from listConversationEntries response:  ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
+                    throw new Error("Failed to list the conversation entries for the current conversation.");
                 });
     }
 
@@ -285,6 +308,7 @@ export default function Conversation(props) {
                 })
                 .catch((err) => {
                     handleMessagingErrors(err);
+                    throw new Error(err);
                 });
     }
 
@@ -703,6 +727,9 @@ export default function Conversation(props) {
                         break;
                     case 400:
                         console.error(`Invalid request parameters. Please check your data before retrying: ${err.message}`);
+                        break;
+                    case 404:
+                        console.error(`Resource not found. Please check your data before retrying: ${err.message}`);
                         break;
                     case 429:
                         console.warn(`Too many requests issued from the app. Try again in sometime: ${err.message}`);
