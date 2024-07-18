@@ -1,7 +1,7 @@
 # Salesforce Messaging for Web API Sample App
 
 A repository holding a sample app created using React JS library to demonstrate the Messaging experience using Messaging for In-App and Web Public (aka v2.0) REST APIs.
-Make sure to always refer to our [Wiki](https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app/wiki/Current-App-Support) for the supported features in the app.
+Make sure to always refer to our [Wiki](https://github.com/Salesforce-Async-Messaging/messaging-web-api-sample-app/wiki/Current-App-Support) for the supported features in the app.
 
 ## REST API Documentation
 [https://developer.salesforce.com/docs/service/messaging-api](https://developer.salesforce.com/docs/service/messaging-api)
@@ -10,7 +10,7 @@ Make sure to always refer to our [Wiki](https://git.soma.salesforce.com/embedded
 Ensure you have an Embedded Service deployment for Messaging for In-App and Web created of type Custom Client.
 
 ## Launch Application Remotely
-Go to [https://git.soma.salesforce.com/pages/embedded-service-for-web/messagingforweb-sample-app/build/index.html](https://git.soma.salesforce.com/pages/embedded-service-for-web/messagingforweb-sample-app/build/index.html)
+Go to [https://salesforce-async-messaging.github.io/messaging-web-api-sample-app/build/index.html](https://salesforce-async-messaging.github.io/messaging-web-api-sample-app/build/index.html)
 
 ## Local Development and Testing Setup
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -51,17 +51,3 @@ $ npm start
 - Once the Sample App page is launched either Remotely or via Local Setup, input your Embedded Service deployment details in the form and submit.
   - The deployment details can be found under the Code Snippet panel under Embedded Service deployment setup in Salesforce.
 - Click on the 'Let's Chat' Button to get started with a new conversation.
-
-## Mirroring the repository (for internal use only)
-[Internal Repo](https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app)
-[Public Repo (Mirror)](https://github.com/Salesforce-Async-Messaging/messaging-web-api-sample-app)
-```
-$ git clone --mirror https://git.soma.salesforce.com/embedded-service-for-web/messagingforweb-sample-app.git
-
-$ cd messagingforweb-sample-app
-$ git remote set-url --push origin https://github.com/Salesforce-Async-Messaging/messaging-web-api-sample-app
-
-$ git fetch -p origin
-$ git push --mirror
-```
-For more details, see documentation on [mirroring a repository in another location](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository#mirroring-a-repository-in-another-location).
