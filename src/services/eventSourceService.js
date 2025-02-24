@@ -15,6 +15,7 @@ const getEventSourceParams = () => {
             "X-Org-ID": getOrganizationId(),
             "Last-Event-ID": getLastEventId()
         },
+        mode: 'no-cors',
         heartbeatTimeout: 90000
     };
 };

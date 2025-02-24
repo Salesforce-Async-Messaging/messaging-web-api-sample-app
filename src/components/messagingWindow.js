@@ -34,7 +34,9 @@ export default function MessagingWindow(props) {
             <Conversation
                 isExistingConversation={props.isExistingConversation}
                 showMessagingWindow={props.showMessagingWindow}
-                uiReady={setAppUIReady} />
+                uiReady={setAppUIReady}
+                reInitializeMessagingClient={props.reInitializeMessagingClient}
+            />
         </div>
     );
 }

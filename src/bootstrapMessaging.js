@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import {
+    isEmpty
+} from 'lodash'
 // Import children components to render.
 import MessagingWindow from "./components/messagingWindow";
 import MessagingButton from "./components/messagingButton";
@@ -23,6 +25,28 @@ export default function BootstrapMessaging() {
     let [shouldShowMessagingWindow, setShouldShowMessagingWindow] = useState(false);
     let [showMessagingButtonSpinner, setShowMessagingButtonSpinner] = useState(false);
     let [isExistingConversation, setIsExistingConversation] = useState(false);
+
+    const getUrlParams = url => {
+        const paramsData = url.match(/([^?=&]+)(=([^&]*))/g) || []
+        // http://localhost:3000?orgId=00DNy0000000Hgn&devName=IOS_Mobile&url=https://bitkuber.my.salesforce-scrt.com
+        const paramData = paramsData.reduce(
+          (a, v) => ((a[v.slice(0, v.indexOf('='))] = v.slice(v.indexOf('=') + 1)), a),
+          {}
+        );
+        console.log("paramData", paramData)
+        if(!isEmpty(paramData?.orgId)) {
+            setOrgId(paramData?.orgId)
+        }
+        if(!isEmpty(paramData?.devName)) {
+            setDeploymentDevName(paramData?.devName)
+        }
+        if(!isEmpty(paramData?.url)) {
+            setMessagingURL(paramData?.url)
+        }
+        handleDeploymentDetailsFormSubmit({})
+        showMessagingWindow(true);
+      }
+
 
     useEffect(() => {
         const storage = determineStorageType();
@@ -75,6 +99,12 @@ export default function BootstrapMessaging() {
             showMessagingWindow(false);
         };
     }, []);
+
+    useEffect(() => {
+
+        console.log("window.location.href", window.location.href)
+        getUrlParams(window.location.href)
+    }, [window.location.href])
 
     /**
      * Initialize the messaging client by
@@ -138,6 +168,7 @@ export default function BootstrapMessaging() {
      */
     function handleDeploymentDetailsFormSubmit(evt) {
         if (evt) {
+            console.log("inside")
             if(!isValidOrganizationId(orgId)) {
                 alert(`Invalid OrganizationId Input Value: ${orgId}`);
                 setShowMessagingButton(false);
@@ -212,8 +243,8 @@ export default function BootstrapMessaging() {
 
     return (
         <>
-            <h1>Messaging for Web - Sample App</h1>
-            <div className="deploymentDetailsForm">
+            {/* <h1>LOADING</h1> */}
+            {/* <div className="deploymentDetailsForm">
                 <h4>Input your Embedded Service (Custom Client) deployment details below</h4>
                 <label>Organization ID</label>
                 <input
@@ -243,20 +274,20 @@ export default function BootstrapMessaging() {
                 >
                     Submit
                 </button>
-            </div>
-            {shouldShowMessagingButton &&
+            </div> */}
+            {/* {shouldShowMessagingButton &&
                 <MessagingButton
                     clickHandler={handleMessagingButtonClick}
                     disableButton={shouldDisableMessagingButton}
-                    showSpinner={showMessagingButtonSpinner} />}
-            {shouldShowMessagingWindow &&
-                <Draggable intitialPosition={{ x: 1000, y: 500 }}>
+                    showSpinner={showMessagingButtonSpinner} />} */}
+            {/* {shouldShowMessagingWindow &&
+                <Draggable intitialPosition={{ x: 0, y: 500 }}>
                     <MessagingWindow
                         isExistingConversation={isExistingConversation}
                         showMessagingWindow={showMessagingWindow}
                         deactivateMessagingButton={appUiReady} />
                 </Draggable>
-            }
+            } */}
         </>
     );
 }

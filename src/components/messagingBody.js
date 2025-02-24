@@ -7,7 +7,7 @@ import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 import ConversationEntry from "./conversationEntry";
 import TypingIndicator from "./typingIndicator";
 
-export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator }) {
+export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator, sendTextMessage }) {
 
     useEffect(() => {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION) {
@@ -26,7 +26,9 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
     const conversationEntriesListView = conversationEntries.map(conversationEntry =>
         <ConversationEntry
             key={conversationEntry.messageId} 
-            conversationEntry={conversationEntry} />
+            conversationEntry={conversationEntry}
+            sendTextMessage={sendTextMessage}
+        />
     );
 
     /**
@@ -38,7 +40,7 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
             const conversationStartTimestamp = conversationEntries[0].transcriptedTimestamp;
             const startDate = util.getFormattedDate(conversationStartTimestamp);
             const startTime = util.getFormattedTime(conversationStartTimestamp);
-            const conversationStartTimeText = `Conversation started: ${startDate} at ${startTime}`;
+            const conversationStartTimeText = `${startDate} at ${startTime}`;
             return conversationStartTimeText;
         }
         return "";
@@ -59,7 +61,18 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
 
     return (
         <div className="messagingBody">
-            {conversationEntries.length > 0 && <p className="conversationStartTimeText">{generateConversationStartTimeText()}</p>}
+            {conversationEntries.length > 0 && 
+                <div className="displayRelative">
+                    <div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '1px',
+                        background: "#000",
+                        top: "8px",
+                    }} />
+                   <p className="conversationStartTimeText">{generateConversationStartTimeText()}</p>
+                </div>
+            }
             <ul className="conversationEntriesListView">
                 {conversationEntriesListView}
             </ul>

@@ -90,9 +90,9 @@ export default function MessagingInputFooter(props) {
      * Handle Send Button click. If the Button is enabled, send a message.
      */
     function handleSendButtonClick() {
-        if (!shouldDisableSendButton()) {
+        // if (!shouldDisableSendButton()) {
             handleSendMessage();
-        }
+        // }
     }
 
     /**

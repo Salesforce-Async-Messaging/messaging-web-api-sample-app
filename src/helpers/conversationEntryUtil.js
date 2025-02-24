@@ -1,5 +1,7 @@
 import { CONVERSATION_CONSTANTS } from "./constants";
-
+import {
+    isEmpty
+} from 'lodash'
 /**
  * Parses JSON data from a server-sent event.
  * @param {object} event - Server-sent event.
@@ -89,6 +91,7 @@ export function isConversationEntryMessage(conversationEntry) {
     return false;
 };
 
+
 /**
  * Validates whether the supplied CONVERSATION_MESSAGE is originating from an end-user participant.
  * @param {object} conversationEntry
@@ -112,6 +115,48 @@ export function isConversationEntryStaticContentMessage(conversationEntry) {
     }
     return false;
 };
+
+
+/**
+ * Gets the supplied CHOICES_MESSAGE's payload.
+ * @param {object} conversationEntry
+ * @returns {object|undefined}
+ */
+export function getChoicesPayload(conversationEntry) {
+    if (isConversationEntryChoicesMessage(conversationEntry)) {
+        return conversationEntry.content || conversationEntry.content.staticContent;
+    }
+    return undefined;
+};
+
+export function getChoicesTitle(conversationEntry) {
+    if (isConversationEntryChoicesMessage(conversationEntry) && !isEmpty(conversationEntry?.content?.choices?.text)) {
+        return conversationEntry?.content?.choices?.text ?? ""
+    }
+    return undefined;
+};
+
+export function getTitleFromChoices(conversationEntry) {
+    if (isConversationEntryChoicesMessage(conversationEntry)) {
+        return getChoicesTitle(conversationEntry);
+    }
+    return "";
+};
+
+export function getChoicesButtonTitle(conversationEntry) {
+    if (conversationEntry && !isEmpty(conversationEntry?.titleItem?.title)) {
+        return conversationEntry?.titleItem?.title ?? ""
+    }
+    return undefined;
+};
+
+export function getButtonTitleFromChoices(conversationEntry) {
+    if (isConversationEntryChoicesButton(conversationEntry)) {
+        return getChoicesButtonTitle(conversationEntry);
+    }
+    return "";
+};
+
 
 /**
  * Gets the supplied STATIC_CONTENT_MESSAGE's payload.
@@ -148,6 +193,8 @@ export function getTextMessageContent(conversationEntry) {
     return "";
 };
 
+
+
 //============================================================== CHOICES MESSAGE functions ==============================================================
 /**
  * Validates whether the supplied CONVERSATION_MESSAGE is a CHOICES_MESSAGE (i.e. messageType === "ChoicesMessage").
@@ -161,6 +208,14 @@ export function isConversationEntryChoicesMessage(conversationEntry) {
     return false;
 };
 
+
+export function isConversationEntryChoicesButton(conversationEntry) {
+    if (conversationEntry) {
+        return conversationEntry && conversationEntry.itemType === "TitleOptionItem"
+    }
+    return false;
+};
+
 /**
  * Validates whether the supplied CHOICES_MESSAGE is QUICK_REPLIES (i.e. formatType === "QuickReplies") or BUTTONS (i.e. formatType === "Buttons").
  * @param {object} conversationEntry
@@ -168,8 +223,9 @@ export function isConversationEntryChoicesMessage(conversationEntry) {
  */
 export function isChoicesMessage(conversationEntry) {
     if (isConversationEntryChoicesMessage(conversationEntry)) {
-        return getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.QUICK_REPLIES 
-            || getStaticContentPayload(conversationEntry).formatType === CONVERSATION_CONSTANTS.FormatTypes.BUTTONS;
+        let statData = getChoicesPayload(conversationEntry)
+        return getChoicesPayload(conversationEntry)?.choices?.formatType === CONVERSATION_CONSTANTS.FormatTypes.QUICK_REPLIES 
+            || getChoicesPayload(conversationEntry)?.choices?.formatType === CONVERSATION_CONSTANTS.FormatTypes.BUTTONS;
     }
     return false;
 };

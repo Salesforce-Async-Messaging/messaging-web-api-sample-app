@@ -11,11 +11,12 @@ import { subscribeToEventSource, closeEventSource } from '../services/eventSourc
 import { sendTypingIndicator, sendTextMessage, getContinuityJwt, listConversations, listConversationEntries, closeConversation, getUnauthenticatedAccessToken, createConversation } from "../services/messagingService";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { CONVERSATION_CONSTANTS, STORAGE_KEYS, CLIENT_CONSTANTS } from "../helpers/constants";
-import { setItemInWebStorage, clearWebStorage } from "../helpers/webstorageUtils";
+import { setItemInWebStorage, clearWebStorage, getItemInWebStorageByKey } from "../helpers/webstorageUtils";
 import { util } from "../helpers/common";
 import { prechatUtil } from "../helpers/prechatUtil.js";
 import Prechat from "./prechat.js";
 import CountdownTimer from "../helpers/countdownTimer.js";
+import { getContentType, writeBlobBodyParameter } from "./HttpFormBuilder";
 
 export default function Conversation(props) {
     // Initialize a list of conversation entries.
@@ -33,6 +34,7 @@ export default function Conversation(props) {
     // Initialize whether at least 1 participant (not including end user) is typing.
     let [isAnotherParticipantTyping, setIsAnotherParticipantTyping] = useState(false);
 
+    // eyJraWQiOiI1MmQ1OWRmNDE3M2MzZjA5ZGMxNWRjNzMzNWY5YWFkYjFhMDVjNzY4ZmZjMzBiMTllMDkxMGFiNmVlZTQyYjExIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ2Mi9pYW1lc3NhZ2UvVU5BVVRIL05BL3VpZDoyYzQzMTUxYi0yOTRmLTRlMDMtODRhMi1mMDI3ODc1MjJjMTEiLCJjbGllbnRJZCI6InYxL0lPU19Nb2JpbGUvNmM0MmQ5MDctZmYwNy00ODY0LWFmZDQtNTYzMTU2ZWM4MmMyIiwiZmFsY29uQ2VsbCI6InNjcnQwMSIsImNoYW5uZWxBZGRJZCI6ImU2ZGQyODI3LWRhZGEtNDlhMS1hYjQ0LTQ0NjUyYWYwY2NlMCIsImlzcyI6ImlhbWVzc2FnZSIsImZhbGNvbkZEIjoidWVuZ2FnZTEiLCJkZXZpY2VJZCI6Ink0ZEMzTWxYVFBhQllQdjltTFk1OTNkOWFRUXpDMUgwa0tWNnoxM1NiOFo5L3grVTJZOWpsZldhclkvRWxQMXpiVVZ1OTVST3hLb0JpNWJ5QjdpbDdRPT0iLCJjYXBhYmlsaXRpZXNWZXJzaW9uIjoiMjQ4Iiwib3JnSWQiOiIwMEROeTAwMDAwMDBIZ24iLCJkZXZpY2VJbmZvIjoie30iLCJwbGF0Zm9ybSI6IldlYiIsImZhbGNvbkZJSGFzaCI6InkzN2h6bSIsImp3dElkIjoiNTFNaEplUmVXallOb2Nlb3h1MTdTLSIsImNsaWVudFNlc3Npb25JZCI6ImQ1NTIzOWE2LTg5ZTItNGFlZC04YTVmLTU2MjljYzVlNDU5MCIsImF1ZCI6IlVTRVIiLCJldnRLZXkiOiJzY3J0LnByb2QuZXZlbnRyb3V0ZXJfX2F3cy5hd3MtcHJvZDItYXBzb3V0aDEudWVuZ2FnZTEuYWpuYWxvY2FsMV9fcHVibGljLmV2ZW50cy5zY3J0MDE6NjMiLCJhcGlWZXJzaW9uIjoidjIiLCJzY29wZSI6InB1YmxpYyIsImp3a3NfdXJpIjoiaHR0cHM6Ly9zY3J0MDEudWVuZ2FnZTEuc2ZkYy15Mzdoem0uc3ZjLnNmZGNmYy5uZXQvaWFtZXNzYWdlL3YxLy53ZWxsLWtub3duL2p3a3MuanNvbj9rZXlJZD01MmQ1OWRmNDE3M2MzZjA5ZGMxNWRjNzMzNWY5YWFkYjFhMDVjNzY4ZmZjMzBiMTllMDkxMGFiNmVlZTQyYjExIiwiZXNEZXBsb3ltZW50VHlwZSI6IkFQSSIsImV4cCI6MTc0MDA3OTM3MCwiaWF0IjoxNzQwMDU3NzcwfQ.IskpRu-_BjPKPWSE3WAKO_eSsYyVsN9PdUoU1rxce3FzTKVVowQ3eZ71uuIQs0q0y07_NCvFvqmwys0SfjqfBKCuLlAyaude2Q873EgluegU7gC0EJqHw2MBlKORirJl-Of8CZGEZBrWRKbUgoJSZ3UbuLwkOFXBkcxoVuknoAHP8SC520krlMhfhOj2Jepfxbc-OaSk3e6Y7GXQq94xg2R5hlHk4C5zt_FxIyOoH_y9BBLuY0wc8zB2F2UtaBjx4D-yX0WkAMcIttU9PL2_eWeItkHiAyOaqJw88RnlYADG2mcit8Slg4W3KDh0Q-VkKCMMCSJu1FSazyQfZ64oNQ
     useEffect(() => {
         let conversationStatePromise;
 
@@ -80,7 +82,7 @@ export default function Conversation(props) {
                         return;
                     }
                     console.log("Pre-Chat is not enabled. Continuing to create a new conversation.");
-                    return handleCreateNewConversation()
+                    return handleCreateNewConversation({"Name":"sardhak","Emai_cus":"a@f.com","Mobile":"aaaaa","UUID":"ssss"})
                             .then(() => {
                                 console.log(`Completed initializing a new conversation with conversationId: ${getConversationId()}`);
                             })
@@ -110,15 +112,17 @@ export default function Conversation(props) {
                                 handleListConversationEntries()
                                 .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`))
                                 .catch(err => {
+                                    console.log("koikokokoko")
                                     console.error(`${err}`);
                                 });
                             })
                             .catch(err => {
+                                console.log("koikokokoko")
                                 console.error(`${err}`);
                             });
                 })
                 .catch(err => {
-                    console.error(`${err}`);
+                    console.error(`handleExistingConversation ${err}`);
                 });
     }
 
@@ -134,12 +138,12 @@ export default function Conversation(props) {
     function handleGetUnauthenticatedJwt() {
         if (getJwt()) {
             console.warn("Messaging access token (JWT) already exists in the web storage. Discontinuing to create a new Unauthenticated access token.");
-            return handleExistingConversation().then(Promise.reject());
+            return handleExistingConversation()
         }
 
         return getUnauthenticatedAccessToken()
                 .then((response) => {
-                    console.log("Successfully fetched an Unauthenticated access token.");
+                    console.log("Successfully fetched an Unauthenticated access token.", response);
                     // Parse the response object which includes access-token (JWT), configutation data.
                     if (typeof response === "object") {
                         setJwt(response.accessToken);
@@ -152,6 +156,7 @@ export default function Conversation(props) {
                     console.error(`Something went wrong in fetching an Unauthenticated access token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     cleanupMessagingData();
+                    // props.reInitializeMessagingClient()
                     props.showMessagingWindow(false);
                     throw new Error("Failed to fetch an Unauthenticated access token.");
                 });
@@ -170,7 +175,7 @@ export default function Conversation(props) {
     function handleCreateNewConversation(routingAttributes) {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
             console.warn("Cannot create a new conversation while a conversation is currently open.");
-            return Promise.reject();
+            return Promise.reject(new Error(`Cannot create a new conversation while a conversation is currently open.`));
         }
 
         // Initialize a new unique conversation-id in-memory.
@@ -185,6 +190,7 @@ export default function Conversation(props) {
                     console.error(`Something went wrong in creating a new conversation with conversation-id: ${getConversationId()}: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     cleanupMessagingData();
+                    // props.reInitializeMessagingClient()
                     props.showMessagingWindow(false);
                     throw new Error("Failed to create a new conversation.");
                 });
@@ -235,6 +241,7 @@ export default function Conversation(props) {
                     } else {
                         // No open conversations found.
                         cleanupMessagingData();
+                        // props.reInitializeMessagingClient()
                         props.showMessagingWindow(false);
                     }
                 })
@@ -372,7 +379,7 @@ export default function Conversation(props) {
                 console.log(`End user successfully sent a message.`);
             } else {
                 conversationEntry.isEndUserMessage = false;
-                console.log(`Successfully received a message from ${conversationEntry.actorType}`);
+                console.log(`Successfully received a message from ${conversationEntry.actorType}, ${JSON.stringify(conversationEntry)}`);
             }
 
             addConversationEntry(conversationEntry);
@@ -717,6 +724,7 @@ export default function Conversation(props) {
      * If a request is failed due to an Unauthorized error (i.e. 401), peforms a cleanup and resets the app and console logs otherwise.
      */
     function handleMessagingErrors(err) {
+        console.log("inside handleMessagingErrors", err)
         if (typeof err === "object") {
             if (err.status) {
                 switch (err.status) {
@@ -724,6 +732,7 @@ export default function Conversation(props) {
                         console.error(`Unauthenticated request: ${err.message}`);
                         cleanupMessagingData();
                         props.showMessagingWindow(false);
+                        // props.reInitializeMessagingClient()
                         break;
                     case 400:
                         console.error(`Invalid request parameters. Please check your data before retrying: ${err.message}`);
@@ -750,10 +759,11 @@ export default function Conversation(props) {
                         console.error(`Unhandled/Unknown http error: ${err}`);
                         cleanupMessagingData();
                         props.showMessagingWindow(false);
+                        // props.reInitializeMessagingClient()
                 }
                 return;
             }
-            console.error(`Something went wrong: ${err && err.message ? err.message : err}`);
+            console.error(`Something went wrong handleMessagingErrors: ${err && err.message ? err.message : err}`);
         }
         return;
     }
@@ -764,7 +774,7 @@ export default function Conversation(props) {
      */
     function handlePrechatSubmit(prechatData) {
         let prechatSubmitPromise;
-        console.log(`Pre-Chat fields values on submit: ${prechatData}.`);
+        console.log(`Pre-Chat fields values on submit: ${prechatData}. --stre${JSON.stringify(prechatData)}`);
 
         // If there is a failed message being tracked while submitting Pre-Chat form, consider it is an existing conversation but a new messaging session. Resend the failed message with the routing attributes to begin a new messaging session.
         if (failedMessage) {
@@ -779,8 +789,97 @@ export default function Conversation(props) {
         });
     }
 
+    const [file, setFile] = useState(null);
+    const conversationId = "e12c35c9-5636-49be-97bc-d7d054e1970e"; // Replace with actual conversation ID
+    const accessToken = "eyJraWQiOiI2ZWZhNzQxYmM2MzA5MzM1OGE0NDhlNmNhMWZlZTRmZTNhZjM4Y2Q2OTU1MTM4NzAxM2MwYWJlNTE4ZmRhMjA0IiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ2Mi9pYW1lc3NhZ2UvVU5BVVRIL05BL3VpZDpiZGMwNjMzYS05MjcwLTQ1ZWQtOGI4NS03NWEzN2ZiZTk0OTUiLCJjbGllbnRJZCI6InYxL0lPU19Nb2JpbGUvNWE1MWZjZTMtMzFiZi00Mzc3LTgxNjktMDFkMGE0MTFlMDEzIiwiZmFsY29uQ2VsbCI6InNjcnQwMSIsImNoYW5uZWxBZGRJZCI6ImU2ZGQyODI3LWRhZGEtNDlhMS1hYjQ0LTQ0NjUyYWYwY2NlMCIsImlzcyI6ImlhbWVzc2FnZSIsImZhbGNvbkZEIjoidWVuZ2FnZTEiLCJkZXZpY2VJZCI6InpEZ29TOTVQRnlHLzhWM1d2RVI1RlhQdTQ4Mk5ocWxoNnBBT0hlVTZVSWJ1TFdSblNycmN6VlVtZmlNcW5BaVhvWDRVcFZlOFBrS3hzT0NyRmZRTHRRPT0iLCJjYXBhYmlsaXRpZXNWZXJzaW9uIjoiMjQ4Iiwib3JnSWQiOiIwMEROeTAwMDAwMDBIZ24iLCJkZXZpY2VJbmZvIjoie30iLCJwbGF0Zm9ybSI6IldlYiIsImZhbGNvbkZJSGFzaCI6InkzN2h6bSIsImp3dElkIjoiNTFOZmRncWdsT1BDRFBjZzVKb2k4ayIsImNsaWVudFNlc3Npb25JZCI6ImYyZjM2MDE4LTA0MWMtNDYxNy1iZWNkLTc1MDYyNzhiNWU1MCIsImF1ZCI6IlVTRVIiLCJldnRLZXkiOiJzY3J0LnByb2QuZXZlbnRyb3V0ZXJfX2F3cy5hd3MtcHJvZDItYXBzb3V0aDEudWVuZ2FnZTEuYWpuYWxvY2FsMV9fcHVibGljLmV2ZW50cy5zY3J0MDE6NjciLCJhcGlWZXJzaW9uIjoidjIiLCJzY29wZSI6InB1YmxpYyIsImp3a3NfdXJpIjoiaHR0cHM6Ly9zY3J0MDEudWVuZ2FnZTEuc2ZkYy15Mzdoem0uc3ZjLnNmZGNmYy5uZXQvaWFtZXNzYWdlL3YxLy53ZWxsLWtub3duL2p3a3MuanNvbj9rZXlJZD02ZWZhNzQxYmM2MzA5MzM1OGE0NDhlNmNhMWZlZTRmZTNhZjM4Y2Q2OTU1MTM4NzAxM2MwYWJlNTE4ZmRhMjA0IiwiZXNEZXBsb3ltZW50VHlwZSI6IkFQSSIsImV4cCI6MTc0MDE0Nzc1NCwiaWF0IjoxNzQwMTI2MzAxfQ.kIDomy3UPvKE6YEfZoSEyLy1PN8tk910iz94b_-rgM8tvZLmTdCLiKKAg9_mTsr8-9i1_U6x9kWudG75sKzUlSg-YbDHs39AGlTzUiJQvwCY0khUB9On0uzLkwu0MozObn7xHI51qpKnLMho2wxAOChejQG5pbc0P30FkAEWvMyqOphFMqMuoJ1r7Uq2CTetoPmpqK_HRr6-D_QxpRwXML-N8QTyXaviOojb16cIx4MDezEfglNqo-9GWwVogP4HAxzMTW-jAuiDNsaj2YXlW8lB-Jr76XnJrLNxynIea2eD6BpREzXCrQW6M2lASUD8qL14VYzdfycePc4EEANvOw"
+  
+
+    const uploadFileToSalesforce = async (conversationId, file, accessToken) => {
+        const boundary = `boundary_string_${Date.now()}`;
+        const apiUrl = `https://bitkuber.my.salesforce-scrt.com/iamessage/api/v2/conversation/${conversationId}/file`;
+      
+        // Convert file to base64
+        const fileBase64 = await fileToBase64(file);
+      
+        const messageEntry = JSON.stringify({
+          esDeveloperName: "myDeployment",
+          message: {
+            id: "bd8f4890-2640-4d94-8ac0-915155b672e8",
+            fileId: "6fc22906-c24a-4c53-b382-fd091dacd848",
+            text: "Lights on my broken router look like this",
+            inReplyToMessageId: "a133c185-73a7-4adf-b6d9",
+          },
+          routingAttributes: {
+            _firstName: "John",
+          },
+          isNewMessagingSession: true,
+          language: "en_US",
+        });
+      
+        // Construct multipart/form-data body
+        const body = `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="messageEntry";\r\n` +
+          `Content-Type: application/json\r\n\r\n` +
+          `${messageEntry}\r\n` +
+          `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="fileData"; filename="${file.name}";\r\n` +
+          `Content-Type: application/octet-stream\r\n\r\n` +
+          `${fileBase64}\r\n` +
+          `--${boundary}--\r\n`;
+      
+          console.log("______body______")
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${accessToken}`,
+              "Content-Type": `multipart/form-data; boundary=${boundary}`,
+            },
+            body,
+          });
+      
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.statusText}`);
+          }
+      
+          const data = await response.json();
+          console.log("Upload Response:", data);
+          alert("File uploaded successfully!");
+        } catch (error) {
+          console.error("Upload Error:", error);
+          alert("Upload failed. Check console for details.");
+        }
+      };
+      
+      // Helper function to convert file to Base64
+      const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]); // Extract only base64 part
+          reader.onerror = (error) => reject(error);
+        });
+      };
+
+      
+
+    const handleFileChange = (event) => {
+      setFile(event.target.files[0]);
+    };
+  
+    const handleUpload = () => {
+      if (!file) {
+        alert("Please select a file first.");
+        return;
+      }
+      uploadFileToSalesforce(conversationId, file, accessToken);
+    };
+
+
     return (
         <>
+            <input type="file" onChange={handleFileChange} />
+            <button onClick={handleUpload} disabled={!file}>Upload to Salesforce</button>
             <MessagingHeader
                 conversationStatus={conversationStatus}
                 endConversation={endConversation}
@@ -791,7 +890,9 @@ export default function Conversation(props) {
                     conversationEntries={conversationEntries}
                     conversationStatus={conversationStatus} 
                     typingParticipants={currentTypingParticipants}
-                    showTypingIndicator={isAnotherParticipantTyping} />
+                    showTypingIndicator={isAnotherParticipantTyping} 
+                    sendTextMessage={handleSendTextMessage} 
+                />
                 <MessagingInputFooter
                     conversationStatus={conversationStatus} 
                     sendTextMessage={handleSendTextMessage} 
@@ -802,6 +903,8 @@ export default function Conversation(props) {
                 showPrechatForm &&
                 <Prechat prechatSubmit={handlePrechatSubmit} />
             }
+            {/* <input type="file" onChange={handleFileChange} />
+            <button onClick={handleUpload} disabled={!file}>Upload to Salesforce</button> */}
         </>
     );
 }
