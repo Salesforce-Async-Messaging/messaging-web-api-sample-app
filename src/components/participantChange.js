@@ -11,12 +11,16 @@ export default function ParticipantChange({conversationEntry}) {
         const participantName = ConversationEntryUtil.getParticipantChangeEventPartcipantName(conversationEntry);
         const hasParticipantJoined = ConversationEntryUtil.hasParticipantJoined(conversationEntry);
         const formattedTime = util.getFormattedTime(conversationEntry.transcriptedTimestamp);
-        const participantChangeText = `${participantName} ${hasParticipantJoined ? `joined` : `left`} at ${formattedTime}`;
+        const participantChangeText = `${participantName} ${hasParticipantJoined ? `has joined` : `left`} at ${formattedTime}`;
 
         return participantChangeText;
     }
 
     return (
-        <p className="participantChangeText">{generateParticipantChangeText()}</p>
+        <div class="container">
+        <div class="line"></div>
+        <p class="participantChangeText">{conversationEntry?.isEndUserMessage?"":"🤖"} {generateParticipantChangeText()}</p>
+        <div class="line"></div>
+       </div>
     );
 }

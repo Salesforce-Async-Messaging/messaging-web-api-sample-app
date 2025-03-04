@@ -1,10 +1,12 @@
 .messagingBody {
-    height: 500px;
+    flex: 1;
+    /* height: auto; */
+    height: 95vh;
     border-bottom: 1px solid #ddd;
     overflow: auto;
-    background: whitesmoke;
     border-radius: inherit;
     font-family: inherit;
+    background: #0a0a0a;
 }
 .displayRelative {
     position: relative;
@@ -26,3 +28,32 @@
     margin-top: 0;
     margin-bottom: 0;
 }
+
+.container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .line {
+    flex: 1; /* Makes the lines expand */
+    height: 1px;
+    background-color: gray;
+  }
+  
+  .text {
+    margin: 0 10px; /* Adds space between text and lines */
+    color: gray;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .lastDiv{
+    margin-bottom: 20px;
+  }
+  .topDiv{
+    margin-top: 70px;
+  }
+  

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./messagingBody.css";
 import { util } from "../helpers/common";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
@@ -7,8 +7,8 @@ import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 import ConversationEntry from "./conversationEntry";
 import TypingIndicator from "./typingIndicator";
 
-export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator, sendTextMessage }) {
-
+export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator, sendTextMessage, previewFile }) {
+    const chatEndRef = useRef(null);
     useEffect(() => {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION) {
             // Render conversation closed message.
@@ -19,15 +19,20 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
         }
     }, [conversationStatus]);
 
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [conversationEntries]);
+
     /**
      * Builds a list of conversation entries where each conversation-entry represents an object of type defined in constants#CONVERSATION_CONSTANTS.EntryTypes.
      * @returns {string}
      */
     const conversationEntriesListView = conversationEntries.map(conversationEntry =>
         <ConversationEntry
-            key={conversationEntry.messageId} 
+            key={conversationEntry.messageId}
             conversationEntry={conversationEntry}
             sendTextMessage={sendTextMessage}
+            previewFile={previewFile}
         />
     );
 
@@ -61,22 +66,19 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
 
     return (
         <div className="messagingBody">
-            {conversationEntries.length > 0 && 
-                <div className="displayRelative">
-                    <div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '1px',
-                        background: "#000",
-                        top: "8px",
-                    }} />
-                   <p className="conversationStartTimeText">{generateConversationStartTimeText()}</p>
+            <div className="topDiv"></div>
+            {conversationEntries.length > 0 &&
+                <div class="container">
+                    <div class="line"></div>
+                    <span class="text">{generateConversationStartTimeText()}</span>
+                    <div class="line"></div>
                 </div>
             }
             <ul className="conversationEntriesListView">
                 {conversationEntriesListView}
             </ul>
-            {showTypingIndicator && <TypingIndicator typingParticipants={typingParticipants}/>}
+            <div ref={chatEndRef} className="lastDiv"></div>
+            {showTypingIndicator && <TypingIndicator typingParticipants={typingParticipants} />}
             {conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION && <p className="conversationEndTimeText">{generateConversationEndTimeText()}</p>}
         </div>
     );

@@ -4,13 +4,14 @@ import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { util } from "../helpers/common";
 import { getConversationId } from '../services/dataProvider';
 
-export default function ChoiceMessage(props={}) {
-    const { conversationEntry } = props
+export default function MediaMessage(props={}) {
+    const { conversationEntry, previewFile } = props
     // Initialize acknowledgement status.
     let [isSent, setIsSent] = useState(false);
     let [isDelivered, setIsDelivered] = useState(false);
     let [isRead, setIsRead] = useState(false);
     let [acknowledgementTimestamp, setAcknowledgementTimestamp] = useState('');
+    console.log("MediaMessage",props);
 
     useEffect(() => {
         if (conversationEntry.isRead) {
@@ -112,42 +113,25 @@ export default function ChoiceMessage(props={}) {
             });
     }
 
-    // console.log("conversationEntry", conversationEntry)
+    console.log("previewFile", previewFile, conversationEntry?.content?.staticContent?.attachments?.[0])
     
     return (
         <>
-            <div className={generateMessageBubbleContainerClassName()} style={!conversationEntry.isEndUserMessage?{ display: "flex", width: "max-content"}:{}}>
-                <div style={ !conversationEntry.isEndUserMessage?{display: "flex",justifyContent: "center",alignItems: "flex-end"}:{}}>
-                    <span style={{marginRight:"2px"}}>{!conversationEntry.isEndUserMessage?"🤖":""}</span> 
-                    <div className={generateMessageBubbleClassName()}>
-                        <p className={generateMessageContentClassName()}>
-                        {ConversationEntryUtil.getTitleFromChoices(conversationEntry)}
-                        </p>
-                    </div>
+            
+
+            <div className={generateMessageBubbleContainerClassName()} style={{display:'flex', flexDirection:"column", alignItems:"flex-end"}}>
+                <div>
+                {previewFile && <img src={previewFile?.[conversationEntry?.content?.staticContent?.attachments?.[0].name]} width={100}/>}
+                |<br/>
+                   {conversationEntry?.content?.staticContent?.text &&   <div className={generateMessageBubbleClassName()} >
+                    <p className={generateMessageContentClassName()}>
+                    {conversationEntry?.content?.staticContent?.text}
+                    </p>
+                </div>}
                 </div>
+         
             </div>
             <p className={generateMessageSenderContentClassName()}>{generateMessageAcknowledgementContentText()}{generateMessageSenderContentText()}</p>
-            <div className={generateMessageBubbleContainerClassName()}>
-                {
-                    conversationEntry?.content?.choices?.optionItems?.map((data, index) => {
-                            return (
-                                
-                                <div 
-                                    className={generateMessageBubbleClassName()}
-                                    style={{margin: '5px'}}
-                                    key={ConversationEntryUtil.getButtonTitleFromChoices(data)}
-                                >
-                                    <button 
-                                        className="sendButton"
-                                        onClick={() =>{ handleSendMessage(ConversationEntryUtil.getButtonTitleFromChoices(data))}}
-                                    >
-                                        {ConversationEntryUtil.getButtonTitleFromChoices(data)}
-                                    </button>
-                                </div>
-                            )
-                    })
-                }
-            </div>
         </>
     );
 }

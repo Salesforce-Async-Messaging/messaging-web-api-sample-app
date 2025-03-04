@@ -95,9 +95,12 @@ export default function TextMessage({conversationEntry}) {
 
     return (
         <>
-            <div className={generateMessageBubbleContainerClassName()}>
+            <div className={generateMessageBubbleContainerClassName()} style={!conversationEntry.isEndUserMessage?{ display: "flex", width: "max-content"}:{}}>
+                <div style={ !conversationEntry.isEndUserMessage?{display: "flex",justifyContent: "center",alignItems: "flex-end"}:{}}>
+                <span style={{marginRight:"2px"}}>{!conversationEntry.isEndUserMessage?"🤖":""}</span> 
                 <div className={generateMessageBubbleClassName()}>
                     <p className={generateMessageContentClassName()}>{ConversationEntryUtil.getTextMessageContent(conversationEntry)}</p>
+                </div>
                 </div>
             </div>
             <p className={generateMessageSenderContentClassName()}>{generateMessageAcknowledgementContentText()}{generateMessageSenderContentText()}</p>

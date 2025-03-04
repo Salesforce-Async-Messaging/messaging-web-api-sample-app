@@ -116,6 +116,12 @@ export default function BootstrapMessaging() {
             setPageLoading(true)
         }
     }, [window.location.href])
+    useEffect(() => {
+        getUrlParams(window.location.href)
+        return () => {
+            setPageLoading(true)
+        }
+    }, [window.location.href])
 
     /**
      * Initialize the messaging client by
@@ -132,9 +138,7 @@ export default function BootstrapMessaging() {
         storeOrganizationId(ord_id || orgId);
         storeDeploymentDeveloperName(deployment_dev_name || deploymentDevName);
         storeSalesforceMessagingUrl(messaging_url || messagingURL);
-        setTimeout(() => {
-            setPageLoading(false)
-        }, 0)
+        setPageLoading(false)
     }
 
     function reInitializeMessagingClient(ord_id, deployment_dev_name, messaging_url) {
@@ -169,15 +173,29 @@ export default function BootstrapMessaging() {
         // Remove the spinner on the Messaging Button if the app is UI ready.
     }
 
+    const getLoadingState = () => {
+        return <div className="loadingContainer">
+            <div className="loadingHeader">
+                <div className="loadingIcon">←</div>
+                <span className="loadingChat-text">Chat</span>
+            </div>
+            <div className="loadingChat-body">
+                {Array(15).fill(<><div className="loadingShimmerLeft"></div>
+                    <div className="loadingShimmerRight"></div></>)}
+            </div>
+        </div>
+    }
+
     return (
         <>
             {
                 isPageLoading ?
-                <h1>LOADING</h1> : 
+                getLoadingState() : 
                 <MessagingWindow
                     isExistingConversation={isExistingConversation}
                     showMessagingWindow={showMessagingWindow}
                     deactivateMessagingButton={appUiReady}
+                    getLoadingState={getLoadingState}
                     reInitializeMessagingClient={reInitializeMessagingClient}
                 />
             }

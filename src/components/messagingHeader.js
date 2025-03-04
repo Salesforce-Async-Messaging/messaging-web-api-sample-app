@@ -1,7 +1,7 @@
 import "./messagingHeader.css";
-import { FaCircleXmark } from "react-icons/fa6";
 
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
+import { getItemInWebStorageByKey } from "../helpers/webstorageUtils";
 
 export default function MessagingHeader(props) {
     /**
@@ -12,13 +12,15 @@ export default function MessagingHeader(props) {
      */
     function handleCloseButtonClick(evt) {
         if (evt) {
-            if (props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
-                // End the conversation if it is currently opened.
-                props.endConversation();
-            } else if (props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION || props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.NOT_STARTED_CONVERSATION) {
-                // Close the messaging window if the conversation is in closed state or not yet started.
-                props.closeMessagingWindow();
-            }
+            // if (props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
+            //     // End the conversation if it is currently opened.
+            //     // props.endConversation();
+            // } else if (props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION || props.conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.NOT_STARTED_CONVERSATION) {
+            //     // Close the messaging window if the conversation is in closed state or not yet started.
+            //     // props.closeMessagingWindow();
+            // }
+           const JWTtoken= getItemInWebStorageByKey("JWT", false)
+           window?.ReactNativeWebView?.postMessage(JSON.stringify({ JWTtoken }));
         }
     }
 
@@ -31,13 +33,14 @@ export default function MessagingHeader(props) {
     }
 
     return (
-        <div className="messagingHeader">
-            <button
-                className="messagingHeaderCloseButton"
-                title={generateCloseButtonTitle()}
-                onClick={handleCloseButtonClick}>
-                <FaCircleXmark className="messagingHeaderCloseButtonIcon"/>
-            </button>
+        <div class="header" >
+        <div class="icon"  onClick={handleCloseButtonClick}>
+          ←
         </div>
+      
+        <span class="chat-text">
+          Chat
+        </span>
+      </div> 
     )
 }

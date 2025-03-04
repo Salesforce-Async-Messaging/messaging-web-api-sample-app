@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as EventSourcePolyfill from "../helpers/eventsource-polyfill.js";
 
 // Import children components to plug in and render.
@@ -19,6 +19,7 @@ import CountdownTimer from "../helpers/countdownTimer.js";
 import { getContentType, writeBlobBodyParameter } from "./HttpFormBuilder";
 
 export default function Conversation(props) {
+    const inputRef= useRef(null)
     // Initialize a list of conversation entries.
     let [conversationEntries, setConversationEntries] = useState([]);
     // Initialize the conversation status.
@@ -790,100 +791,93 @@ export default function Conversation(props) {
     }
 
     const [file, setFile] = useState(null);
-    const conversationId = "e12c35c9-5636-49be-97bc-d7d054e1970e"; // Replace with actual conversation ID
-    const accessToken = "eyJraWQiOiI2ZWZhNzQxYmM2MzA5MzM1OGE0NDhlNmNhMWZlZTRmZTNhZjM4Y2Q2OTU1MTM4NzAxM2MwYWJlNTE4ZmRhMjA0IiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJ2Mi9pYW1lc3NhZ2UvVU5BVVRIL05BL3VpZDpiZGMwNjMzYS05MjcwLTQ1ZWQtOGI4NS03NWEzN2ZiZTk0OTUiLCJjbGllbnRJZCI6InYxL0lPU19Nb2JpbGUvNWE1MWZjZTMtMzFiZi00Mzc3LTgxNjktMDFkMGE0MTFlMDEzIiwiZmFsY29uQ2VsbCI6InNjcnQwMSIsImNoYW5uZWxBZGRJZCI6ImU2ZGQyODI3LWRhZGEtNDlhMS1hYjQ0LTQ0NjUyYWYwY2NlMCIsImlzcyI6ImlhbWVzc2FnZSIsImZhbGNvbkZEIjoidWVuZ2FnZTEiLCJkZXZpY2VJZCI6InpEZ29TOTVQRnlHLzhWM1d2RVI1RlhQdTQ4Mk5ocWxoNnBBT0hlVTZVSWJ1TFdSblNycmN6VlVtZmlNcW5BaVhvWDRVcFZlOFBrS3hzT0NyRmZRTHRRPT0iLCJjYXBhYmlsaXRpZXNWZXJzaW9uIjoiMjQ4Iiwib3JnSWQiOiIwMEROeTAwMDAwMDBIZ24iLCJkZXZpY2VJbmZvIjoie30iLCJwbGF0Zm9ybSI6IldlYiIsImZhbGNvbkZJSGFzaCI6InkzN2h6bSIsImp3dElkIjoiNTFOZmRncWdsT1BDRFBjZzVKb2k4ayIsImNsaWVudFNlc3Npb25JZCI6ImYyZjM2MDE4LTA0MWMtNDYxNy1iZWNkLTc1MDYyNzhiNWU1MCIsImF1ZCI6IlVTRVIiLCJldnRLZXkiOiJzY3J0LnByb2QuZXZlbnRyb3V0ZXJfX2F3cy5hd3MtcHJvZDItYXBzb3V0aDEudWVuZ2FnZTEuYWpuYWxvY2FsMV9fcHVibGljLmV2ZW50cy5zY3J0MDE6NjciLCJhcGlWZXJzaW9uIjoidjIiLCJzY29wZSI6InB1YmxpYyIsImp3a3NfdXJpIjoiaHR0cHM6Ly9zY3J0MDEudWVuZ2FnZTEuc2ZkYy15Mzdoem0uc3ZjLnNmZGNmYy5uZXQvaWFtZXNzYWdlL3YxLy53ZWxsLWtub3duL2p3a3MuanNvbj9rZXlJZD02ZWZhNzQxYmM2MzA5MzM1OGE0NDhlNmNhMWZlZTRmZTNhZjM4Y2Q2OTU1MTM4NzAxM2MwYWJlNTE4ZmRhMjA0IiwiZXNEZXBsb3ltZW50VHlwZSI6IkFQSSIsImV4cCI6MTc0MDE0Nzc1NCwiaWF0IjoxNzQwMTI2MzAxfQ.kIDomy3UPvKE6YEfZoSEyLy1PN8tk910iz94b_-rgM8tvZLmTdCLiKKAg9_mTsr8-9i1_U6x9kWudG75sKzUlSg-YbDHs39AGlTzUiJQvwCY0khUB9On0uzLkwu0MozObn7xHI51qpKnLMho2wxAOChejQG5pbc0P30FkAEWvMyqOphFMqMuoJ1r7Uq2CTetoPmpqK_HRr6-D_QxpRwXML-N8QTyXaviOojb16cIx4MDezEfglNqo-9GWwVogP4HAxzMTW-jAuiDNsaj2YXlW8lB-Jr76XnJrLNxynIea2eD6BpREzXCrQW6M2lASUD8qL14VYzdfycePc4EEANvOw"
-  
+    const [fileName, setFileName] = useState("");
+    const [previewFile, setPreviewFile] = useState(null);
 
-    const uploadFileToSalesforce = async (conversationId, file, accessToken) => {
-        const boundary = `boundary_string_${Date.now()}`;
+    const handleFileChange = (event) => {
+        console.log("handleFileChange",event.target.files);
+        if(event.target.files?.length>0){
+      setFile(event.target.files?.[0] || null);
+      setFileName(event.target.files?.[0]?.name || "");
+      setPreviewFile((prev)=>({ ...prev,[event.target.files[0]?.name]: event.target.files?.[0]? URL.createObjectURL(event.target.files?.[0]):""}));
+        }
+
+    };
+
+    const uploadFileToSalesforce = async (conversationId, file, accessToken,msg) => {
         const apiUrl = `https://bitkuber.my.salesforce-scrt.com/iamessage/api/v2/conversation/${conversationId}/file`;
       
-        // Convert file to base64
-        const fileBase64 = await fileToBase64(file);
-      
-        const messageEntry = JSON.stringify({
-          esDeveloperName: "myDeployment",
+        // Prepare the JSON payload for the messageEntry part
+        const messageEntry = {
+          esDeveloperName: "IOS_Mobile",
           message: {
-            id: "bd8f4890-2640-4d94-8ac0-915155b672e8",
-            fileId: "6fc22906-c24a-4c53-b382-fd091dacd848",
-            text: "Lights on my broken router look like this",
-            inReplyToMessageId: "a133c185-73a7-4adf-b6d9",
+            id: util.generateUUID(),
+            fileId: util.generateUUID(),
+            text: msg,
+            inReplyToMessageId: "a133c185-73a7-4adf-b6d9"
           },
           routingAttributes: {
-            _firstName: "John",
+            _firstName: ""
           },
           isNewMessagingSession: true,
-          language: "en_US",
-        });
+          language: "en_US"
+        };
       
-        // Construct multipart/form-data body
-        const body = `--${boundary}\r\n` +
-          `Content-Disposition: form-data; name="messageEntry";\r\n` +
-          `Content-Type: application/json\r\n\r\n` +
-          `${messageEntry}\r\n` +
-          `--${boundary}\r\n` +
-          `Content-Disposition: form-data; name="fileData"; filename="${file.name}";\r\n` +
-          `Content-Type: application/octet-stream\r\n\r\n` +
-          `${fileBase64}\r\n` +
-          `--${boundary}--\r\n`;
+        // Use FormData to construct the multipart/form-data request
+        const formData = new FormData();
+        // Append messageEntry as a Blob so that its Content-Type is application/json
+        formData.append(
+          "messageEntry",
+          new Blob([JSON.stringify(messageEntry)], { type: "application/json" })
+        );
+        // Append the file directly. The browser will handle the binary data.
+        formData.append("fileData", file, file.name);
       
-          console.log("______body______")
         try {
           const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${accessToken}`,
-              "Content-Type": `multipart/form-data; boundary=${boundary}`,
             },
-            body,
+            body: formData,
           });
       
           if (!response.ok) {
             throw new Error(`Upload failed: ${response.statusText}`);
           }
-      
-          const data = await response.json();
-          console.log("Upload Response:", data);
-          alert("File uploaded successfully!");
+          setFile(null);
+          setFileName("");
+          inputRef.current.value= null;
         } catch (error) {
           console.error("Upload Error:", error);
-          alert("Upload failed. Check console for details.");
         }
       };
       
-      // Helper function to convert file to Base64
-      const fileToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result.split(",")[1]); // Extract only base64 part
-          reader.onerror = (error) => reject(error);
-        });
-      };
-
-      
-
-    const handleFileChange = (event) => {
-      setFile(event.target.files[0]);
-    };
   
-    const handleUpload = () => {
-      if (!file) {
-        alert("Please select a file first.");
-        return;
-      }
-      uploadFileToSalesforce(conversationId, file, accessToken);
+    const handleUpload = (msg) => {
+      uploadFileToSalesforce(getConversationId(), file, getJwt(), msg);
     };
+    const discardFile=(name)=>{
+        
+        setFile(null)
+        setFileName("")
+        setPreviewFile((prevData)=>{
+            const data= {...prevData};
+            delete data?.[name];
+            return {...data}
+        })
+        inputRef.current.value= null;
+    }
 
 
     return (
         <>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload} disabled={!file}>Upload to Salesforce</button>
             <MessagingHeader
                 conversationStatus={conversationStatus}
                 endConversation={endConversation}
-                closeMessagingWindow={closeMessagingWindow} />
+                closeMessagingWindow={closeMessagingWindow} 
+            />
+
             {!showPrechatForm &&
             <>
                 <MessagingBody
@@ -892,11 +886,19 @@ export default function Conversation(props) {
                     typingParticipants={currentTypingParticipants}
                     showTypingIndicator={isAnotherParticipantTyping} 
                     sendTextMessage={handleSendTextMessage} 
+                    previewFile={previewFile}
                 />
                 <MessagingInputFooter
                     conversationStatus={conversationStatus} 
                     sendTextMessage={handleSendTextMessage} 
-                    sendTypingIndicator={sendTypingIndicator} />
+                    sendTypingIndicator={sendTypingIndicator}
+                    handleFileChange={handleFileChange}
+                    handleUpload={handleUpload}
+                    fileName={fileName}
+                    previewFile={previewFile}
+                    discardFile={discardFile}
+                    ref={inputRef}
+                     />
             </>
             }
             {

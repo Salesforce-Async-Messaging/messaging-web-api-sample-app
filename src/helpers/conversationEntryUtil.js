@@ -215,6 +215,12 @@ export function isConversationEntryChoicesButton(conversationEntry) {
     }
     return false;
 };
+export function isConversationEntryMediaMessage(conversationEntry) {
+    if (conversationEntry) {
+        return conversationEntry.content && conversationEntry.content.messageType === "StaticContentMessage";
+    }
+    return false;
+};
 
 /**
  * Validates whether the supplied CHOICES_MESSAGE is QUICK_REPLIES (i.e. formatType === "QuickReplies") or BUTTONS (i.e. formatType === "Buttons").
@@ -256,4 +262,18 @@ export function hasParticipantJoined(conversationEntry) {
  */
 export function getParticipantChangeEventPartcipantName(conversationEntry) {
     return isParticipantChangeEvent(conversationEntry) && (conversationEntry.content.entries[0].displayName || conversationEntry.content.entries[0].participant.role);
+};
+
+export function getMediaPayload(conversationEntry) {
+    if (isConversationEntryMediaMessage(conversationEntry)) {
+        return conversationEntry.content || conversationEntry.content.staticContent;
+    }
+    return undefined;
+};
+
+export function isMediaMessage(conversationEntry) {
+    if (isConversationEntryMediaMessage(conversationEntry)) {
+        return getMediaPayload(conversationEntry)?.staticContent?.formatType === "Attachments"
+    }
+    return false;
 };

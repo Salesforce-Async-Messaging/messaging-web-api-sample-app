@@ -19,9 +19,8 @@
 
 .textMessageBubble {
     min-width: 50px;
-    max-width: 350px;
+    max-width: 300px;
     width: -webkit-fit-content;
-    background-color: rgb(158 154 154);
     border-radius: 20px;
     margin: 1px auto;
     padding: 8px 14px;
@@ -29,15 +28,18 @@
 
 .textMessageBubble[class~="incoming"] {
     float: left;
+    background-color: #1e1e1e;
 }
 
 .textMessageBubble[class~="outgoing"] {
     float: right;
+    background-color: #007bff;
 }
 
 .textMessageContent {
     color: rgb(255, 255, 255);
     margin: 0px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 300;
+    text-align: left;
 }

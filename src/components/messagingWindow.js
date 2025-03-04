@@ -30,7 +30,9 @@ export default function MessagingWindow(props) {
     }
 
     return(
-        <div className={generateMessagingWindowClassName()}>
+        <>
+        {!uiReady && props?.getLoadingState()}
+      <div className={generateMessagingWindowClassName()}>
             <Conversation
                 isExistingConversation={props.isExistingConversation}
                 showMessagingWindow={props.showMessagingWindow}
@@ -38,5 +40,6 @@ export default function MessagingWindow(props) {
                 reInitializeMessagingClient={props.reInitializeMessagingClient}
             />
         </div>
+        </>
     );
 }

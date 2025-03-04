@@ -1,20 +1,17 @@
 .messagingHeader {
     width: inherit;
-    height: 50px;
-    background-color: rgb(98 91 91);
-    border-radius: 15px 15px 0px 0px;
+    height: 70px;
+    background-color: #312e2e;
     font-family: inherit;
 }
 
 .messagingHeaderCloseButton {
-    float: right;
-    margin-right: 20px;
+    float: left;
+    margin-left: 20px;
     height: 50px;
     width: max-content;
     background: transparent;
     border: none;
-    pointer-events: all;
-    cursor: pointer;
 }
 
 .messagingHeaderCloseButtonIcon {
@@ -26,3 +23,29 @@
     opacity: 0.5;
     transform: scale(2);
 }
+
+.header {
+    position: fixed;
+    padding: 16px; /* Same as p-4 */
+    background: #312e2e; /* Black Background */
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start; 
+    border-bottom: 1px solid #1e1e1e; /* Thin Dark Line */
+    top: 0;
+    width: 100%;
+    z-index: 100000000;
+  }
+  
+  .icon {
+    color: #d1d1d1; /* Light Grey Color */
+    font-size: 24px; /* Same as text-2xl */
+  }
+  
+  .chat-text {
+    color: #d1d1d1; /* Light Grey */
+    font-size: 16px; 
+    font-weight: 600; /* Semi-bold */
+    margin-left: 10px;
+  }
+  

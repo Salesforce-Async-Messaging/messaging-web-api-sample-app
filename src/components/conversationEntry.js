@@ -5,9 +5,10 @@ import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import TextMessage from "./textMessage";
 import ChoiceMessage from "./choiceMessage";
 import ParticipantChange from "./participantChange";
+import MediaMessage from "./mediaMessage";
 
 export default function ConversationEntry(props={}) {
-    const {conversationEntry} = props
+    const {conversationEntry,previewFile} = props;
 
     return (
         <>
@@ -15,9 +16,12 @@ export default function ConversationEntry(props={}) {
                 {/* Render component for a conversation entry of type Text Message. */}
                 {ConversationEntryUtil.isTextMessage(conversationEntry) && <TextMessage conversationEntry={conversationEntry} />}
                 {
-                    ConversationEntryUtil.isChoicesMessage(conversationEntry) ? 
-                    <ChoiceMessage conversationEntry={conversationEntry} sendTextMessage={props?.sendTextMessage} /> :
-                    null
+                    ConversationEntryUtil.isChoicesMessage(conversationEntry) && 
+                    <ChoiceMessage conversationEntry={conversationEntry} sendTextMessage={props?.sendTextMessage} />
+                }
+                {
+                    ConversationEntryUtil.isMediaMessage(conversationEntry) && 
+                    <MediaMessage conversationEntry={conversationEntry} sendTextMessage={props?.sendTextMessage} previewFile={previewFile} />
                 }
                 {/* Render component for a conversation entry of type Participant Change. */}
                 {ConversationEntryUtil.isParticipantChangeEvent(conversationEntry) && <ParticipantChange conversationEntry={conversationEntry} />}

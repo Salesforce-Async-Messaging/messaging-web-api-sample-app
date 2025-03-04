@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import "./messagingInputFooter.css";
 import { VscSend } from "react-icons/vsc";
@@ -7,7 +7,8 @@ import { util } from "../helpers/common";
 import { CONVERSATION_CONSTANTS, CLIENT_CONSTANTS } from '../helpers/constants';
 import { getConversationId } from '../services/dataProvider';
 
-export default function MessagingInputFooter(props) {
+export default React.forwardRef(function MessagingInputFooter(props, ref) {
+    const { handleFileChange, handleUpload, fileName, previewFile, discardFile } = props || {};
     // Initialize the Textarea value to empty.
     let [textareaContent, setTextareaContent] = useState('');
 
@@ -48,7 +49,7 @@ export default function MessagingInputFooter(props) {
     function handleTextareaKeyChange(event) {
         if (event.key === "Enter" && !event.altKey) {
             event.preventDefault();
-            
+
             handleSendButtonClick();
         }
     }
@@ -82,17 +83,26 @@ export default function MessagingInputFooter(props) {
      * Determines whether to disable the Send Button.
      * TRUE - disables if the Textarea is either empty or if the conversation is not open and FALSE - otherwise.
      */
-    function shouldDisableSendButton() {
+    function shouldDisableSendButton(isFile) {
+        // console.log("shouldDisableSendButton",isFile)
+        if(fileName){
+        return !previewFile?.[fileName]
+        }else{
         return textareaContent.trim().length === 0 || props.conversationStatus !== CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION;
+        }
     }
 
     /**
      * Handle Send Button click. If the Button is enabled, send a message.
      */
     function handleSendButtonClick() {
-        // if (!shouldDisableSendButton()) {
-            handleSendMessage();
-        // }
+        if(fileName && previewFile?.[fileName]){
+            handleUpload(textareaContent)
+        }else{
+        handleSendMessage();
+        }
+        clearMessageContent();
+
     }
 
     /**
@@ -121,33 +131,58 @@ export default function MessagingInputFooter(props) {
      * Handle calling a sendTypingIndicator when the timer fires with started/stopped indicator.
      * @param {string} typingIndicator - whether to send a typing started or stopped indicator.
      */
-        function handleSendTypingIndicator(typingIndicator) {
-            const conversationId = getConversationId();
-    
-            props.sendTypingIndicator(conversationId, typingIndicator)
+    function handleSendTypingIndicator(typingIndicator) {
+        const conversationId = getConversationId();
+
+        props.sendTypingIndicator(conversationId, typingIndicator)
             .then(() => {
                 console.log(`Successfully sent ${typingIndicator} to conversation: ${conversationId}`);
             })
             .catch(error => {
                 console.error(`Something went wrong while sending a typing indicator to conversation ${conversationId}: ${error}`);
             });
-        }
+    }
 
-    return(
+    return (
         <div className="messagingFooter">
-            <textarea className="messagingInputTextarea" 
+            <div className='addMediaConatiner'>
+                <div className='addMedia'>
+                    <input type="file" id="fileInput" className="hidden" onChange={handleFileChange} style={{ display: 'none' }} ref={ref} />
+
+                    <label htmlFor="fileInput" className='fileInputLabel'>
+                        +
+                    </label>
+                </div>
+            </div>
+            {fileName && previewFile?.[fileName] && <div style={{ position: "relative", marginLeft:"5px"}}>
+                <img src={previewFile?.[fileName] || ""}
+                    width={50} height={50} style={{ border: "1px solid black" }} />
+                <div style={{
+                    position: "absolute", right: -5, top: -5, background: "red", width: 15, height: 15, fontSize: "smaller",
+                    backgroundColor: "black",
+                    borderRadius: 15,
+                    fontSize: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }} onClick={() => discardFile(fileName)}>X</div>
+            </div>}
+
+            <textarea className="messagingInputTextarea"
                 placeholder="Type to send a message"
                 value={textareaContent}
                 onChange={handleTextareaContentChange}
                 onKeyDown={handleTextareaKeyChange}
                 onClick={handleTextareaClick}
                 disabled={shouldDisableTextarea()} />
-        
+
+
             <button className="sendButton"
                 onClick={handleSendButtonClick}
-                disabled={shouldDisableSendButton()}>
+                disabled={shouldDisableSendButton(previewFile?.[fileName])}
+                >
                 <VscSend className="sendButtonIcon" />
             </button>
         </div>
     );
-}
+})
