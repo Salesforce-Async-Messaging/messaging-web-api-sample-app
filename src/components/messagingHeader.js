@@ -33,12 +33,12 @@ export default function MessagingHeader(props) {
     }
 
     return (
-        <div class="header" >
-        <div class="icon"  onClick={handleCloseButtonClick}>
+        <div className="header" >
+        <div className="icon"  onClick={handleCloseButtonClick}>
           ←
         </div>
       
-        <span class="chat-text">
+        <span className="chat-text">
           Chat
         </span>
       </div> 

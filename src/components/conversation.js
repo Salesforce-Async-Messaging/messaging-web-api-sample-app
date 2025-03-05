@@ -82,8 +82,9 @@ export default function Conversation(props) {
                         setShowPrechatForm(true);
                         return;
                     }
-                    console.log("Pre-Chat is not enabled. Continuing to create a new conversation.");
-                    return handleCreateNewConversation({"Name":"sardhak","Emai_cus":"a@f.com","Mobile":"aaaaa","UUID":"ssss"})
+                    const {email,full_name,user_uuid,mobile_no}= props?.hiddenPrechatValues || {};
+
+                    return handleCreateNewConversation({"Name":full_name,"Emai_cus":email,"Mobile":mobile_no,"UUID":user_uuid})
                             .then(() => {
                                 console.log(`Completed initializing a new conversation with conversationId: ${getConversationId()}`);
                             })
@@ -905,8 +906,6 @@ export default function Conversation(props) {
                 showPrechatForm &&
                 <Prechat prechatSubmit={handlePrechatSubmit} />
             }
-            {/* <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload} disabled={!file}>Upload to Salesforce</button> */}
         </>
     );
 }

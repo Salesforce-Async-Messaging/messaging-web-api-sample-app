@@ -17,10 +17,10 @@ export default function ParticipantChange({conversationEntry}) {
     }
 
     return (
-        <div class="container">
-        <div class="line"></div>
-        <p class="participantChangeText">{conversationEntry?.isEndUserMessage?"":"🤖"} {generateParticipantChangeText()}</p>
-        <div class="line"></div>
+        <div className="container">
+        <div className="line"></div>
+        <p className="participantChangeText">{conversationEntry?.isEndUserMessage?"":"🤖"} {generateParticipantChangeText()}</p>
+        <div className="line"></div>
        </div>
     );
 }

@@ -68,10 +68,10 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
         <div className="messagingBody">
             <div className="topDiv"></div>
             {conversationEntries.length > 0 &&
-                <div class="container">
-                    <div class="line"></div>
-                    <span class="text">{generateConversationStartTimeText()}</span>
-                    <div class="line"></div>
+                <div className="container">
+                    <div className="line"></div>
+                    <span className="text">{generateConversationStartTimeText()}</span>
+                    <div className="line"></div>
                 </div>
             }
             <ul className="conversationEntriesListView">

@@ -28,6 +28,7 @@ export default function BootstrapMessaging() {
     const [messagingURL, setMessagingURL] = useState('');
     const [isExistingConversation, setIsExistingConversation] = useState(false);
     const [existingJwtToken, setExistingJwtToken] = useState("")
+    const [hiddenPrechatValues, setHiddenPrechatValues] = useState({})
 
 
     const getListConversations = (jwt="", url="") => {
@@ -57,7 +58,6 @@ export default function BootstrapMessaging() {
           (a, v) => ((a[v.slice(0, v.indexOf('='))] = v.slice(v.indexOf('=') + 1)), a),
           {}
         );
-        console.log("paramData", paramData)
        let jwt = ""
         if(!isEmpty(paramData?.jwt) && !isEmpty(paramData?.url)) {
             // setIsExistingConversation(true);
@@ -104,18 +104,13 @@ export default function BootstrapMessaging() {
 
         if(!isEmpty(paramData?.orgId) && !isEmpty(paramData?.devName) && !isEmpty(paramData?.url)) {
             initializeMessagingClient(paramData?.orgId, paramData?.devName, paramData?.url, jwt);
+            const {email,full_name,user_uuid,mobile_no}=paramData || {};
+            if(email||full_name||user_uuid||mobile_no){
+                setHiddenPrechatValues({email,full_name,user_uuid,mobile_no})
+            }
         }
     }
 
-
-  
-
-    useEffect(() => {
-        getUrlParams(window.location.href)
-        return () => {
-            setPageLoading(true)
-        }
-    }, [window.location.href])
     useEffect(() => {
         getUrlParams(window.location.href)
         return () => {
@@ -189,7 +184,7 @@ export default function BootstrapMessaging() {
     return (
         <>
             {
-                isPageLoading ?
+               ( isPageLoading || Object.keys(hiddenPrechatValues).length===0)?
                 getLoadingState() : 
                 <MessagingWindow
                     isExistingConversation={isExistingConversation}
@@ -197,6 +192,7 @@ export default function BootstrapMessaging() {
                     deactivateMessagingButton={appUiReady}
                     getLoadingState={getLoadingState}
                     reInitializeMessagingClient={reInitializeMessagingClient}
+                    hiddenPrechatValues={hiddenPrechatValues}
                 />
             }
         </>
