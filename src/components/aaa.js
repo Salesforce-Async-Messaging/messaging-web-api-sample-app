@@ -34,7 +34,6 @@ const FileUpload = () => {
       }
 
       const data = await response.json();
-      console.log("Upload Response:", data);
       alert("File uploaded successfully!");
     } catch (error) {
       console.error("Upload Error:", error);

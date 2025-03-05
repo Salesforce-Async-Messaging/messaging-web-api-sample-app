@@ -48,7 +48,6 @@ export const isSessionStorageAvailable = () => {
         }
     } catch {
         // sessionStorage is not available. User chat sessions end after a web page refresh or across browser tabs and windows.
-        console.log("sessionStorage not available.");
         return false;
     }
     // We should never reach this return statement, it exists to make the linter happy.
@@ -97,7 +96,6 @@ export const initializeWebStorage = (organizationId) => {
         sessionStorage.setItem(storageKey, storageObj);
     }
 
-    console.log("Browser Web Storage initialized.");
 };
 
 /**
@@ -128,7 +126,6 @@ export const setItemInWebStorage = (key, value, inLocalStorage = true) => {
         const storageObj = (storage.getItem(storageKey) && JSON.parse(storage.getItem(storageKey))) || {};
         storageObj[key] = value;
         storage.setItem(storageKey, JSON.stringify(storageObj));
-        console.log(`${key} set in ${storageName}`);
     }
 };
 
@@ -148,7 +145,6 @@ export const removeItemInWebStorage = (key) => {
         sessionStorage.setItem(storageKey, JSON.stringify(storageObj));
     }
 
-    console.log(`${key} removed from web storage`);
 };
 
 /**
@@ -162,5 +158,4 @@ export const clearWebStorage = () => {
         sessionStorage.removeItem(storageKey);
     }
 
-    console.log(`web storage cleared`);
 };

@@ -33,7 +33,6 @@ export default function BootstrapMessaging() {
           (a, v) => ((a[v.slice(0, v.indexOf('='))] = v.slice(v.indexOf('=') + 1)), a),
           {}
         );
-        console.log("paramData", paramData)
         if(!isEmpty(paramData?.orgId)) {
             setOrgId(paramData?.orgId)
         }
@@ -101,8 +100,6 @@ export default function BootstrapMessaging() {
     }, []);
 
     useEffect(() => {
-
-        console.log("window.location.href", window.location.href)
         getUrlParams(window.location.href)
     }, [window.location.href])
 
@@ -168,7 +165,6 @@ export default function BootstrapMessaging() {
      */
     function handleDeploymentDetailsFormSubmit(evt) {
         if (evt) {
-            console.log("inside")
             if(!isValidOrganizationId(orgId)) {
                 alert(`Invalid OrganizationId Input Value: ${orgId}`);
                 setShowMessagingButton(false);
@@ -208,7 +204,6 @@ export default function BootstrapMessaging() {
      */
     function handleMessagingButtonClick(evt) {
         if (evt) {
-            console.log("Messaging Button clicked.");
             setShowMessagingButtonSpinner(true);
             showMessagingWindow(true);
         }

@@ -78,7 +78,6 @@ export default function Conversation(props) {
         return handleGetUnauthenticatedJwt()
                 .then(() => {
                     if (prechatUtil.shouldDisplayPrechatForm()) {
-                        console.log("Pre-Chat is enabled. Continuing to render a Pre-Chat form.");
                         setShowPrechatForm(true);
                         return;
                     }
@@ -86,14 +85,11 @@ export default function Conversation(props) {
 
                     return handleCreateNewConversation({"Name":full_name,"Emai_cus":email,"Mobile":mobile_no,"UUID":user_uuid})
                             .then(() => {
-                                console.log(`Completed initializing a new conversation with conversationId: ${getConversationId()}`);
                             })
                             .catch(err => {
-                                console.error(`${err}`);
                             });
                 })
                 .catch(err => {
-                    console.error(`${err}`);
                 });
     }
 
@@ -110,21 +106,15 @@ export default function Conversation(props) {
                 .then(() => {
                     return handleListConversations()
                             .then(() => {
-                                console.log(`Successfully listed the conversations.`);
                                 handleListConversationEntries()
-                                .then(console.log(`Successfully retrieved entries for the current conversation: ${getConversationId()}`))
+                                .then()
                                 .catch(err => {
-                                    console.log("koikokokoko")
-                                    console.error(`${err}`);
                                 });
                             })
                             .catch(err => {
-                                console.log("koikokokoko")
-                                console.error(`${err}`);
                             });
                 })
                 .catch(err => {
-                    console.error(`handleExistingConversation ${err}`);
                 });
     }
 
@@ -139,13 +129,11 @@ export default function Conversation(props) {
      */
     function handleGetUnauthenticatedJwt() {
         if (getJwt()) {
-            console.warn("Messaging access token (JWT) already exists in the web storage. Discontinuing to create a new Unauthenticated access token.");
             return handleExistingConversation()
         }
 
         return getUnauthenticatedAccessToken()
                 .then((response) => {
-                    console.log("Successfully fetched an Unauthenticated access token.", response);
                     // Parse the response object which includes access-token (JWT), configutation data.
                     if (typeof response === "object") {
                         setJwt(response.accessToken);
@@ -155,7 +143,6 @@ export default function Conversation(props) {
                     }    
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in fetching an Unauthenticated access token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     cleanupMessagingData();
                     // props.reInitializeMessagingClient()
@@ -176,7 +163,6 @@ export default function Conversation(props) {
      */
     function handleCreateNewConversation(routingAttributes) {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION) {
-            console.warn("Cannot create a new conversation while a conversation is currently open.");
             return Promise.reject(new Error(`Cannot create a new conversation while a conversation is currently open.`));
         }
 
@@ -184,12 +170,10 @@ export default function Conversation(props) {
         storeConversationId(util.generateUUID());
         return createConversation(getConversationId(), routingAttributes)
                 .then(() => {
-                    console.log(`Successfully created a new conversation with conversation-id: ${getConversationId()}`);
                     updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.OPENED_CONVERSATION);
                     props.showMessagingWindow(true);
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in creating a new conversation with conversation-id: ${getConversationId()}: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     cleanupMessagingData();
                     // props.reInitializeMessagingClient()
@@ -213,7 +197,6 @@ export default function Conversation(props) {
                     setItemInWebStorage(STORAGE_KEYS.JWT, response.accessToken);
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in fetching a Continuation Access Token: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     throw new Error("Failed to fetch a Continuation access token.");
                 });
@@ -233,7 +216,6 @@ export default function Conversation(props) {
                     if (response && response.openConversationsFound > 0 && response.conversations.length) {
                         const openConversations = response.conversations;
                         if (openConversations.length > 1) {
-				            console.warn(`Expected the user to be participating in 1 open conversation but instead found ${openConversations.length}. Loading the conversation with latest startTimestamp.`);
 				            openConversations.sort((conversationA, conversationB) => conversationB.startTimestamp - conversationA.startTimestamp);
                         }
                         // Update conversation-id with the one from service.
@@ -248,7 +230,6 @@ export default function Conversation(props) {
                     }
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in fetching a list of conversations: ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     throw new Error("Failed to list the conversations.");
                 });
@@ -281,15 +262,12 @@ export default function Conversation(props) {
                                     addConversationEntry(conversationEntry);
                                     break;
                                 default:
-                                    console.log(`Unrecognized conversation entry type: ${conversationEntry.entryType}.`);
                             }
                         });
                     } else {
-                        console.error(`Expecting a response of type Array from listConversationEntries but instead received: ${response}`);
                     }
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong while processing entries from listConversationEntries response:  ${err && err.message ? err.message : err}`);
                     handleMessagingErrors(err);
                     throw new Error("Failed to list the conversation entries for the current conversation.");
                 });
@@ -313,7 +291,6 @@ export default function Conversation(props) {
                     [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_CLOSE_CONVERSATION]: handleCloseConversationServerSentEvent
                 })
                 .then(() => {
-                    console.log("Subscribed to the Event Source (SSE).");
                 })
                 .catch((err) => {
                     handleMessagingErrors(err);
@@ -336,7 +313,6 @@ export default function Conversation(props) {
         if (parsedEventData.conversationId === getConversationId()) {
             return conversationEntry;
         }
-        console.log(`Current conversation-id: ${getConversationId()} does not match the conversation-id in server sent event: ${parsedEventData.conversationId}. Ignoring the event.`);
         return undefined;
     }
 
@@ -360,7 +336,6 @@ export default function Conversation(props) {
      */
     function handleConversationMessageServerSentEvent(event) {
         try {
-            console.log(`Successfully handling conversation message server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -378,15 +353,12 @@ export default function Conversation(props) {
                 // Since message is echoed back by the server, mark the conversation entry as sent.
                 conversationEntry.isSent = true;
 
-                console.log(`End user successfully sent a message.`);
             } else {
                 conversationEntry.isEndUserMessage = false;
-                console.log(`Successfully received a message from ${conversationEntry.actorType}, ${JSON.stringify(conversationEntry)}`);
             }
 
             addConversationEntry(conversationEntry);
         } catch(err) {
-            console.error(`Something went wrong in handling conversation message server sent event: ${err}`);
         }
     }
 
@@ -403,7 +375,6 @@ export default function Conversation(props) {
      */
     function handleRoutingResultServerSentEvent(event) {
         try {
-            console.log(`Successfully handling routing result server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -425,7 +396,6 @@ export default function Conversation(props) {
                         addConversationEntry(conversationEntry);
                         break;
                     default:
-                        console.error(`Unrecognized initial routing failure type: ${conversationEntry.content.failureType}`);
                 }
                 // Handle when a conversation is being transferred.
             } else if (conversationEntry.messageType === CONVERSATION_CONSTANTS.RoutingTypes.TRANSFER) {
@@ -440,13 +410,10 @@ export default function Conversation(props) {
                     case CONVERSATION_CONSTANTS.RoutingFailureTypes.UNKNOWN_ERROR:
                         break;
                     default:
-                        console.error(`Unrecognized transfer routing failure type: ${conversationEntry.content.failureType}`);
                 }
             } else {
-                console.error(`Unrecognized routing type: ${conversationEntry.messageType}`);
             }
         } catch (err) {
-            console.error(`Something went wrong in handling routing result server sent event: ${err}`);
         }
     }
 
@@ -461,7 +428,6 @@ export default function Conversation(props) {
      */
     function handleParticipantChangedServerSentEvent(event) {
         try {
-            console.log(`Successfully handling participant changed server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -474,7 +440,6 @@ export default function Conversation(props) {
             }
             addConversationEntry(conversationEntry);
         } catch (err) {
-            console.error(`Something went wrong in handling participant changed server sent event: ${err}`);
         }
     }
 
@@ -498,7 +463,7 @@ export default function Conversation(props) {
                 // If we have received typing indicator from this sender within the past 5 seconds, reset the timer
                 // Otherwise, start a new timer
                 if (ConversationEntryUtil.getSenderRole(parsedEventData) !== CONVERSATION_CONSTANTS.ParticipantRoles.ENDUSER) {
-                    console.log(`Successfully handling typing started indicator server sent event.`);
+
 
                     if (typingParticipantTimer) {
                         typingParticipantTimer.reset(Date.now());
@@ -521,7 +486,6 @@ export default function Conversation(props) {
                 }
             }
         } catch (err) {
-            console.error(`Something went wrong in handling typing started indicator server sent event: ${err}`);
         }
     }
 
@@ -548,7 +512,6 @@ export default function Conversation(props) {
                 }
             }
         } catch (err) {
-            console.error(`Something went wrong in handling typing stopped indicator server sent event: ${err}`);
         }
     }
 
@@ -560,7 +523,6 @@ export default function Conversation(props) {
      */
     function handleConversationDeliveryAcknowledgementServerSentEvent(event) {
         try {
-            console.log(`Successfully handling conversation delivery acknowledgement server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -584,7 +546,6 @@ export default function Conversation(props) {
                 }
             }
         } catch (err) {
-            console.error(`Something went wrong in handling conversation delivery acknowledgement server sent event: ${err}`);
         }
     }
 
@@ -596,7 +557,6 @@ export default function Conversation(props) {
      */
     function handleConversationReadAcknowledgementServerSentEvent(event) {
         try {
-            console.log(`Successfully handling conversation read acknowledgement server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -620,7 +580,6 @@ export default function Conversation(props) {
                 }
             }
         } catch (err) {
-            console.error(`Something went wrong in handling conversation read acknowledgement server sent event: ${err}`);
         }
     }
 
@@ -631,7 +590,6 @@ export default function Conversation(props) {
      */
     function handleCloseConversationServerSentEvent(event) {
         try {
-            console.log(`Successfully handling close conversation server sent event.`);
             // Update in-memory to the latest lastEventId
             if (event && event.lastEventId) {
                 setLastEventId(event.lastEventId);
@@ -645,7 +603,6 @@ export default function Conversation(props) {
                 updateConversationStatus(CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION);
             }
         } catch (err) {
-            console.error(`Something went wrong while handling conversation closed server sent event in conversation ${getConversationId()}: ${err}`);
         }
     }
 
@@ -664,7 +621,6 @@ export default function Conversation(props) {
     function handleSendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language) {
         return sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
                 .catch((err) => {
-                    console.error(`Something went wrong while sending a message to conversation ${conversationId}: ${err}`);
                     setFailedMessage(Object.assign({}, {messageId, value, inReplyToMessageId, isNewMessagingSession, routingAttributes, language}));
                     handleMessagingErrors(err);
                 });
@@ -679,10 +635,8 @@ export default function Conversation(props) {
             // End the conversation if it is currently opened.
             return closeConversation(getConversationId())
                 .then(() => {
-                    console.log(`Successfully closed the conversation with conversation-id: ${getConversationId()}`);
                 })
                 .catch((err) => {
-                    console.error(`Something went wrong in closing the conversation with conversation-id ${getConversationId()}: ${err}`);
                 })
                 .finally(() => {
                     cleanupMessagingData();
@@ -709,9 +663,8 @@ export default function Conversation(props) {
      */
     function cleanupMessagingData() {
         closeEventSource()
-        .then(console.log("Closed the Event Source (SSE)."))
+        .then()
         .catch((err) => {
-            console.error(`Something went wrong in closing the Event Source (SSE): ${err}`);
         });
 
         clearWebStorage();
@@ -726,24 +679,19 @@ export default function Conversation(props) {
      * If a request is failed due to an Unauthorized error (i.e. 401), peforms a cleanup and resets the app and console logs otherwise.
      */
     function handleMessagingErrors(err) {
-        console.log("inside handleMessagingErrors", err)
         if (typeof err === "object") {
             if (err.status) {
                 switch (err.status) {
                     case 401:
-                        console.error(`Unauthenticated request: ${err.message}`);
                         cleanupMessagingData();
                         props.showMessagingWindow(false);
                         // props.reInitializeMessagingClient()
                         break;
                     case 400:
-                        console.error(`Invalid request parameters. Please check your data before retrying: ${err.message}`);
                         break;
                     case 404:
-                        console.error(`Resource not found. Please check your data before retrying: ${err.message}`);
                         break;
                     case 429:
-                        console.warn(`Too many requests issued from the app. Try again in sometime: ${err.message}`);
                         break;
                     /**
                      * HTTP error code returned by the API(s) when a message is sent and failed because no messaging session exists. This error indicates client
@@ -751,21 +699,17 @@ export default function Conversation(props) {
                      */
                     case 417:
                         if (prechatUtil.shouldDisplayPrechatForm() && prechatUtil.shouldDisplayPrechatEveryMessagingSession()) {
-                            console.log("Pre-Chat configured to show for every new messaging session. Continuing to display the Pre-Chat form.");
                             setShowPrechatForm(true);
                         }
                     case 500:
-                        console.error(`Something went wrong in the request, please try again: ${err.message}`);
                         break;
                     default:
-                        console.error(`Unhandled/Unknown http error: ${err}`);
                         cleanupMessagingData();
                         props.showMessagingWindow(false);
                         // props.reInitializeMessagingClient()
                 }
                 return;
             }
-            console.error(`Something went wrong handleMessagingErrors: ${err && err.message ? err.message : err}`);
         }
         return;
     }
@@ -776,7 +720,6 @@ export default function Conversation(props) {
      */
     function handlePrechatSubmit(prechatData) {
         let prechatSubmitPromise;
-        console.log(`Pre-Chat fields values on submit: ${prechatData}. --stre${JSON.stringify(prechatData)}`);
 
         // If there is a failed message being tracked while submitting Pre-Chat form, consider it is an existing conversation but a new messaging session. Resend the failed message with the routing attributes to begin a new messaging session.
         if (failedMessage) {
@@ -796,7 +739,6 @@ export default function Conversation(props) {
     const [previewFile, setPreviewFile] = useState(null);
 
     const handleFileChange = (event) => {
-        console.log("handleFileChange",event.target.files);
         if(event.target.files?.length>0){
       setFile(event.target.files?.[0] || null);
       setFileName(event.target.files?.[0]?.name || "");
@@ -850,7 +792,6 @@ export default function Conversation(props) {
           setFileName("");
           inputRef.current.value= null;
         } catch (error) {
-          console.error("Upload Error:", error);
         }
       };
       

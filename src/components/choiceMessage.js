@@ -108,11 +108,9 @@ export default function ChoiceMessage(props={}) {
 
         props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
             .then(() => {
-                console.log(`Successfully sent a text message to conversation: ${conversationId}`);
             });
     }
 
-    // console.log("conversationEntry", conversationEntry)
     
     return (
         <>

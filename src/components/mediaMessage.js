@@ -11,7 +11,6 @@ export default function MediaMessage(props={}) {
     let [isDelivered, setIsDelivered] = useState(false);
     let [isRead, setIsRead] = useState(false);
     let [acknowledgementTimestamp, setAcknowledgementTimestamp] = useState('');
-    console.log("MediaMessage",props);
 
     useEffect(() => {
         if (conversationEntry.isRead) {
@@ -109,11 +108,8 @@ export default function MediaMessage(props={}) {
 
         props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
             .then(() => {
-                console.log(`Successfully sent a text message to conversation: ${conversationId}`);
             });
     }
-
-    console.log("previewFile", previewFile, conversationEntry?.content?.staticContent?.attachments?.[0])
     
     return (
         <>

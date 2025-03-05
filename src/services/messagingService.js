@@ -173,7 +173,6 @@ function listConversations(includeClosedConversations = false, jwt="", url=""){
 	}
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
 
-	console.log("apiPath", apiPath, jwt)
 	return sendFetchRequest(
 		apiPath,
 		"GET",

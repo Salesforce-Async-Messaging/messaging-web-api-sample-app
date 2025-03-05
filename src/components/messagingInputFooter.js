@@ -84,7 +84,6 @@ export default React.forwardRef(function MessagingInputFooter(props, ref) {
      * TRUE - disables if the Textarea is either empty or if the conversation is not open and FALSE - otherwise.
      */
     function shouldDisableSendButton(isFile) {
-        // console.log("shouldDisableSendButton",isFile)
         if(fileName){
         return !previewFile?.[fileName]
         }else{
@@ -121,7 +120,6 @@ export default React.forwardRef(function MessagingInputFooter(props, ref) {
 
         props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
             .then(() => {
-                console.log(`Successfully sent a text message to conversation: ${conversationId}`);
                 // Clear textarea value.
                 clearMessageContent();
             });
@@ -136,10 +134,8 @@ export default React.forwardRef(function MessagingInputFooter(props, ref) {
 
         props.sendTypingIndicator(conversationId, typingIndicator)
             .then(() => {
-                console.log(`Successfully sent ${typingIndicator} to conversation: ${conversationId}`);
             })
             .catch(error => {
-                console.error(`Something went wrong while sending a typing indicator to conversation ${conversationId}: ${error}`);
             });
     }
 
