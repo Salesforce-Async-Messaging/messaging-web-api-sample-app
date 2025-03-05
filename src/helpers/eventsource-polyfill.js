@@ -10581,7 +10581,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	// log is just a thin wrapper to console.log that prepends a timestamp
 	exports.log = function () {
-	  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+		console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));	
 	};
 
 

@@ -2,6 +2,9 @@ import { APP_CONSTANTS, STORAGE_KEYS, MESSAGING_API_CONSTANTS, CONVERSATION_CONS
 import { getOrganizationId, getDeploymentDeveloperName, getSalesforceMessagingUrl } from "./dataProvider";
 import { getItemInWebStorageByKey, clearWebStorage } from "../helpers/webstorageUtils";
 import { util } from "../helpers/common";
+import {
+	isEmpty
+} from 'lodash'
 
 /**
  * Send an HTTP request using fetch with a specified path, method, mode, headers, and body.
@@ -14,8 +17,12 @@ import { util } from "../helpers/common";
  *                               uploading a file. For file attachments, request body must be binary data.
  * @returns {Promise}
  */
-function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
-	const messagingJwt = getItemInWebStorageByKey(STORAGE_KEYS.JWT);
+function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody, jwt) {
+	let messagingJwt = getItemInWebStorageByKey(STORAGE_KEYS.JWT);
+	if(isEmpty(messagingJwt)) {
+		messagingJwt = jwt
+	}
+	// console.log("messagingJwt", messagingJwt, jwt)
 	const headers = requestHeaders ?
 		requestHeaders :
 		{
@@ -35,7 +42,7 @@ function sendFetchRequest(apiPath, method, mode, requestHeaders, requestBody) {
 	).then(async (response) => {
 		if (response.status === 401) {
 			// Unauthorized request. Clear the web storage.
-			clearWebStorage();
+			// clearWebStorage();
 		}
 		if (!response.ok) {
 			let responseObject;
@@ -124,8 +131,12 @@ function createConversation(conversationId, routingAttributes) {
  *
  * @returns {Promise}
  */
-function getContinuityJwt() {
-	const messagingUrl = getSalesforceMessagingUrl();
+function getContinuityJwt(jwt="", url="") {
+	let messagingUrl = getSalesforceMessagingUrl();
+	if(!isEmpty(url)){
+		messagingUrl = url
+	}
+	// console.log("getContinuityJwt_______", messagingUrl, url)
 	const apiPath = `${messagingUrl}/iamessage/api/v2/authorization/continuation-access-token`;
 
 	return sendFetchRequest(
@@ -133,7 +144,8 @@ function getContinuityJwt() {
 		"GET",
 		"cors",
 		null,
-		null
+		null,
+		jwt
 	).then(response => {
 		if (!response.ok) {
 			throw response;
@@ -154,8 +166,11 @@ function getContinuityJwt() {
  * @param {Boolean} includeClosedConversations - Whether to include closed conversations in list. Optional.
  * @returns {Promise}
  */
-function listConversations(includeClosedConversations = false){
-	const messagingUrl = getSalesforceMessagingUrl();
+function listConversations(includeClosedConversations = false, jwt="", url=""){
+	let messagingUrl = getSalesforceMessagingUrl();
+	if(!isEmpty(url)){
+		messagingUrl = url
+	}
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/list?inclClosedConvs=${includeClosedConversations}&limit=${MESSAGING_API_CONSTANTS.LIST_CONVERSATION_API_NUM_CONVERSATIONS_LIMIT}`;
 
 	return sendFetchRequest(
@@ -163,7 +178,8 @@ function listConversations(includeClosedConversations = false){
 		"GET",
 		"cors",
 		null,
-		null
+		null,
+		jwt
 	).then(response => {
 		if (!response.ok) {
 			throw response;
@@ -246,6 +262,42 @@ function sendTextMessage(conversationId, text, messageId, inReplyToMessageId, is
 	const messagingUrl = getSalesforceMessagingUrl();
 	const esDeveloperName = getDeploymentDeveloperName();
 	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/message`;
+
+	return sendFetchRequest(
+		apiPath,
+		"POST",
+		"cors",
+		null,
+        {
+			message: {
+				...(inReplyToMessageId && { inReplyToMessageId }),
+				id: messageId,
+				messageType: CONVERSATION_CONSTANTS.MessageTypes.STATIC_CONTENT_MESSAGE,
+				staticContent: {
+					formatType: CONVERSATION_CONSTANTS.FormatTypes.TEXT,
+					text
+				},
+			},
+			...(routingAttributes && { routingAttributes }),
+			...(isNewMessagingSession && { isNewMessagingSession }),
+			esDeveloperName,
+			...(language && { language })
+        }
+	).then(response => {
+		if (!response.ok) {
+			throw response;
+		}
+		response.json();
+	});
+}
+
+
+
+
+function sendFileMessage(conversationId, text, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language) {
+	const messagingUrl = getSalesforceMessagingUrl();
+	const esDeveloperName = getDeploymentDeveloperName();
+	const apiPath = `${messagingUrl}/iamessage/api/v2/conversation/${conversationId}/file`;
 
 	return sendFetchRequest(
 		apiPath,

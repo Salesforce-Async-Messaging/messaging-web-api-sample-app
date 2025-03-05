@@ -1,9 +1,11 @@
-import "./textMessage.css";
+import "./choiceMessage.css";
 import { useState, useEffect } from "react";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { util } from "../helpers/common";
+import { getConversationId } from '../services/dataProvider';
 
-export default function TextMessage({conversationEntry}) {
+export default function MediaMessage(props={}) {
+    const { conversationEntry, previewFile } = props
     // Initialize acknowledgement status.
     let [isSent, setIsSent] = useState(false);
     let [isDelivered, setIsDelivered] = useState(false);
@@ -93,15 +95,37 @@ export default function TextMessage({conversationEntry}) {
         }
     }
 
+    const handleSendMessage = (data) => {
+        // Required parameters.
+        const conversationId = getConversationId();
+        const messageId = util.generateUUID();
+        const value = data;
+        // Optional parameters.
+        let inReplyToMessageId;
+        let isNewMessagingSession;
+        let routingAttributes;
+        let language;
+
+        props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
+            .then(() => {
+            });
+    }
+    
     return (
         <>
-            <div className={generateMessageBubbleContainerClassName()} style={!conversationEntry.isEndUserMessage?{ display: "flex", width: "max-content"}:{}}>
-                <div style={ !conversationEntry.isEndUserMessage?{display: "flex",justifyContent: "center",alignItems: "flex-end"}:{}}>
-                <span style={{marginRight:"2px"}}>{!conversationEntry.isEndUserMessage?"🤖":""}</span> 
-                <div className={generateMessageBubbleClassName()}>
-                    <p className={generateMessageContentClassName()}>{ConversationEntryUtil.getTextMessageContent(conversationEntry)}</p>
+            
+
+            <div className={generateMessageBubbleContainerClassName()} style={{display:'flex', flexDirection:"column", alignItems:"flex-end"}}>
+                <div>
+                {previewFile && <img src={previewFile?.[conversationEntry?.content?.staticContent?.attachments?.[0].name]} width={100}/>}
+                |<br/>
+                   {conversationEntry?.content?.staticContent?.text &&   <div className={generateMessageBubbleClassName()} >
+                    <p className={generateMessageContentClassName()}>
+                    {conversationEntry?.content?.staticContent?.text}
+                    </p>
+                </div>}
                 </div>
-                </div>
+         
             </div>
             <p className={generateMessageSenderContentClassName()}>{generateMessageAcknowledgementContentText()}{generateMessageSenderContentText()}</p>
         </>

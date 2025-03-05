@@ -74,7 +74,9 @@ function FormFields({visiblePrechatFields}) {
                     <p className="prechatFormFieldName">{field.name}
                         {field.required && <span className="requiredFieldIndicator">*</span>}
                         <FormField
-                            field={field} /></p>
+                            field={field}
+                        />
+                    </p>
                 </li>;
     });
 

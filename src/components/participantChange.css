@@ -1,12 +1,9 @@
 .participantChangeText {
     color: rgb(98 91 91);
-    background-color: linen;
     margin-top: 10px;
     font-size: 12px;
-    font-weight: bold;
     text-align: center;
-    border: 1px solid rgb(153, 153, 153);
-    border-radius: 10px;
     width: max-content;
     display: inline-block;
+    padding: 0px 5px;
 }
