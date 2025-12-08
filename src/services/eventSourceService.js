@@ -6,6 +6,16 @@ import { getOrganizationId, getSalesforceMessagingUrl, getJwt, getLastEventId } 
 let eventSource;
 
 /**
+ * Configuration for reconnection behavior
+ */
+const RECONNECT_CONFIG = {
+    maxAttempts: 10,
+    initialDelay: 1000, // 1 second
+    maxDelay: 30000, // 30 seconds
+    backoffMultiplier: 1.5
+};
+
+/**
  * Get the request headers for connecting to SSE.
  */
 const getEventSourceParams = () => {
@@ -52,6 +62,17 @@ const handleEventSourceListeners = (listenerOperationName, eventListenerMap) => 
 };
 
 /**
+ * Calculate the delay for the next reconnection attempt using exponential backoff.
+ *
+ * @param {Number} attemptNumber - The current attempt number (0-indexed)
+ * @returns {Number} Delay in milliseconds
+ */
+const calculateReconnectDelay = (attemptNumber) => {
+    const delay = RECONNECT_CONFIG.initialDelay * Math.pow(RECONNECT_CONFIG.backoffMultiplier, attemptNumber);
+    return Math.min(delay, RECONNECT_CONFIG.maxDelay);
+};
+
+/**
  * Establish the EventSource object with handlers for onopen and onerror.
  *
  * @param {String} fullApiPath - The full API path endpoint to request server-sent events.
@@ -70,26 +91,97 @@ export const createEventSource = (fullApiPath, eventListenerMap) => {
     }
 
     /**
-     * Create a closure here to isolate `reconnectAttempts` and `reconnectIntervalSeconds` values to a single invocation of `createEventSource`.
-     * All calls to `resolveEventSource` within a call to `createEventSource` share the same `reconnectAttempts` and `reconnectIntervalSeconds` values.
+     * Create a closure here to isolate `reconnectAttempts` and reconnect logic to a single invocation of `createEventSource`.
+     * All calls to `resolveEventSource` within a call to `createEventSource` share the same `reconnectAttempts` value.
      *
      * @param {Promise.resolve} resolve - Event source opened.
      * @param {Promise.reject} reject - Attempted to reconnect to event source too many times.
      */
     const resolveEventSource = (resolve, reject) => {
-        try {
-            eventSource = new window.EventSourcePolyfill(fullApiPath, getEventSourceParams());
+        let reconnectAttempts = 0;
+        let reconnectTimeoutId = null;
 
-            eventSource.onopen = () => {
-                handleEventSourceListeners("addEventListener", eventListenerMap);
-                resolve();
-            };
-            eventSource.onerror = (error) => {
-                reject();
-            };
-        } catch (error) {
-            reject(error);
-        }
+        /**
+         * Attempts to create a new EventSource connection.
+         * This function is called initially and on each reconnection attempt.
+         */
+        const attemptConnection = () => {
+            try {
+                // Close existing eventSource if it exists
+                if (eventSource) {
+                    try {
+                        eventSource.close();
+                    } catch (closeError) {
+                        // Ignore errors when closing, as the connection may already be closed
+                        console.warn("Error closing existing EventSource:", closeError);
+                    }
+                }
+
+                // Create new EventSource with timestamp to avoid caching
+                const apiPathWithTimestamp = `${fullApiPath}${fullApiPath.includes('?') ? '&' : '?'}_ts=${Date.now()}`;
+                eventSource = new window.EventSourcePolyfill(apiPathWithTimestamp, getEventSourceParams());
+
+                eventSource.onopen = () => {
+                    // Reset reconnect attempts on successful connection
+                    reconnectAttempts = 0;
+                    if (reconnectTimeoutId) {
+                        clearTimeout(reconnectTimeoutId);
+                        reconnectTimeoutId = null;
+                    }
+                    handleEventSourceListeners("addEventListener", eventListenerMap);
+                    resolve();
+                };
+
+                eventSource.onerror = (error) => {
+                    // Check if EventSource is in CLOSED state (readyState === 2)
+                    // This indicates a fatal error that requires reconnection
+                    if (eventSource && eventSource.readyState === eventSource.CLOSED) {
+                        reconnectAttempts++;
+                        
+                        if (reconnectAttempts <= RECONNECT_CONFIG.maxAttempts) {
+                            const delay = calculateReconnectDelay(reconnectAttempts - 1);
+                            console.log(`EventSource connection error. Attempting to reconnect (${reconnectAttempts}/${RECONNECT_CONFIG.maxAttempts}) in ${delay}ms...`);
+                            
+                            reconnectTimeoutId = setTimeout(() => {
+                                attemptConnection();
+                            }, delay);
+                        } else {
+                            console.error(`EventSource connection failed after ${RECONNECT_CONFIG.maxAttempts} reconnection attempts.`);
+                            if (reconnectTimeoutId) {
+                                clearTimeout(reconnectTimeoutId);
+                                reconnectTimeoutId = null;
+                            }
+                            reject(new Error(`Failed to establish EventSource connection after ${RECONNECT_CONFIG.maxAttempts} attempts`));
+                        }
+                    } else if (eventSource && eventSource.readyState === eventSource.CONNECTING) {
+                        // EventSource is still connecting, wait for it to either open or close
+                        // This is a transient state, so we don't need to take action yet
+                        console.log("EventSource is connecting...");
+                    }
+                };
+            } catch (error) {
+                reconnectAttempts++;
+                
+                if (reconnectAttempts <= RECONNECT_CONFIG.maxAttempts) {
+                    const delay = calculateReconnectDelay(reconnectAttempts - 1);
+                    console.log(`Error creating EventSource. Attempting to reconnect (${reconnectAttempts}/${RECONNECT_CONFIG.maxAttempts}) in ${delay}ms...`);
+                    
+                    reconnectTimeoutId = setTimeout(() => {
+                        attemptConnection();
+                    }, delay);
+                } else {
+                    console.error(`Failed to create EventSource after ${RECONNECT_CONFIG.maxAttempts} attempts.`);
+                    if (reconnectTimeoutId) {
+                        clearTimeout(reconnectTimeoutId);
+                        reconnectTimeoutId = null;
+                    }
+                    reject(error);
+                }
+            }
+        };
+
+        // Start the initial connection attempt
+        attemptConnection();
     };
 
     return new Promise(resolveEventSource);
