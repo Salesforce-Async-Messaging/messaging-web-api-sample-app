@@ -201,7 +201,7 @@ export const subscribeToEventSource = (eventListenerMap) => {
              * Directly connect to event router endpoint on Salesforce Messaging domain instead of going through ia-message.
              */
             createEventSource(
-                getSalesforceMessagingUrl().concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
+                getSalesforceMessagingUrl().concat(`/eventrouter/v1/sse`),
                 eventListenerMap
             ).then(
                 resolve,
