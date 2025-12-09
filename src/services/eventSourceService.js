@@ -133,31 +133,26 @@ export const createEventSource = (fullApiPath, eventListenerMap) => {
                 };
 
                 eventSource.onerror = (error) => {
-                    // Check if EventSource is in CLOSED state (readyState === 2)
-                    // This indicates a fatal error that requires reconnection
-                    if (eventSource && eventSource.readyState === eventSource.CLOSED) {
-                        reconnectAttempts++;
+                    // Remove event listeners to prevent duplicates, then attenpt to reconnect
+                    handleEventSourceListeners("removeEventListener", eventListenerMap);
+                    reconnectAttempts++;
+                    
+                    if (reconnectAttempts <= RECONNECT_CONFIG.maxAttempts) {
+                        const delay = calculateReconnectDelay(reconnectAttempts - 1);
+                        console.log(`EventSource connection error. Attempting to reconnect (${reconnectAttempts}/${RECONNECT_CONFIG.maxAttempts}) in ${delay}ms...`);
                         
-                        if (reconnectAttempts <= RECONNECT_CONFIG.maxAttempts) {
-                            const delay = calculateReconnectDelay(reconnectAttempts - 1);
-                            console.log(`EventSource connection error. Attempting to reconnect (${reconnectAttempts}/${RECONNECT_CONFIG.maxAttempts}) in ${delay}ms...`);
-                            
-                            reconnectTimeoutId = setTimeout(() => {
-                                attemptConnection();
-                            }, delay);
-                        } else {
-                            console.error(`EventSource connection failed after ${RECONNECT_CONFIG.maxAttempts} reconnection attempts.`);
-                            if (reconnectTimeoutId) {
-                                clearTimeout(reconnectTimeoutId);
-                                reconnectTimeoutId = null;
-                            }
-                            reject(new Error(`Failed to establish EventSource connection after ${RECONNECT_CONFIG.maxAttempts} attempts`));
+                        reconnectTimeoutId = setTimeout(() => {
+                            attemptConnection();
+                        }, delay);
+                    } else {
+                        console.error(`EventSource connection failed after ${RECONNECT_CONFIG.maxAttempts} reconnection attempts.`);
+                        if (reconnectTimeoutId) {
+                            clearTimeout(reconnectTimeoutId);
+                            reconnectTimeoutId = null;
                         }
-                    } else if (eventSource && eventSource.readyState === eventSource.CONNECTING) {
-                        // EventSource is still connecting, wait for it to either open or close
-                        // This is a transient state, so we don't need to take action yet
-                        console.log("EventSource is connecting...");
+                        reject(new Error(`Failed to establish EventSource connection after ${RECONNECT_CONFIG.maxAttempts} attempts`));
                     }
+
                 };
             } catch (error) {
                 reconnectAttempts++;
