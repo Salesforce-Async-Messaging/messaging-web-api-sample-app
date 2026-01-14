@@ -30,11 +30,17 @@ export default function MessagingWindow(props) {
     }
 
     return(
-        <div className={generateMessagingWindowClassName()}>
+        <>
+        {(!uiReady || Object.keys(props?.hiddenPrechatValues).length===0) && props?.getLoadingState()}
+      <div className={generateMessagingWindowClassName()}>
             <Conversation
                 isExistingConversation={props.isExistingConversation}
                 showMessagingWindow={props.showMessagingWindow}
-                uiReady={setAppUIReady} />
+                uiReady={setAppUIReady}
+                reInitializeMessagingClient={props.reInitializeMessagingClient}
+                hiddenPrechatValues={props.hiddenPrechatValues}
+            />
         </div>
+        </>
     );
 }

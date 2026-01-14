@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./messagingBody.css";
 import { util } from "../helpers/common";
 import { CONVERSATION_CONSTANTS } from "../helpers/constants";
@@ -7,8 +7,8 @@ import { CONVERSATION_CONSTANTS } from "../helpers/constants";
 import ConversationEntry from "./conversationEntry";
 import TypingIndicator from "./typingIndicator";
 
-export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator }) {
-
+export default function MessagingBody({ conversationEntries, conversationStatus, typingParticipants, showTypingIndicator, sendTextMessage, previewFile }) {
+    const chatEndRef = useRef(null);
     useEffect(() => {
         if (conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION) {
             // Render conversation closed message.
@@ -19,14 +19,21 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
         }
     }, [conversationStatus]);
 
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [conversationEntries]);
+
     /**
      * Builds a list of conversation entries where each conversation-entry represents an object of type defined in constants#CONVERSATION_CONSTANTS.EntryTypes.
      * @returns {string}
      */
     const conversationEntriesListView = conversationEntries.map(conversationEntry =>
         <ConversationEntry
-            key={conversationEntry.messageId} 
-            conversationEntry={conversationEntry} />
+            key={conversationEntry.messageId}
+            conversationEntry={conversationEntry}
+            sendTextMessage={sendTextMessage}
+            previewFile={previewFile}
+        />
     );
 
     /**
@@ -38,7 +45,7 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
             const conversationStartTimestamp = conversationEntries[0].transcriptedTimestamp;
             const startDate = util.getFormattedDate(conversationStartTimestamp);
             const startTime = util.getFormattedTime(conversationStartTimestamp);
-            const conversationStartTimeText = `Conversation started: ${startDate} at ${startTime}`;
+            const conversationStartTimeText = `${startDate} at ${startTime}`;
             return conversationStartTimeText;
         }
         return "";
@@ -59,11 +66,19 @@ export default function MessagingBody({ conversationEntries, conversationStatus,
 
     return (
         <div className="messagingBody">
-            {conversationEntries.length > 0 && <p className="conversationStartTimeText">{generateConversationStartTimeText()}</p>}
+            <div className="topDiv"></div>
+            {conversationEntries.length > 0 &&
+                <div className="container">
+                    <div className="line"></div>
+                    <span className="text">{generateConversationStartTimeText()}</span>
+                    <div className="line"></div>
+                </div>
+            }
             <ul className="conversationEntriesListView">
                 {conversationEntriesListView}
             </ul>
-            {showTypingIndicator && <TypingIndicator typingParticipants={typingParticipants}/>}
+            <div ref={chatEndRef} className="lastDiv"></div>
+            {showTypingIndicator && <TypingIndicator typingParticipants={typingParticipants} />}
             {conversationStatus === CONVERSATION_CONSTANTS.ConversationStatus.CLOSED_CONVERSATION && <p className="conversationEndTimeText">{generateConversationEndTimeText()}</p>}
         </div>
     );

@@ -1,0 +1,917 @@
+[
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "32f17ea6-b5b5-4ecf-ad8a-fcafee2f6f16",
+        "content": {
+            "entryType": "RoutingResult",
+            "id": "32f17ea6-b5b5-4ecf-ad8a-fcafee2f6f16",
+            "recordId": "0MwNy00000NfUJR",
+            "errorMessages": [],
+            "pendingServiceRoutingId": "0JRNy00000Ma1Lu",
+            "routingType": "Initial",
+            "estimatedWaitTime": {
+                "estimatedWaitTimeInSeconds": -1,
+                "isEWTRequested": true
+            },
+            "failureReason": "",
+            "failureType": "None",
+            "isExternallyRouted": false,
+            "routingConfigurationDetails": {
+                "routingConfigurationType": "QueueRoutingType",
+                "queueId": "00GNy000000O12z"
+            }
+        },
+        "messageType": "Initial",
+        "entryType": "RoutingResult",
+        "sender": {
+            "role": "System",
+            "appType": "conversation",
+            "subject": "005Ny0000000DZz",
+            "clientIdentifier": ""
+        },
+        "actorName": "Platform Integration User",
+        "actorType": "System",
+        "transcriptedTimestamp": 1739971135088
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "084f1ca9-cf7a-4fa2-8d7f-d1b3a0227dd8",
+        "content": {
+            "entryType": "ParticipantChanged",
+            "id": "084f1ca9-cf7a-4fa2-8d7f-d1b3a0227dd8",
+            "entries": [
+                {
+                    "operation": "add",
+                    "menuMetadata": {
+                        "menuOptions": [
+                            {
+                                "title": "Hindi Menu",
+                                "optionIdentifier": "0XdNy0000000A3EKAU"
+                            }
+                        ]
+                    },
+                    "participant": {
+                        "role": "Chatbot",
+                        "appType": "chatbot",
+                        "subject": "0XxNy00000000RR",
+                        "clientIdentifier": ""
+                    },
+                    "displayName": "CoinSwitch"
+                }
+            ]
+        },
+        "messageType": "add",
+        "entryType": "ParticipantChanged",
+        "sender": {
+            "role": "System",
+            "appType": "conversation",
+            "subject": "005Ny0000000DZz",
+            "clientIdentifier": ""
+        },
+        "actorName": "Platform Integration User",
+        "actorType": "System",
+        "transcriptedTimestamp": 1739971135940
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "32cd97e7-8843-4d92-a5b6-4a7b331c85d2",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "32cd97e7-8843-4d92-a5b6-4a7b331c85d2",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "Hi, welcome to CoinSwitch!"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971138541,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "46220df9-2b76-40ce-84e0-19dd7f21a00d",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "46220df9-2b76-40ce-84e0-19dd7f21a00d",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Please select your preferred language",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "English",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "9e3279ba-5dd3-4177-bf7c-42a43ce502e4",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "हिन्दी",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "6fb3c10d-026a-411e-8a27-fb78ab1800a2",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971139979,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "7cd9a406-fc23-4328-b6d3-a0491c6b1922",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "7cd9a406-fc23-4328-b6d3-a0491c6b1922",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "check"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "EndUser",
+            "appType": "iamessage",
+            "subject": "v2/iamessage/UNAUTH/NA/uid:d230a50f-ef6b-4d4b-ada8-4661d69c7be3",
+            "clientIdentifier": ""
+        },
+        "actorName": "Guest",
+        "actorType": "EndUser",
+        "transcriptedTimestamp": 1739971722244,
+        "messageReason": null,
+        "isEndUserMessage": true,
+        "isSent": true
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "d0730a73-2953-45b6-a02b-4e0be533f5a3",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "d0730a73-2953-45b6-a02b-4e0be533f5a3",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Please select your preferred language",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "English",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "bc2a0ccf-58a8-424e-8a34-42e5174a5478",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "हिन्दी",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "f7a0b549-defb-43cc-a626-f53593ee9c29",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971725067,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "4b577175-dd51-45a4-8ab1-6ec11876f6d5",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "4b577175-dd51-45a4-8ab1-6ec11876f6d5",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "English"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "EndUser",
+            "appType": "iamessage",
+            "subject": "v2/iamessage/UNAUTH/NA/uid:d230a50f-ef6b-4d4b-ada8-4661d69c7be3",
+            "clientIdentifier": ""
+        },
+        "actorName": "Guest",
+        "actorType": "EndUser",
+        "transcriptedTimestamp": 1739971746559,
+        "messageReason": null,
+        "isEndUserMessage": true,
+        "isSent": true
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "66893487-f858-4017-9ec5-b9a059ee15f3",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "66893487-f858-4017-9ec5-b9a059ee15f3",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Please choose the option that describes your issue.",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Trade Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "4d772a2f-e383-4eeb-b3df-ea7dd5ade0df",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Futures Trade-related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "b8320707-38e4-4ba7-9738-b2553989570a",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "INR Deposits",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "85f6f229-0471-40e5-bb8e-88681ae0f543",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "KYC Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "ab05c261-bab9-401e-938e-9ab66d727018",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Bank Addition/Change",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "5f3e508e-90f0-4eb6-9f65-a9e74de96018",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "App Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "55b2786f-2f24-4e13-8d41-b4bb0e3563d8",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "INR Withdrawals",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "d8e6a525-dad5-4d8d-929c-f8621ac43f7c",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Tax Query",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "16ac21d0-7f55-4606-857a-7eebb41bc879",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "CoinSwitch Pro",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "ab623e5e-d635-4380-8d6a-40c1e971ca06",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Referral Program",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "8a3b8fae-4955-4748-96fa-1f8ea731d23c",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Crypto Deposit/Withdrawal",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "0e0499c6-96f6-43a9-a6dc-f4bd692f7019",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Rewards Program",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "96457bc7-1e14-4b4d-87ff-3ca570f01dbb",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Portfolio Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "3b38bd2a-1899-40ac-91d6-959eb8e05bdf",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "CoinSwitch Earn",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "493c0741-2714-4f5b-9921-ec0c8100198b",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Account Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "cde1567b-18b2-4087-aeb8-7f23d09e775b",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Others",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "bb6ce830-cfa6-41d7-8a78-e153622b6ea0",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971748735,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "b0bbde0c-11ba-4d9f-836e-5940ab280da1",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "b0bbde0c-11ba-4d9f-836e-5940ab280da1",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "Trade Related"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "EndUser",
+            "appType": "iamessage",
+            "subject": "v2/iamessage/UNAUTH/NA/uid:d230a50f-ef6b-4d4b-ada8-4661d69c7be3",
+            "clientIdentifier": ""
+        },
+        "actorName": "Guest",
+        "actorType": "EndUser",
+        "transcriptedTimestamp": 1739971792546,
+        "messageReason": null,
+        "isEndUserMessage": true,
+        "isSent": true
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "3b3fc2b0-fe01-4406-9524-79ae6ca90452",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "3b3fc2b0-fe01-4406-9524-79ae6ca90452",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Please select the relevant category.",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Buy / Sell Issues",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "095ee634-dd94-450b-a61c-4466962607b9",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "SIP Related",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "f7ba86c0-6fcd-45ad-9012-bf122bb0a881",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Limit Orders",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "b0bdb57b-4f12-4d8d-9d9d-34149fce31fa",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Invoice clarifications",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "2db55c1a-645b-496d-af19-b7d79c823092",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Coin Disabled",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "8b176980-9dba-44fa-a8bb-fd0f6bd4e413",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "How to trade?",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "d26736b8-e885-41bb-abe3-eef11b13be91",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Back",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "065932b3-dd9f-459b-982d-d74d2f4540d5",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971795396,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "1705b7a7-7f0c-48ea-8bfe-f66308207c25",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "1705b7a7-7f0c-48ea-8bfe-f66308207c25",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "Buy / Sell Issues"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "EndUser",
+            "appType": "iamessage",
+            "subject": "v2/iamessage/UNAUTH/NA/uid:d230a50f-ef6b-4d4b-ada8-4661d69c7be3",
+            "clientIdentifier": ""
+        },
+        "actorName": "Guest",
+        "actorType": "EndUser",
+        "transcriptedTimestamp": 1739971837327,
+        "messageReason": null,
+        "isEndUserMessage": true,
+        "isSent": true
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "8f422294-c9fd-44ef-921d-f5238b1bdee4",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "8f422294-c9fd-44ef-921d-f5238b1bdee4",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Please select the relevant category.",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "In how much time does a purchase order get executed?",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "d52c1b82-4fab-412e-8920-80bffe08f0f4",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "How do I cancel my buy/sell order?",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "84bae3e2-bd7f-4276-9156-65aa8133b4f6",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Minimum amount required to start trading",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "0687ac16-68eb-4774-8da6-b5005cc2f1ff",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Where do I find the current buy/sell price?",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "b1d652bf-abc4-4f8d-91ce-36db6cb794b1",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Buy-Sell Not Working",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "36c93035-2f25-4e3b-974c-32992bb85004",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Price difference in graph and preview page",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "c49a2382-3e8f-4f6c-b5f7-a35adcd87bfa",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971840797,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "fcf09d38-3685-4321-992d-b8305f19f002",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "fcf09d38-3685-4321-992d-b8305f19f002",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "In how much time does a purchase order get executed?"
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "EndUser",
+            "appType": "iamessage",
+            "subject": "v2/iamessage/UNAUTH/NA/uid:d230a50f-ef6b-4d4b-ada8-4661d69c7be3",
+            "clientIdentifier": ""
+        },
+        "actorName": "Guest",
+        "actorType": "EndUser",
+        "transcriptedTimestamp": 1739971868051,
+        "messageReason": null,
+        "isEndUserMessage": true,
+        "isSent": true
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "ed699ffa-497d-41bc-909a-0ca4fbb91727",
+        "content": {
+            "messageType": "StaticContentMessage",
+            "inReplyToMessageId": null,
+            "id": "ed699ffa-497d-41bc-909a-0ca4fbb91727",
+            "references": null,
+            "staticContent": {
+                "formatType": "Text",
+                "text": "Purchase orders get executed instantly. Please reach out to us if your transaction does not reflect in your account in 30 minutes."
+            }
+        },
+        "messageType": "StaticContentMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971870204,
+        "messageReason": null,
+        "isEndUserMessage": false
+    },
+    {
+        "conversationId": "d10c295f-25c1-42ac-b762-32ac80f177b7",
+        "messageId": "1b0e6a0a-d92d-4c1b-988b-eb1c81bba8ec",
+        "content": {
+            "messageType": "ChoicesMessage",
+            "inReplyToMessageId": null,
+            "id": "1b0e6a0a-d92d-4c1b-988b-eb1c81bba8ec",
+            "references": null,
+            "choices": {
+                "formatType": "QuickReplies",
+                "images": [],
+                "text": "Did we resolve your issue?",
+                "optionItems": [
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Yes",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "728d6540-6aea-4e96-b8f8-8740de8491ef",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "No, chat with an agent",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "415bb0e6-0e18-4e8b-bcba-6c83b43815b3",
+                        "optionId": null
+                    },
+                    {
+                        "itemType": "TitleOptionItem",
+                        "titleItem": {
+                            "itemType": "TitleItem",
+                            "secondarySubTitle": null,
+                            "title": "Back to main menu",
+                            "subTitle": null,
+                            "tertiarySubTitle": null,
+                            "referenceId": null
+                        },
+                        "optionIdentifier": "6d89bfe6-6018-4ea2-b8fa-2252d242d12e",
+                        "optionId": null
+                    }
+                ]
+            }
+        },
+        "messageType": "ChoicesMessage",
+        "entryType": "Message",
+        "sender": {
+            "role": "Chatbot",
+            "appType": "chatbot",
+            "subject": "0XxNy00000000RR",
+            "clientIdentifier": ""
+        },
+        "actorName": "CoinSwitch",
+        "actorType": "Chatbot",
+        "transcriptedTimestamp": 1739971871611,
+        "messageReason": null,
+        "isEndUserMessage": false
+    }
+]

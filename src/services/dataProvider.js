@@ -68,7 +68,6 @@ function clearInMemoryData() {
     conversationId = undefined;
     lastEventId = undefined;
 
-    console.log("Cleared in-memory data.");
 }
 
 export {

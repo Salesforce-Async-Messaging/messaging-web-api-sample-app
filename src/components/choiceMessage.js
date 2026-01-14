@@ -1,9 +1,11 @@
-import "./textMessage.css";
+import "./choiceMessage.css";
 import { useState, useEffect } from "react";
 import * as ConversationEntryUtil from "../helpers/conversationEntryUtil";
 import { util } from "../helpers/common";
+import { getConversationId } from '../services/dataProvider';
 
-export default function TextMessage({conversationEntry}) {
+export default function ChoiceMessage(props={}) {
+    const { conversationEntry } = props
     // Initialize acknowledgement status.
     let [isSent, setIsSent] = useState(false);
     let [isDelivered, setIsDelivered] = useState(false);
@@ -93,17 +95,57 @@ export default function TextMessage({conversationEntry}) {
         }
     }
 
+    const handleSendMessage = (data) => {
+        // Required parameters.
+        const conversationId = getConversationId();
+        const messageId = util.generateUUID();
+        const value = data;
+        // Optional parameters.
+        let inReplyToMessageId;
+        let isNewMessagingSession;
+        let routingAttributes;
+        let language;
+
+        props.sendTextMessage(conversationId, value, messageId, inReplyToMessageId, isNewMessagingSession, routingAttributes, language)
+            .then(() => {
+            });
+    }
+
+    
     return (
         <>
             <div className={generateMessageBubbleContainerClassName()} style={!conversationEntry.isEndUserMessage?{ display: "flex", width: "max-content"}:{}}>
                 <div style={ !conversationEntry.isEndUserMessage?{display: "flex",justifyContent: "center",alignItems: "flex-end"}:{}}>
-                <span style={{marginRight:"2px"}}>{!conversationEntry.isEndUserMessage?"🤖":""}</span> 
-                <div className={generateMessageBubbleClassName()}>
-                    <p className={generateMessageContentClassName()}>{ConversationEntryUtil.getTextMessageContent(conversationEntry)}</p>
-                </div>
+                    <span style={{marginRight:"2px"}}>{!conversationEntry.isEndUserMessage?"🤖":""}</span> 
+                    <div className={generateMessageBubbleClassName()}>
+                        <p className={generateMessageContentClassName()}>
+                        {ConversationEntryUtil.getTitleFromChoices(conversationEntry)}
+                        </p>
+                    </div>
                 </div>
             </div>
             <p className={generateMessageSenderContentClassName()}>{generateMessageAcknowledgementContentText()}{generateMessageSenderContentText()}</p>
+            <div className={generateMessageBubbleContainerClassName()}>
+                {
+                    conversationEntry?.content?.choices?.optionItems?.map((data, index) => {
+                            return (
+                                
+                                <div 
+                                    className={generateMessageBubbleClassName()}
+                                    style={{margin: '5px'}}
+                                    key={ConversationEntryUtil.getButtonTitleFromChoices(data)}
+                                >
+                                    <button 
+                                        className="sendButton"
+                                        onClick={() =>{ handleSendMessage(ConversationEntryUtil.getButtonTitleFromChoices(data))}}
+                                    >
+                                        {ConversationEntryUtil.getButtonTitleFromChoices(data)}
+                                    </button>
+                                </div>
+                            )
+                    })
+                }
+            </div>
         </>
     );
 }
